@@ -9,7 +9,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 @SpringBootApplication
-@EnableJpaRepositories("com.studentshub.repository") // Add this
+@EnableJpaRepositories("com.studentshub.repository")
 @EntityScan("com.studentshub.model")
 public class StudentsHubApplication {
 
