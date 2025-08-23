@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Детали за материјал</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .material-card {
+            max-width: 700px;
+            margin: 0 auto;
+            box-shadow: 0 0.5rem 1rem rgba(0,0,0,0.15);
+            border-radius: 0.5rem;
+            overflow: hidden;
+            background-color: #fff;
+        }
+        .material-info p {
+            font-size: 1.1rem;
+            margin-bottom: 0.75rem;
+        }
+        .btn-group-custom > * {
+            min-width: 100px;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<section class="container my-5">
+    <h2 th:text="${materialPost.title}" class="mb-4 text-center fw-bold">Име на материјал</h2>
+
+    <div class="card material-card">
+        <div class="card-body material-info px-4 py-3">
+            <p><strong>Предмет:</strong> <span th:text="${materialPost.subject}">Предмет</span></p>
+            <p><strong>Опис:</strong> <span th:text="${materialPost.description}"></span></p>
+            <p><strong>Оцена:</strong> <span th:text="${materialPost.rating}">5.0</span></p>
+
+            <p>
+                <strong>Фајл:</strong>
+                <a th:href="@{'/material-posts/download/' + ${materialPost.id}}" class="btn btn-outline-success btn-sm" target="_blank">Преземи</a>
+
+            </p>
+            <div class="mb-3">
+                <strong>Објавил:</strong>
+                <span th:text="${materialPost.owner.username}" class="ms-2"></span>
+                <span th:text="${#temporals.format(materialPost.createdAt, 'dd-MM-yyyy HH:mm')}" class="ms-2 text-muted"></span>
+            </div>
+
+            <div class="d-flex justify-content-center gap-3 mt-4 btn-group-custom">
+                <a th:href="@{'/chat/' + ${materialPost.owner.username}}"
+                   class="btn btn-warning">
+                    <i class="bi bi-chat-dots"></i> Прати порака
+                </a>
+                <a th:href="@{'/material-posts/edit/' + ${materialPost.id}}" th:if="${currentUser.username == materialPost.owner.username}" class="btn btn-primary">Уреди</a>
+
+                <form th:action="@{'/material-posts/delete/' + ${materialPost.id}}" th:if="${currentUser.username == materialPost.owner.username}" method="post"
+                      onsubmit="return confirm('Дали сте сигурни дека сакате да го избришете материјалот?');">
+                    <button type="submit" class="btn btn-danger">Избриши</button>
+                </form>
+
+                <a href="/material-posts" class="btn btn-secondary">Назад</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

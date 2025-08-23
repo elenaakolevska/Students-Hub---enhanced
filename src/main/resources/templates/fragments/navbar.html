@@ -1,0 +1,136 @@
+
+<nav class="navbar navbar-expand-lg fixed-top mb-5" style="background-color: #0d6efd;" th:fragment="navbar">
+    <div class="container-fluid px-5">
+        <!-- Logo / Brand -->
+        <a class="navbar-brand fw-bold text-white" th:href="@{/}">Student's Hub</a>
+
+        <!-- Toggler (for small screens) -->
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar"
+                aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <!-- Navbar Links -->
+        <div class="collapse navbar-collapse" id="mainNavbar">
+            <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link text-white" style="position: relative;" onmouseover="this.style.color='orange'; this.style.borderBottom='2px solid orange';"
+                       onmouseout="this.style.color='white'; this.style.borderBottom='none';"
+                       th:href="@{/}">Дома</a>
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle text-white" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false"
+                       onmouseover="this.style.color='orange';"
+                       onmouseout="this.style.color='white';">
+                        Категории
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" th:href="@{/event-posts}"
+                               onmouseover="this.style.backgroundColor='orange'; this.style.color='white';"
+                               onmouseout="this.style.backgroundColor=''; this.style.color='';">
+                            Настани</a></li>
+                        <li><a class="dropdown-item" th:href="@{/internship-posts}"
+                               onmouseover="this.style.backgroundColor='orange'; this.style.color='white';"
+                               onmouseout="this.style.backgroundColor=''; this.style.color='';">
+                            Пракса</a></li>
+                        <li><a class="dropdown-item" th:href="@{/transport-posts}"
+                               onmouseover="this.style.backgroundColor='orange'; this.style.color='white';"
+                               onmouseout="this.style.backgroundColor=''; this.style.color='';">
+                            Превоз</a></li>
+                        <li><a class="dropdown-item" th:href="@{/housing-posts}"
+                               onmouseover="this.style.backgroundColor='orange'; this.style.color='white';"
+                               onmouseout="this.style.backgroundColor=''; this.style.color='';">
+                            Сместување</a></li>
+                        <li><a class="dropdown-item" th:href="@{/tutor-posts}"
+                               onmouseover="this.style.backgroundColor='orange'; this.style.color='white';"
+                               onmouseout="this.style.backgroundColor=''; this.style.color='';">
+                            Туторство</a></li>
+                        <li><a class="dropdown-item" th:href="@{/material-posts}"
+                               onmouseover="this.style.backgroundColor='orange'; this.style.color='white';"
+                               onmouseout="this.style.backgroundColor=''; this.style.color='';">
+                            Материјали</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                    </ul>
+                </li>
+
+<!--                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">-->
+<!--                    <a class="nav-link text-white" style="position: relative;"-->
+<!--                       onmouseover="this.style.color='orange'; this.style.borderBottom='2px solid orange';"-->
+<!--                       onmouseout="this.style.color='white'; this.style.borderBottom='none';"-->
+<!--                       th:href="@{/chat}">Инбокс</a>-->
+<!--                </li>-->
+                <li class="nav-item">
+                    <a class="nav-link text-white" style="position: relative;" onmouseover="this.style.color='orange'; this.style.borderBottom='2px solid orange';"
+                       onmouseout="this.style.color='white'; this.style.borderBottom='none';"
+                       th:href="@{/about}">За нас</a>
+                </li>
+<!--               <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">-->
+<!--                    <a class="nav-link text-white" style="position: relative;"-->
+<!--                       onmouseover="this.style.color='orange'; this.style.borderBottom='2px solid orange';"-->
+<!--                       onmouseout="this.style.color='white'; this.style.borderBottom='none';"-->
+<!--                       th:href="@{/profile}">Профил</a>-->
+<!--                </li>-->
+<!--                <li class="nav-item" th:if="${#authorization.expression('isAuthenticated()')}">-->
+<!--                    <a class="nav-link text-white" style="position: relative;" onmouseover="this.style.color='orange'; this.style.borderBottom='2px solid orange';"-->
+<!--                       onmouseout="this.style.color='white'; this.style.borderBottom='none';"-->
+<!--                       th:href="@{/logout}">Одјава</a>-->
+<!--                </li>-->
+                <li class="nav-item" th:if="${#authorization.expression('!isAuthenticated()')}">
+                    <a class="nav-link text-white" style="position: relative;" onmouseover="this.style.color='orange'; this.style.borderBottom='2px solid orange';"
+                       onmouseout="this.style.color='white'; this.style.borderBottom='none';"
+                       th:href="@{/users/login}">Најава</a>
+                </li>
+
+                <!-- Replace the separate Profile and Inbox items with this dropdown -->
+                <li class="nav-item dropdown" th:if="${#authorization.expression('isAuthenticated()')}">
+                    <a class="nav-link dropdown-toggle text-white" href="#" role="button"
+                       data-bs-toggle="dropdown" aria-expanded="false"
+                       onmouseover="this.style.color='orange';"
+                       onmouseout="this.style.color='white';">
+                        Профил
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li>
+                            <a class="dropdown-item" th:href="@{/profile}"
+                               onmouseover="this.style.backgroundColor='orange'; this.style.color='white';"
+                               onmouseout="this.style.backgroundColor=''; this.style.color='';">
+                                <i class="bi bi-person"></i> Мој профил
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/chat}"
+                               onmouseover="this.style.backgroundColor='orange'; this.style.color='white';"
+                               onmouseout="this.style.backgroundColor=''; this.style.color='';">
+                                <i class="bi bi-chat-dots"></i> Инбокс
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/favorites}"
+                               onmouseover="this.style.backgroundColor='orange'; this.style.color='white';"
+                               onmouseout="this.style.backgroundColor=''; this.style.color='';">
+                                <i class="bi bi-heart"></i> Мои омилени
+                            </a>
+                        </li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/posts/my-posts}"
+                               onmouseover="this.style.backgroundColor='orange'; this.style.color='white';"
+                               onmouseout="this.style.backgroundColor=''; this.style.color='';">
+                                <i class="bi bi-file-text"></i> Мои објави
+                            </a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <a class="dropdown-item" th:href="@{/logout}"
+                               onmouseover="this.style.backgroundColor='orange'; this.style.color='white';"
+                               onmouseout="this.style.backgroundColor=''; this.style.color='';">
+                                <i class="bi bi-box-arrow-right"></i> Одјава
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+

@@ -1,0 +1,173 @@
+APS - Dragan
+
+Primitivni data podatoci  
+              
+- int  - 4B
+- float 
+- double
+- char
+- long 
+- short  - 2B
+- boolean
+- byte -  1B (koga stanuva zbor za vozrast najtocno ke bide)
+
+
+Wrapper class
+
+- Integer
+- Float
+- Double
+- Character
+- Long
+- Short
+- Boolean
+- Byte
+
+Kreiraat OBJEKT vo RAM i mozeme da gi koristime site site gotovi klasi koi gi nudat
+**I nizite vo Java se objekti.
+
+Razlika:
+
+int a;
+int niza[] = new int [30];
+
+Integer a1 = new Inetegr(5);
+
+Student s = new Student ("Dragan", "Joksimovski"); 
+s1=s  //ako nema new odnosno ako ima s1 = s, togas s1 ke pokazuva kon istiot objekt odnosno kon s
+
+Garbage collector
+
+Onie objekti koi imaat referenci odnosno sto pokazuvaat kon toj objekt/kup ne se brisat.
+
+Important classes
+
+- String
+- Scanner
+- BufferReader - se koristi za citanje od tastatura, datoteka...
+- StringBuilder
+- Object - 10tina metodi vo ramki na samata taa klasa koi sto site ostanati klasi gi imaat
+    *toString()
+    *equals()
+    *hashCode()
+
+Interface - apstrakten tip na podatok koj sto sodrzi mnozestvo na metodi i konstantni promenlivi; 
+- Metodite vo toa mnozestvo ne se deifinirani(ne mozes da kreiras objekt od nea)
+- Zamena na povekjekratno nasleduvanje (nadminuvanje na diamond problemot);
+
+extends - nasleduvanje
+implements - site metodi sto gi ima vo eden interface 
+
+Koga se sporeduvaat objekti se sporeduva nesto so .equals()
+Null e zamena za referencata koja ne pokazuva nikade (objekti)
+
+Vo Java za pecatenje ke go prepokrivame toString() metodot 
+Ovoj metod ne moze da vrakja promenliva moja sto ne e String i zatoa ako sakame da vratime nekoj integer ili float kaj return vreme/godini/dolzina... vreme+"";
+
+*BufferedReader input = new BufferedReader(new InputStreamReader(System.in)); - se koristi koga imame nekakva recenica odnosno cel red
+*Scanner cita do prvoto prazno mesto 
+
+line = "Dragan M 34 3453 Macedonia";
+Za da se procita samo eden zbor potrebno e da se napravi pomosna niza od Strings
+*String []pom = line.split(" ") odnosno da splitne tamu kade sto ke ima prazno mesto
+
+
+***LISTI***
+
+SLL
+
+class SLL<E>
+
+SLL = single linked lists (edinecno povrzana lista) - mnozestvo na megjusebno povrzani jazli
+eden so drug 
+Listata mora da znae koj od jazlite e prv, a koj e posleden.
+Ako znaeme koj e prv preku negoviot succesor ke znaeme i koj e vtor itn...
+Posledniot jazol nema succesor odnosno pokazuva kon null
+
+class SSlNode<E>
+{
+	E element;
+	SLLNode<E> succ;
+	public SLLNode (E element, SLLNode<E> succ)
+	{
+		this.element = element;
+		this.succ = succ;
+
+}
+
+Generik - vo zavisnost vo kakva klasa se koristi moze da bide sekakov vid na podatok(int,floar,String...) 
+- se menuva vo zavisnost od tipot na podatokot koj sto nas ni treba da se cuva
+
+Simple input:
+4 9 1 7
+
+- InsertFirst - kreira nov jazol i go stava na pocetok, pokazuvacot firts pokazuva na nego, koga se kreira drug nov jazol pokazuvacot first sega pokazuva na nego itn. so dodavanje na drugi jazli
+Pokazuvacot first sekogas ke pokazuva kaj posledniot element koj ke bide vnesen vo lisata
+Redosledot na jazlite i na elementite vo jazlite ke bide obraten od onoj redosled sto e na vnesuvanje.
+
+- InsertLast
+Dokolku sakame da go zacuvame redosledot na elementite kako onoj sto e na vnesuvanje togas treba da koristime InsertLast.
+Koga se kreira nov jazol pokazuvacot firts normalno e deka ke pokazuva na nego, so dodavanje na novi jazli pokazuvacor firts seuste pokazuva na prvovneseniot element, a site posledovatelni elementi se mestat kako krajni odnosno vo ovoj slucaj prviot vnesen element ke si ostane prv, a posledniot vnesen element ke si ostane posleden.
+
+*InsertLast* se koristi povekje za razlika od InsertFirst bidejki go zadrzuva redot na elementite.
+
+
+DLL
+
+DLL<E> - double linked lists (dvojno povrzana lista) - ovde osven succ(napred) ima i pred(nazad)
+*moze da se cuva lista od listi
+
+---Prednosti vo odnos na edinecno povrzana lista---
+Pri brisenje na jazli ne mora da ja setas nizata 
+Ako ni treba nekoj jazol, mn polesno e da go zememe vo DLL otkolku vo SLL
+
+---Nedostatoci---
+Vo odnos na prostor DLL e posleozena od SLL zosto ima plus pokazuvaci 
+ 
+DLLNode<E>
+
+
+SLOZENOSTI NA IZVRSUVANJE
+
+O(1) < O(log(n)) < O(sqrt(n))< O(n) < O(pow(n,2)) < O(pow(2,n)) < O(pow(e,n))
+
+- Ako imame vgnezdeni forovi togas slozenosta e O(pow(n,2))
+- Ako imame 2 fora edno po drugo odnosno ne se vgnezdeni - O(n)
+
+***STACK***
+- ima eden vlez i eden izlez 
+- ima protokol na rabota LIFO (last in first out)
+- imamr brojac koj se narekuva depth (goleminata na stackot mozeme da ja najdeme preku getDepth)
+- push() - stava vrednist vo stackot
+- pop() - vadi vrednost od stackot
+- peek() - da dzirne koj e posledno vnesen element vo stackot
+- isEmpty() - proveruva dali stackot e prazen
+- clear () - go cisti stackot
+- moze da go implementirame stackot so upotreba na niza ili lista 
+   - ako znaeme kolku elementi ima stackot mozeme da upotrebuvame niza
+   - ako ne znaeme kolku elementi ima stackot podobro e so lista
+-- stackot e podatocna struktura koja sto najbrzo prevrtuva --
+*push() - insertFirst();
+*pop() - deleteFirst();
+
+***REDICA***
+- ima protokol na rabota FIFO (first in first out)
+- imame dva brojaci front and rear 
+- isto kako i kaj stack, redicite moze da se implementiraat so upotreba na nizi ili listi
+rear se isto ponasa kako depth
+- enqueue() - vo sustina push() - nacinot na dodavanje na nov element vo stack i vo gueue e ist VO NIZI
+- dequeue() - vo sustina pop()
+- peek () - da dzirne koj e posledno vnesen element vo redicata
+- isEmpty () - proveruva dali redicata e prazna
+- clear() - ja cisti redicata
+-- redot e da gi zacuva podatocite i da gi vrati istite po nekakov redosled --
+*enqueue() - insertLast();
+*dequeue() - deleteFisrt();
+
+
+
+
+
+
+
+

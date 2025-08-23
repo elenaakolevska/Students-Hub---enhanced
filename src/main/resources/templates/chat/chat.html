@@ -1,0 +1,217 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <title>Title</title>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h2>Chat with <span th:text="${receiver.username}"></span></h2>-->
+<!--<div id="message-container">-->
+<!--    <div th:each="message : ${messages}">-->
+<!--        <p><strong th:text="${message.sender.username} + ':'"></strong> <span th:text="${message.content}"></span></p>-->
+<!--    </div>-->
+<!--</div>-->
+
+<!--<input id="message-input" type="text" placeholder="Type a message..." />-->
+<!--<button type="button" onclick="sendMessage()">Send</button>-->
+
+<!--<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>-->
+<!--<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>-->
+<!--<script th:inline="javascript">-->
+<!--    let sender = /*[[${#authentication.name}]]*/ 'me';-->
+<!--    let receiver = /*[[${receiver.username}]]*/ 'you';-->
+
+<!--    let socket = new SockJS('/ws');-->
+<!--    let stompClient = Stomp.over(socket);-->
+
+<!--    stompClient.connect({}, function (frame) {-->
+<!--        stompClient.subscribe('/topic/messages', function (msg) {-->
+<!--            let m = JSON.parse(msg.body);-->
+<!--            if ((m.sender === sender && m.receiver === receiver) ||-->
+<!--                (m.sender === receiver && m.receiver === sender)) {-->
+<!--                let p = document.createElement("p");-->
+<!--                p.innerHTML = `<strong>${m.sender}:</strong> ${m.content}`;-->
+<!--                document.getElementById("message-container").appendChild(p);-->
+<!--            }-->
+<!--        });-->
+<!--    });-->
+
+<!--    function sendMessage() {-->
+<!--        let content = document.getElementById("message-input").value;-->
+<!--        stompClient.send("/app/chat", {}, JSON.stringify({-->
+<!--            sender: sender,-->
+<!--            receiver: receiver,-->
+<!--            content: content-->
+<!--        }));-->
+<!--        document.getElementById("message-input").value = '';-->
+<!--    }-->
+<!--</script>-->
+<!--</body>-->
+<!--</html>-->
+
+<!DOCTYPE html>
+<html lang="en" >
+<head>
+    <meta charset="UTF-8" />
+    <title>Messenger Style Chat</title>
+    <!-- Bootstrap 5 CSS CDN -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        body, html {
+            height: 100%;
+            background-color: #f0f2f5;
+        }
+        .chat-container {
+            max-width: 600px;
+            margin: 30px auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 3px 10px rgb(0 0 0 / 0.2);
+            display: flex;
+            flex-direction: column;
+            height: 80vh;
+            overflow: hidden;
+        }
+        .chat-header {
+            padding: 15px 20px;
+            border-bottom: 1px solid #ddd;
+            font-weight: 600;
+            font-size: 1.25rem;
+            background-color: #0084ff;
+            color: white;
+            border-top-left-radius: 15px;
+            border-top-right-radius: 15px;
+        }
+        #message-container {
+            flex-grow: 1;
+            padding: 20px;
+            overflow-y: auto;
+            background: #e5ddd5;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .message {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 20px;
+            font-size: 1rem;
+            line-height: 1.3;
+            position: relative;
+            word-wrap: break-word;
+        }
+        .message.sender {
+            align-self: flex-end;
+            background-color: #0084ff;
+            color: white;
+            border-bottom-right-radius: 0;
+        }
+        .message.receiver {
+            align-self: flex-start;
+            background-color: white;
+            color: #333;
+            border-bottom-left-radius: 0;
+            box-shadow: 0 1px 1.5px rgb(0 0 0 / 0.13);
+        }
+        .message .username {
+            font-weight: 600;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
+            opacity: 0.8;
+        }
+        .chat-input-area {
+            padding: 10px 15px;
+            border-top: 1px solid #ddd;
+            display: flex;
+            gap: 10px;
+            background-color: white;
+        }
+        #message-input {
+            flex-grow: 1;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+            padding: 10px 15px;
+            font-size: 1rem;
+            outline: none;
+        }
+        #message-input:focus {
+            border-color: #0084ff;
+            box-shadow: 0 0 5px #0084ff;
+        }
+        #send-btn {
+            background-color: #0084ff;
+            color: white;
+            border-radius: 20px;
+            border: none;
+            padding: 10px 20px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        #send-btn:hover {
+            background-color: #006bbf;
+        }
+    </style>
+</head>
+<body>
+<div class="chat-container">
+    <div class="chat-header">
+        Chat with <span th:text="${receiver.username}">Receiver</span>
+    </div>
+    <div id="message-container">
+        <div th:each="message : ${messages}"
+             th:classappend="${message.sender.username == #authentication.name} ? 'message sender' : 'message receiver'">
+            <div class="username" th:text="${message.sender.username}">Username</div>
+            <div th:text="${message.content}">Message content</div>
+        </div>
+    </div>
+    <div class="chat-input-area">
+        <input id="message-input" type="text" placeholder="Type a message..." autocomplete="off" />
+        <button id="send-btn" type="button" onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+<script th:inline="javascript">
+    let sender = /*[[${#authentication.name}]]*/ 'me';
+    let receiver = /*[[${receiver.username}]]*/ 'you';
+
+    let socket = new SockJS('/ws');
+    let stompClient = Stomp.over(socket);
+
+    stompClient.connect({}, function (frame) {
+        stompClient.subscribe('/topic/messages', function (msg) {
+            let m = JSON.parse(msg.body);
+            if ((m.sender === sender && m.receiver === receiver) ||
+                (m.sender === receiver && m.receiver === sender)) {
+
+                let messageContainer = document.getElementById("message-container");
+                let div = document.createElement("div");
+                div.classList.add("message");
+                if(m.sender === sender){
+                    div.classList.add("sender");
+                } else {
+                    div.classList.add("receiver");
+                }
+                div.innerHTML = `<div class="username">${m.sender}</div><div>${m.content}</div>`;
+                messageContainer.appendChild(div);
+                messageContainer.scrollTop = messageContainer.scrollHeight;
+            }
+        });
+    });
+
+    function sendMessage() {
+        let input = document.getElementById("message-input");
+        let content = input.value.trim();
+        if(content === '') return;
+        stompClient.send("/app/chat", {}, JSON.stringify({
+            sender: sender,
+            receiver: receiver,
+            content: content
+        }));
+        input.value = '';
+    }
+</script>
+</body>
+</html>

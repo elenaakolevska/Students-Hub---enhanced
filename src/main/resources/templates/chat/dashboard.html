@@ -1,0 +1,385 @@
+<!--    <!DOCTYPE html>-->
+<!--    <html xmlns:th="http://www.thymeleaf.org" lang="en">-->
+<!--    <head>-->
+<!--        <meta charset="UTF-8" />-->
+<!--        <title>Chat Dashboard</title>-->
+<!--        &lt;!&ndash; Bootstrap CSS CDN &ndash;&gt;-->
+<!--        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />-->
+<!--        <style>-->
+<!--            body { padding: 1rem; background: #f8f9fa; }-->
+<!--            .user-list { max-height: 80vh; overflow-y: auto; }-->
+<!--            .user-item { cursor: pointer; }-->
+<!--            .user-item:hover, .user-item:focus {-->
+<!--                background-color: #e9ecef;-->
+<!--                text-decoration: none;-->
+<!--            }-->
+<!--        </style>-->
+<!--    </head>-->
+<!--    <body>-->
+<!--    <div class="container-fluid">-->
+<!--        <div class="row">-->
+
+<!--            &lt;!&ndash; Left sidebar: list of all registered users &ndash;&gt;-->
+<!--            <div class="col-3 border-end bg-white user-list">-->
+<!--                <h5 class="mb-3">Users</h5>-->
+<!--                <ul class="list-group">-->
+<!--                    <li th:each="user : ${chatPartners}" class="list-group-item user-item p-0">-->
+<!--                        <a th:href="@{/chat/{username}(username=${user.username})}"-->
+<!--                           th:text="${user.username}"-->
+<!--                           class="d-block px-3 py-2 text-decoration-none text-dark">-->
+<!--                        </a>-->
+<!--                    </li>-->
+<!--                </ul>-->
+
+<!--            </div>-->
+
+<!--            &lt;!&ndash; Right main panel: prompt user to select a chat &ndash;&gt;-->
+<!--            <div class="col-9 d-flex align-items-center justify-content-center bg-white" style="height:80vh;">-->
+<!--                <h4 class="text-muted">Select a user from the left to start chatting.</h4>-->
+<!--            </div>-->
+
+<!--        </div>-->
+<!--    </div>-->
+
+<!--    &lt;!&ndash; Bootstrap JS Bundle with Popper &ndash;&gt;-->
+<!--    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>-->
+<!--    </body>-->
+<!--    </html>-->
+
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <title>Chat Dashboard</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            background: #f8f9fa;
+        }
+
+        body {
+            padding-top: 56px;
+            padding-bottom: 60px;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        main.container-fluid {
+            flex: 1 0 auto;
+        }
+
+        .user-list {
+            max-height: calc(100vh - 56px - 60px - 2rem);
+            overflow-y: auto;
+            padding-top: 0.5rem;
+            background: #fff;
+        }
+
+        .user-item a {
+            cursor: pointer;
+            transition: background-color 0.15s ease, color 0.15s ease;
+        }
+
+        .user-item a:hover,
+        .user-item a:focus {
+            background-color: #e9ecef;
+            text-decoration: none;
+            color: #000;
+        }
+
+        .user-item a.bg-primary {
+            background-color: #0d6efd !important;
+            color: #fff !important;
+            font-weight: 600;
+        }
+
+        .chat-container {
+            background: #fff;
+            border-radius: 0.75rem;
+            box-shadow: 0 3px 15px rgba(0, 0, 0, 0.15);
+            display: flex;
+            flex-direction: column;
+            height: calc(100vh - 56px - 60px - 2rem);
+            overflow: hidden;
+        }
+
+        .chat-header {
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid #dee2e6;
+            font-weight: 600;
+            font-size: 1.5rem;
+            background-color: #0d6efd;
+            color: white;
+            border-top-left-radius: 0.75rem;
+            border-top-right-radius: 0.75rem;
+            user-select: none;
+        }
+
+        #message-container {
+            flex-grow: 1;
+            padding: 1.25rem 1.5rem;
+            overflow-y: auto;
+            background: #e5ddd5;
+            display: flex;
+            flex-direction: column;
+            gap: 0.8rem;
+            scroll-behavior: smooth;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 0.75rem 1rem;
+            border-radius: 20px;
+            font-size: 1rem;
+            line-height: 1.3;
+            word-wrap: break-word;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+
+        .message.sender {
+            align-self: flex-end;
+            background-color: #0d6efd;
+            color: #fff;
+            border-bottom-right-radius: 0;
+        }
+
+        .message.receiver {
+            align-self: flex-start;
+            background-color: #fff;
+            color: #212529;
+            border-bottom-left-radius: 0;
+        }
+
+        .message .username {
+            font-weight: 700;
+            margin-bottom: 0.3rem;
+            font-size: 0.85rem;
+            opacity: 0.75;
+        }
+
+        .chat-input-area {
+            padding: 0.75rem 1rem;
+            border-top: 1px solid #dee2e6;
+            display: flex;
+            gap: 0.75rem;
+            background-color: #fff;
+            border-bottom-left-radius: 0.75rem;
+            border-bottom-right-radius: 0.75rem;
+        }
+
+        #message-input {
+            flex-grow: 1;
+            border-radius: 20px;
+            border: 1px solid #ced4da;
+            padding: 0.5rem 1rem;
+            font-size: 1rem;
+            outline: none;
+        }
+
+        #message-input:focus {
+            border-color: #0d6efd;
+            box-shadow: 0 0 5px rgba(13, 110, 253, 0.5);
+        }
+
+        #send-btn {
+            background-color: #0d6efd;
+            color: white;
+            border-radius: 20px;
+            border: none;
+            padding: 0.55rem 1.5rem;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        #send-btn:hover {
+            background-color: #084ecb;
+        }
+
+        .user-list::-webkit-scrollbar,
+        #message-container::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .user-list::-webkit-scrollbar-thumb,
+        #message-container::-webkit-scrollbar-thumb {
+            background-color: rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        @media (max-width: 768px) {
+            .user-list {
+                max-height: 30vh !important;
+            }
+
+            .chat-container {
+                height: 50vh !important;
+                border-radius: 0 !important;
+                box-shadow: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body class="d-flex flex-column min-vh-100">
+<!-- Navbar -->
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<main class="flex-grow-1 mt-5 px-2">
+    <div class="row g-0">
+        <!-- Sidebar -->
+        <div class="col-12 col-md-3 border-end user-list">
+            <div class="px-3 pt-3">
+                <input type="text" class="form-control mb-2" id="userSearchInput" placeholder="Пребарај корисник..." />
+                <h5 class="mb-3">Корисници</h5>
+            </div>
+            <ul class="list-group list-group-flush" id="userList">
+<!--                <li th:each="user : ${chatPartners}" class="list-group-item user-item p-0">-->
+<!--                    <a th:href="@{/chat/{username}(username=${user.username})}"-->
+<!--                       th:text="${user.username}"-->
+<!--                       class="d-block px-3 py-2 text-decoration-none text-dark"-->
+<!--                       th:classappend="-->
+<!--    ${receiver != null && receiver.username == user.username} ? 'bg-primary text-white' : '' +-->
+<!--    (${usersWithUnreadMessages != null and usersWithUnreadMessages.contains(user.username)} ? ' fw-bold' : '')">-->
+<!--                    </a>-->
+<!--                </li>-->
+                <li th:each="user : ${chatPartners}" class="list-group-item user-item p-0">
+                    <a th:href="@{/chat/{username}(username=${user.username})}"
+                       class="d-flex align-items-center gap-2 px-3 py-2 text-decoration-none text-dark"
+                       th:classappend="
+           ${receiver != null && receiver.username == user.username} ? 'bg-primary text-white' : '' +
+           (${usersWithUnreadMessages != null and usersWithUnreadMessages.contains(user.username)} ? ' fw-bold' : '')">
+
+                        <img th:src="${user.profileImageUrl != null} ? ${user.profileImageUrl} : '/images/default-profile.png'"
+                             alt="User Image"
+                             class="rounded-circle"
+                             style="width: 35px; height: 35px; object-fit: cover;" />
+
+                        <span th:text="${user.username}">Username</span>
+                    </a>
+                </li>
+            </ul>
+        </div>
+
+        <!-- Chat Area -->
+        <div class="col-12 col-md-9 d-flex flex-column justify-content-center mt-3 mt-md-0 px-3 px-md-4">
+            <div th:if="${receiver == null}" class="d-flex align-items-center justify-content-center bg-white rounded shadow-sm" style="height:80vh;">
+                <h4 class="text-muted text-center px-3">Одбери корисник од листата за да започнеш разговор</h4>
+            </div>
+
+            <div th:if="${receiver != null}" class="chat-container">
+<!--                <div class="chat-header">Chat with <span th:text="${receiver.username}">Receiver</span></div>-->
+<!--                <div class="chat-header">-->
+<!--                    Chat with-->
+<!--                    <a th:href="@{/users/profile/{username}(username=${receiver.username})}"-->
+<!--                       th:text="${receiver.username}"-->
+<!--                       style="color: white; text-decoration: none;">-->
+<!--                    >Receiver</a>-->
+<!--                </div>-->
+                <div class="chat-header d-flex align-items-center gap-2 p-3 bg-primary text-white rounded-top">
+                    <img th:src="${receiver.profileImageUrl != null} ? ${receiver.profileImageUrl} : '/images/default-profile.png'"
+                         alt="Profile Image"
+                         class="rounded-circle"
+                         style="width: 40px; height: 40px; object-fit: cover;" />
+
+                    <a th:href="@{/users/profile/{username}(username=${receiver.username})}"
+                       th:text="${receiver.username}"
+                       class="text-white fw-semibold text-decoration-none">
+                        Receiver
+                    </a>
+                </div>
+
+                <div id="message-container" th:if="${messages != null}">
+                    <div th:each="message : ${messages}"
+                         th:classappend="${message.sender.username == #authentication.name} ? 'message sender' : 'message receiver'">
+                        <div class="username" th:text="${message.sender.username}">Username</div>
+                        <div th:text="${message.content}">Message content</div>
+                    </div>
+                </div>
+
+                <div class="chat-input-area">
+                    <input id="message-input" type="text" placeholder="Type a message..." autocomplete="off" aria-label="Type your message" />
+                    <button id="send-btn" type="button" onclick="sendMessage()" aria-label="Send message">Send</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<!-- Footer -->
+<div th:replace="fragments/footer :: footer" class="bg-dark text-white py-4 mt-auto text-center"></div>
+
+<!-- Scripts -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/stompjs@2.3.3/lib/stomp.min.js"></script>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    document.addEventListener("DOMContentLoaded", function () {
+        const sender = /*[[${#authentication.name}]]*/ 'me';
+        const receiver = /*[[${receiver != null} ? ${receiver.username} : '' ]]*/ '';
+
+        // Set up message sending only if a receiver is selected
+        if (receiver !== '') {
+            const socket = new SockJS('/ws');
+            const stompClient = Stomp.over(socket);
+
+            stompClient.connect({}, function () {
+                stompClient.subscribe('/topic/messages', function (msg) {
+                    const m = JSON.parse(msg.body);
+                    if ((m.sender === sender && m.receiver === receiver) ||
+                        (m.sender === receiver && m.receiver === sender)) {
+
+                        const messageContainer = document.getElementById("message-container");
+                        const div = document.createElement("div");
+                        div.classList.add("message");
+                        div.classList.add(m.sender === sender ? "sender" : "receiver");
+                        div.innerHTML = `<div class="username">${m.sender}</div><div>${m.content}</div>`;
+                        messageContainer.appendChild(div);
+                        messageContainer.scrollTop = messageContainer.scrollHeight;
+                    }
+                });
+            });
+
+            function sendMessage() {
+                const input = document.getElementById("message-input");
+                const content = input.value.trim();
+                if (content === '') return;
+                stompClient.send("/app/chat", {}, JSON.stringify({ sender, receiver, content }));
+                input.value = '';
+            }
+
+            window.sendMessage = sendMessage;
+
+            const msgInput = document.getElementById("message-input");
+            if (msgInput) {
+                msgInput.addEventListener("keydown", function (event) {
+                    if (event.key === "Enter" && !event.shiftKey) {
+                        event.preventDefault();
+                        sendMessage();
+                    }
+                });
+            }
+        }
+
+        // ✅ Search always works even without a selected receiver
+        const userSearchInput = document.getElementById("userSearchInput");
+        if (userSearchInput) {
+            userSearchInput.addEventListener("input", function () {
+                const filter = this.value.toLowerCase();
+                const userItems = document.querySelectorAll("#userList .user-item");
+                userItems.forEach(item => {
+                    const username = item.textContent.trim().toLowerCase();
+                    item.style.display = username.includes(filter) ? "" : "none";
+                });
+            });
+        }
+    });
+    /*]]>*/
+</script>
+</body>
+
+</html>

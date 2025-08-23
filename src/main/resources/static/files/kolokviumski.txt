@@ -1,0 +1,91 @@
+Најди ги шифрите на сите уметнички дела што биле изложени во музеј на отворено.
+
+π(shifra_d)(σ(tip='otvoreno')((Muzej) ⨝ (Izlozba) ⨝ (Izlozba_UD) ⨝ (Izlozeni)))
+
+
+
+
+
+Prvo=(Muzej) ⨝ (Muzej.shifra= Izlozba.shifra_muzej)(Izlozba)
+Otvoreno=σ(tip='otvoreno')((Prvo) ⨝ (Izlozba_UD) ⨝ (Izlozeni))
+Site=(Otvoreno) ∪ (σ(tip='zatvoreno')((Prvo) ⨝ (Izlozba_UD) ⨝ (Izlozeni)))
+Result=(Site) - (Otvoreno)
+Final=(Result) ⨝ (Izlozeni.shifra_d = Umetnicko_delo.shifra)(Umetnicko_delo)
+Final2=π(sifra_d,ime,godina,umetnik)(Final)
+
+
+pablo=σ(umetnik='Pablo Picasso')(Umetnicko_delo)
+izlozen_pablo=(Izlozeni) ⨝ (Izlozeni.shifra_d=Umetnicko_delo.shifra)(pablo)
+γ ime_i; COUNT(umetnik) -> dela(izlozen_pablo)
+
+
+pablo=σ(umetnik='Pablo Picasso')(Umetnicko_delo)
+izlozen_pablo=(Izlozeni) ⨝ (Izlozeni.shifra_d=Umetnicko_delo.shifra)(pablo)
+counter= γ ime_i; COUNT(umetnik) -> dela(izlozen_pablo)
+joined = ((Izlozba) ⨝ (izlozen_pablo))
+datum = σ()(joined)
+
+Relaciona vezbi
+
+1.
+π pizza (σ age>20 and gender='female'(Person ⨝ Eats))
+
+2.
+
+π name (σ pizzeria='Straw Hat' and gender='female'(Person ⨝ Serves ⨝ Eats))
+
+3.
+
+amyorFay = σ name='Amy' or name='Fay' (Eats join Frequents)
+res = σ price<10 (Serves join Frequents)
+π pizzeria (res)
+
+4.
+
+amyorFay = σ name='Amy' or name='Fay' (Eats join Serves)
+res = σ price>10 (amyorFay)
+π pizzeria (res)
+
+
+5.
+amyorFay = σ name='Amy' and name='Fay' (Eats join Serves)
+res = σ price<10 (amyorFay)
+π pizzeria (res)
+
+6.
+
+pizzaDominos = π pizza(σ pizzeria='Dominos' (Serves))
+eatsDominos = π name (Eats join pizzaDominos)
+inDominos = π name (σ pizzeria='Dominos' (Frequents))
+π name (eatsDominos - inDominos)
+
+
+7.
+
+price = π pizza (σ price<=10 (Serves ⨝ Eats))
+people = π pizza (σ age<24 (Eats join Person))
+π pizza (price ∪ people)
+
+
+
+8.
+pecurki = σ pizza='mushroom'(Eats join Serves join Person)
+γ max(age) -> age(pecurki)
+
+
+9.
+π pizzeria (σ age>30 (Eats join Person join Serves))
+
+
+
+10.
+younger = π pizzeria (σ age<=30 (Eats join Person join Serves))
+all = π pizzeria (Eats join Person join Serves)
+all - younger
+
+
+
+
+
+
+

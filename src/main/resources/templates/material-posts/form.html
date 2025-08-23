@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Форма за материјал</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body, html {
+            height: 100%;
+            background: #f8f9fa;
+        }
+        .form-container {
+            max-width: 480px;
+            margin: auto;
+            padding: 2rem;
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 0.25rem 1rem rgba(0,0,0,0.1);
+            margin-top: 3rem;
+            margin-bottom: 3rem;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+
+<div th:replace="fragments/navbar :: navbar"></div>
+
+<div class="container">
+    <div class="form-container">
+        <h1 th:text="(${materialPost.id} != null) ? 'Измени материјал' : 'Креирај нов материјал'">Форма за материјал</h1>
+
+        <form th:action="@{${materialPost.id != null ? '/material-posts/update' : '/material-posts'}}"
+              th:object="${materialPost}" method="post" enctype="multipart/form-data"
+              class="needs-validation" novalidate>
+
+            <input type="hidden" th:field="*{id}"/>
+
+            <div class="mb-3">
+                <label for="title" class="form-label">Име:</label>
+                <input type="text" id="title" th:field="*{title}" class="form-control" required/>
+                <div class="invalid-feedback">Внесете име.</div>
+            </div>
+            <div class="mb-3">
+                <label for="subject" class="form-label">Предмет:</label>
+                <input type="text" id="subject" th:field="*{subject}" class="form-control" required/>
+            </div>
+
+            <div class="mb-3">
+                <label for="description" class="form-label">Опис:</label>
+                <textarea id="description" th:field="*{description}" class="form-control" rows="3"></textarea>
+            </div>
+
+            <div class="mb-3">
+                <label for="file" class="form-label">Прикачи фајл:</label>
+                <input type="file" id="file" name="file" class="form-control" th:required="${materialPost.id == null}"/>
+            </div>
+
+
+            <div class="mb-3">
+                <label for="rating" class="form-label">Оцена:</label>
+                <input type="number" id="rating" th:field="*{rating}" class="form-control" step="0.1" min="0" max="5" placeholder="0.0 - 5.0"/>
+            </div>
+
+
+            <button type="submit" class="btn btn-primary w-100">Зачувај</button>
+        </form>
+    </div>
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    (() => {
+        'use strict'
+        const forms = document.querySelectorAll('.needs-validation')
+        Array.from(forms).forEach(form => {
+            form.addEventListener('submit', event => {
+                if (!form.checkValidity()) {
+                    event.preventDefault()
+                    event.stopPropagation()
+                }
+                form.classList.add('was-validated')
+            }, false)
+        })
+    })()
+</script>
+
+</body>
+</html>
