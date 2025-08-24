@@ -1,4 +1,4 @@
-package mk.ukim.finki.fooddeliverybackend.service.application;
+package com.studentshub.service.application;
 
 import com.studentshub.dto.create.CreateReviewDto;
 import com.studentshub.dto.display.DisplayReviewDto;

@@ -1,3 +1,4 @@
+package com.studentshub.service.application;
 
 import com.studentshub.dto.create.CreateFavoriteDto;
 import com.studentshub.dto.display.DisplayFavoriteDto;

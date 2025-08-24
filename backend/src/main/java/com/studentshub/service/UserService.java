@@ -1,4 +1,4 @@
-package com.studentshub.service.domain;
+package com.studentshub.service;
 
 import com.studentshub.model.User;
 
