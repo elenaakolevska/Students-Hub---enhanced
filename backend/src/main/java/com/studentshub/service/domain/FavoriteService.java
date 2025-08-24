@@ -1,5 +1,4 @@
-package mk.ukim.finki.fooddeliverybackend.service.domain;
-
+package com.studentshub.service.domain;
 import com.studentshub.model.Favorite;
 import com.studentshub.model.Post;
 import com.studentshub.model.User;

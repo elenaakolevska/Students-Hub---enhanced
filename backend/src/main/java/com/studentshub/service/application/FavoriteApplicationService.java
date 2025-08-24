@@ -1,4 +1,3 @@
-package mk.ukim.finki.fooddeliverybackend.service.application;
 
 import com.studentshub.dto.create.CreateFavoriteDto;
 import com.studentshub.dto.display.DisplayFavoriteDto;
