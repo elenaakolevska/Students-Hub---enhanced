@@ -1,85 +1,67 @@
 package com.studentshub.web;
 
-import com.studentshub.model.EventPost;
-import com.studentshub.model.User;
+import com.studentshub.dto.create.CreateEventPostDto;
+import com.studentshub.dto.display.DisplayEventPostDto;
 import com.studentshub.model.enumerations.EventCategory;
-import com.studentshub.service.domain.EventPostService;
-import com.studentshub.service.FavoriteService;
-import com.studentshub.service.UserService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import com.studentshub.service.application.EventPostApplicationService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
-@Controller
-@RequestMapping("/event-posts")
+@RestController
+@RequestMapping("/api/event-posts")
 public class EventPostController {
 
-    private final EventPostService eventPostService;
-    private final UserService userService;
-    private final FavoriteService favoriteService;
+    private final EventPostApplicationService eventPostApplicationService;
 
-    public EventPostController(EventPostService eventPostService, UserService userService, FavoriteService favoriteService) {
-        this.eventPostService = eventPostService;
-        this.userService = userService;
-        this.favoriteService = favoriteService;
+    public EventPostController(EventPostApplicationService eventPostApplicationService) {
+        this.eventPostApplicationService = eventPostApplicationService;
     }
 
     @GetMapping
-    public String listEventPosts(@RequestParam(required = false) EventCategory category, Model model) {
-        List<EventPost> posts = (category == null) ?
-                eventPostService.getAllEventPosts() :
-                eventPostService.getEventPostsByCategory(category);
-        model.addAttribute("eventPosts", posts);
-        return "event-posts/list";
+    public List<DisplayEventPostDto> findAll(@RequestParam(required = false) EventCategory category) {
+        return (category == null) ?
+                eventPostApplicationService.findAll() :
+                eventPostApplicationService.findByEventCategory(category);
     }
-
 
     @GetMapping("/{id}")
-    public String viewEventPost(@PathVariable Long id, Model model) {
-        model.addAttribute("eventPost", eventPostService.getEventPostById(id));
-        User currentUser = userService.getCurrentUser();
-        model.addAttribute("currentUser", currentUser);
-        return "event-posts/details";
+    public ResponseEntity<DisplayEventPostDto> findById(@PathVariable Long id) {
+        return eventPostApplicationService.findById(id)
+                .map(eventPost -> ResponseEntity.ok().body(eventPost))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/create")
-    public String showCreateForm(Model model) {
-        model.addAttribute("eventPost", new EventPost());
-        model.addAttribute("categories", EventCategory.values());
-
-
-        return "event-posts/form";
+    @PostMapping("/add")
+    public ResponseEntity<DisplayEventPostDto> save(@RequestBody CreateEventPostDto createEventPostDto,
+                                                    Authentication authentication) {
+        return eventPostApplicationService.save(createEventPostDto, authentication.getName())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @PostMapping
-    public String createEventPost(@ModelAttribute EventPost post, Principal principal) {
-        eventPostService.createEventPost(post, principal.getName());
-        return "redirect:/event-posts";
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<DisplayEventPostDto> update(@PathVariable Long id,
+                                                      @RequestBody CreateEventPostDto createEventPostDto) {
+        return eventPostApplicationService.update(id, createEventPostDto)
+                .map(eventPost -> ResponseEntity.ok().body(eventPost))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable Long id, Model model) {
-        model.addAttribute("eventPost", eventPostService.getEventPostById(id));
-        model.addAttribute("categories", EventCategory.values());
-
-        return "event-posts/form";
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        if (eventPostApplicationService.findById(id).isPresent()) {
+            eventPostApplicationService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @PostMapping("/update")
-    public String updateEventPost(@ModelAttribute("eventPost") EventPost eventPost) {
-        eventPostService.updateEventPost(eventPost.getId(), eventPost);
-        return "redirect:/event-posts";
-    }
-
-
-    @PostMapping("/delete/{id}")
-    public String deleteEventPost(@PathVariable Long id) {
-        favoriteService.deleteAllByPostId(id);
-        eventPostService.deleteEventPost(id);
-        return "redirect:/event-posts";
+    @GetMapping("/category/{category}")
+    public List<DisplayEventPostDto> findByCategory(@PathVariable EventCategory category) {
+        return eventPostApplicationService.findByEventCategory(category);
     }
 }
-

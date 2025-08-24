@@ -1,84 +1,66 @@
 package com.studentshub.web;
 
-import com.studentshub.model.TransportPost;
-import com.studentshub.model.User;
-import com.studentshub.service.FavoriteService;
-import com.studentshub.service.domain.TransportPostService;
-import com.studentshub.service.UserService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import com.studentshub.dto.create.CreateTransportPostDto;
+import com.studentshub.dto.display.DisplayTransportPostDto;
+import com.studentshub.service.application.TransportPostApplicationService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
+import java.util.List;
 
-@Controller
-@RequestMapping("/transport-posts")
+@RestController
+@RequestMapping("/api/transport-posts")
 public class TransportPostController {
 
-    private final TransportPostService transportPostService;
-    private final UserService userService;
-    private final FavoriteService favoriteService;
+    private final TransportPostApplicationService transportPostApplicationService;
 
-
-    public TransportPostController(TransportPostService transportPostService, UserService userService, FavoriteService favoriteService) {
-        this.transportPostService = transportPostService;
-        this.userService = userService;
-        this.favoriteService = favoriteService;
+    public TransportPostController(TransportPostApplicationService transportPostApplicationService) {
+        this.transportPostApplicationService = transportPostApplicationService;
     }
 
     @GetMapping
-    public String listAll(
-            @RequestParam(required = false) String locationFrom,
-            @RequestParam(required = false) String locationTo,
-            Model model) {
-
-        var filteredPosts = transportPostService.findByLocationFromAndLocationTo(locationFrom, locationTo);
-
-        model.addAttribute("transportPosts", filteredPosts);
-        return "transport-posts/list";
+    public List<DisplayTransportPostDto> findAll(@RequestParam(required = false) String locationFrom,
+                                                 @RequestParam(required = false) String locationTo) {
+        return transportPostApplicationService.findByLocationFromAndLocationTo(locationFrom, locationTo);
     }
 
     @GetMapping("/{id}")
-    public String viewTransportPost(@PathVariable Long id, Model model) {
-        TransportPost transportPost = transportPostService.findById(id);
-        model.addAttribute("transportPost", transportPost);
-
-        User currentUser = userService.getCurrentUser();
-        model.addAttribute("currentUser", currentUser);
-
-        return "transport-posts/details";
+    public ResponseEntity<DisplayTransportPostDto> findById(@PathVariable Long id) {
+        return transportPostApplicationService.findById(id)
+                .map(transportPost -> ResponseEntity.ok().body(transportPost))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-
-    @GetMapping("/create")
-    public String showCreateForm(Model model) {
-        model.addAttribute("transportPost", new TransportPost());
-        return "transport-posts/form";
+    @PostMapping("/add")
+    public ResponseEntity<DisplayTransportPostDto> save(@RequestBody CreateTransportPostDto createTransportPostDto,
+                                                        Authentication authentication) {
+        return transportPostApplicationService.save(createTransportPostDto, authentication.getName())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @PostMapping("/create")
-    public String createPost(@ModelAttribute TransportPost transportPost, Principal principal) {
-        transportPostService.create(transportPost, principal.getName());
-        return "redirect:/transport-posts";
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<DisplayTransportPostDto> update(@PathVariable Long id,
+                                                          @RequestBody CreateTransportPostDto createTransportPostDto) {
+        return transportPostApplicationService.update(id, createTransportPostDto)
+                .map(transportPost -> ResponseEntity.ok().body(transportPost))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable Long id, Model model) {
-        TransportPost post = transportPostService.findById(id);
-        model.addAttribute("transportPost", post);
-        return "transport-posts/form";
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        if (transportPostApplicationService.findById(id).isPresent()) {
+            transportPostApplicationService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @PostMapping("/update")
-    public String updatePost(@ModelAttribute TransportPost transportPost) {
-        transportPostService.update(transportPost.getId(), transportPost);
-        return "redirect:/transport-posts";
-    }
-
-    @PostMapping("/delete/{id}")
-    public String deletePost(@PathVariable Long id) {
-        favoriteService.deleteAllByPostId(id);
-        transportPostService.delete(id);
-        return "redirect:/transport-posts";
+    @GetMapping("/route")
+    public List<DisplayTransportPostDto> findByRoute(@RequestParam(required = false) String from,
+                                                     @RequestParam(required = false) String to) {
+        return transportPostApplicationService.findByLocationFromAndLocationTo(from, to);
     }
 }

@@ -1,105 +1,71 @@
 package com.studentshub.web;
 
-import com.studentshub.model.HousingPost;
-import com.studentshub.model.User;
-import com.studentshub.service.FavoriteService;
-import com.studentshub.service.domain.HousingPostService;
-import com.studentshub.service.UserService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import com.studentshub.dto.create.CreateHousingPostDto;
+import com.studentshub.dto.display.DisplayHousingPostDto;
+import com.studentshub.service.application.HousingPostApplicationService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-
-import java.security.Principal;
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
-@Controller
-@RequestMapping("/housing-posts")
+@RestController
+@RequestMapping("/api/housing-posts")
 public class HousingPostController {
 
-    private final HousingPostService service;
-    private final UserService userService;
-    private final FavoriteService favoriteService;
+    private final HousingPostApplicationService housingPostApplicationService;
 
-
-    public HousingPostController(HousingPostService service, UserService userService, FavoriteService favoriteService) {
-        this.service = service;
-        this.userService = userService;
-        this.favoriteService = favoriteService;
+    public HousingPostController(HousingPostApplicationService housingPostApplicationService) {
+        this.housingPostApplicationService = housingPostApplicationService;
     }
 
     @GetMapping
-    public String getAll(@RequestParam(required = false) String municipality, Model model) {
-        List<HousingPost> posts;
-
-        if (municipality != null && !municipality.isEmpty()) {
-            posts = service.findByMunicipality(municipality);
-        } else {
-            posts = service.findAll();
-        }
-
-        model.addAttribute("posts", posts);
-        model.addAttribute("municipalities", service.getAllMunicipalities());
-        return "housing-posts/list";
+    public List<DisplayHousingPostDto> findAll(@RequestParam(required = false) String municipality) {
+        return (municipality != null && !municipality.isEmpty()) ?
+                housingPostApplicationService.findByMunicipality(municipality) :
+                housingPostApplicationService.findAll();
     }
 
     @GetMapping("/{id}")
-    public String getById(@PathVariable Long id, Model model) {
-        HousingPost post = service.findById(id);
-        model.addAttribute("post", post);
-        User currentUser = userService.getCurrentUser();
-        model.addAttribute("currentUser", currentUser);
-        return "housing-posts/details";
+    public ResponseEntity<DisplayHousingPostDto> findById(@PathVariable Long id) {
+        return housingPostApplicationService.findById(id)
+                .map(housingPost -> ResponseEntity.ok().body(housingPost))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-
-
-
-    @PostMapping
-    public String create(@ModelAttribute HousingPost post, Principal principal
-    ) {
-        service.create(post,principal.getName());
-        return "redirect:/housing-posts";
+    @PostMapping("/add")
+    public ResponseEntity<DisplayHousingPostDto> save(@RequestBody CreateHousingPostDto createHousingPostDto,
+                                                      Authentication authentication) {
+        return housingPostApplicationService.save(createHousingPostDto, authentication.getName())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @GetMapping("/create")
-    public String showCreateForm(Model model) {
-        model.addAttribute("post", new HousingPost());
-        model.addAttribute("municipalities", service.getAllMunicipalities());
-
-        return "housing-posts/form";
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<DisplayHousingPostDto> update(@PathVariable Long id,
+                                                        @RequestBody CreateHousingPostDto createHousingPostDto) {
+        return housingPostApplicationService.update(id, createHousingPostDto)
+                .map(housingPost -> ResponseEntity.ok().body(housingPost))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable Long id, Model model) {
-        HousingPost post = service.findById(id);
-        String imagesAsString = String.join(", ", post.getImages());
-        model.addAttribute("post", post);
-        model.addAttribute("imagesAsString", imagesAsString);
-        model.addAttribute("municipalities", service.getAllMunicipalities());
-        return "housing-posts/form";
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        if (housingPostApplicationService.findById(id).isPresent()) {
+            housingPostApplicationService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-
-
-    @PostMapping("/update/{id}")
-    public String update(@PathVariable Long id, @ModelAttribute HousingPost post, @RequestParam String images) {
-        List<String> imagesList = Arrays.stream(images.split(","))
-                .map(String::trim)
-                .filter(s -> !s.isEmpty())
-                .collect(Collectors.toList());
-        post.setImages(imagesList);
-        service.update(id, post);
-        return "redirect:/housing-posts";
+    @GetMapping("/municipality/{municipality}")
+    public List<DisplayHousingPostDto> findByMunicipality(@PathVariable String municipality) {
+        return housingPostApplicationService.findByMunicipality(municipality);
     }
 
-
-    @PostMapping("/delete/{id}")
-    public String delete(@PathVariable Long id) {
-        favoriteService.deleteAllByPostId(id);
-        service.delete(id);
-        return "redirect:/housing-posts";
+    @GetMapping("/municipalities")
+    public List<String> getAllMunicipalities() {
+        return housingPostApplicationService.getAllMunicipalities();
     }
 }
