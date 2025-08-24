@@ -1,10 +1,10 @@
-package com.studentshub.service.impl;
+package com.studentshub.service.domain.impl;
 
 import com.studentshub.model.TutorPost;
 import com.studentshub.model.User;
 import com.studentshub.model.exceptions.PostNotFoundException;
 import com.studentshub.repository.TutorPostRepository;
-import com.studentshub.service.TutorPostService;
+import com.studentshub.service.domain.TutorPostService;
 import com.studentshub.service.UserService;
 import org.springframework.stereotype.Service;
 

@@ -3,7 +3,7 @@ package com.studentshub.web;
 import com.studentshub.model.EventPost;
 import com.studentshub.model.User;
 import com.studentshub.model.enumerations.EventCategory;
-import com.studentshub.service.EventPostService;
+import com.studentshub.service.domain.EventPostService;
 import com.studentshub.service.FavoriteService;
 import com.studentshub.service.UserService;
 import org.springframework.stereotype.Controller;

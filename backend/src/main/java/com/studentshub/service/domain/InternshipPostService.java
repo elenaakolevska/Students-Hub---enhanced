@@ -1,8 +1,7 @@
-package com.studentshub.service;
+package com.studentshub.service.domain;
 
 
 import com.studentshub.model.InternshipPost;
-import com.studentshub.model.enumerations.PostCategory;
 
 import java.util.List;
 

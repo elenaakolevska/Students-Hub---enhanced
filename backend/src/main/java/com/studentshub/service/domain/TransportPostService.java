@@ -1,4 +1,4 @@
-package com.studentshub.service;
+package com.studentshub.service.domain;
 
 
 import com.studentshub.model.TransportPost;

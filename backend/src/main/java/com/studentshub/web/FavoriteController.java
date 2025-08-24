@@ -2,7 +2,7 @@ package com.studentshub.web;
 
 import com.studentshub.model.*;
 import com.studentshub.service.FavoriteService;
-import com.studentshub.service.PostService;
+import com.studentshub.service.domain.PostService;
 import com.studentshub.service.UserService;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;

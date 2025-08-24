@@ -1,7 +1,7 @@
 package com.studentshub.web;
 
 import com.studentshub.model.enumerations.PostCategory;
-import com.studentshub.service.PostService;
+import com.studentshub.service.domain.PostService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;

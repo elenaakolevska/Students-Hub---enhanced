@@ -1,11 +1,11 @@
-package com.studentshub.service.impl;
+package com.studentshub.service.domain.impl;
 
 import com.studentshub.model.EventPost;
 import com.studentshub.model.User;
 import com.studentshub.model.enumerations.EventCategory;
 import com.studentshub.model.exceptions.ResourceNotFoundException;
 import com.studentshub.repository.EventPostRepository;
-import com.studentshub.service.EventPostService;
+import com.studentshub.service.domain.EventPostService;
 import com.studentshub.service.UserService;
 import org.springframework.stereotype.Service;
 

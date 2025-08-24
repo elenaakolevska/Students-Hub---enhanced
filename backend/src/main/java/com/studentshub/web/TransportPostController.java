@@ -3,15 +3,13 @@ package com.studentshub.web;
 import com.studentshub.model.TransportPost;
 import com.studentshub.model.User;
 import com.studentshub.service.FavoriteService;
-import com.studentshub.service.TransportPostService;
+import com.studentshub.service.domain.TransportPostService;
 import com.studentshub.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.security.Principal;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 
 @Controller
 @RequestMapping("/transport-posts")

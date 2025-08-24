@@ -1,10 +1,10 @@
-package com.studentshub.service.impl;
+package com.studentshub.service.domain.impl;
 import com.studentshub.model.HousingPost;
 import com.studentshub.model.User;
 import com.studentshub.model.exceptions.PostNotFoundException;
 import com.studentshub.model.exceptions.ResourceNotFoundException;
 import com.studentshub.repository.HousingPostRepository;
-import com.studentshub.service.HousingPostService;
+import com.studentshub.service.domain.HousingPostService;
 import com.studentshub.service.UserService;
 import org.springframework.stereotype.Service;
 
