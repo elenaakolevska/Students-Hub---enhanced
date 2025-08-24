@@ -3,7 +3,7 @@ package com.studentshub.web;
 import com.studentshub.model.HousingPost;
 import com.studentshub.model.User;
 import com.studentshub.service.FavoriteService;
-import com.studentshub.service.HousingPostService;
+import com.studentshub.service.domain.HousingPostService;
 import com.studentshub.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

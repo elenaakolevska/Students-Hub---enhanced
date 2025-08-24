@@ -2,9 +2,8 @@ package com.studentshub.web;
 
 import com.studentshub.model.InternshipPost;
 import com.studentshub.model.User;
-import com.studentshub.model.enumerations.PostCategory;
 import com.studentshub.service.FavoriteService;
-import com.studentshub.service.InternshipPostService;
+import com.studentshub.service.domain.InternshipPostService;
 import com.studentshub.service.UserService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;

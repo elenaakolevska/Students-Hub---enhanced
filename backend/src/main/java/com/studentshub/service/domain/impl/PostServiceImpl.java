@@ -1,11 +1,11 @@
-package com.studentshub.service.impl;
+package com.studentshub.service.domain.impl;
 
 import com.studentshub.model.Post;
 import com.studentshub.model.User;
 import com.studentshub.model.enumerations.PostCategory;
 import com.studentshub.model.exceptions.PostNotFoundException;
 import com.studentshub.repository.PostRepository;
-import com.studentshub.service.PostService;
+import com.studentshub.service.domain.PostService;
 import com.studentshub.service.UserService;
 import org.springframework.stereotype.Service;
 
