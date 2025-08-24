@@ -1,85 +1,66 @@
 package com.studentshub.web;
 
-import com.studentshub.model.TutorPost;
-import com.studentshub.model.User;
-import com.studentshub.service.FavoriteService;
-import com.studentshub.service.domain.TutorPostService;
-import com.studentshub.service.UserService;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import com.studentshub.dto.create.CreateTutorPostDto;
+import com.studentshub.dto.display.DisplayTutorPostDto;
+import com.studentshub.service.application.TutorPostApplicationService;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.security.Principal;
 import java.util.List;
 
-@Controller
-@RequestMapping("/tutor-posts")
+@RestController
+@RequestMapping("/api/tutor-posts")
 public class TutorPostController {
 
-    private final TutorPostService tutorPostService;
-    private final UserService userService;
-    private final FavoriteService favoriteService;
+    private final TutorPostApplicationService tutorPostApplicationService;
 
-
-    public TutorPostController(TutorPostService tutorPostService, UserService userService, FavoriteService favoriteService) {
-        this.tutorPostService = tutorPostService;
-        this.userService = userService;
-        this.favoriteService = favoriteService;
+    public TutorPostController(TutorPostApplicationService tutorPostApplicationService) {
+        this.tutorPostApplicationService = tutorPostApplicationService;
     }
 
     @GetMapping
-    public String listTutorPosts(
-            @RequestParam(required = false) String tutorName,
-            @RequestParam(required = false) String subject,
-            Model model) {
-
-        List<TutorPost> posts = tutorPostService.findByTutorNameAndSubject(tutorName, subject);
-        model.addAttribute("tutorPosts", posts);
-        model.addAttribute("tutorName", tutorName);
-        model.addAttribute("subject", subject);
-        return "tutor-posts/list";
+    public List<DisplayTutorPostDto> findAll(@RequestParam(required = false) String tutorName,
+                                             @RequestParam(required = false) String subject) {
+        return tutorPostApplicationService.findByTutorNameAndSubject(tutorName, subject);
     }
-
-
 
     @GetMapping("/{id}")
-    public String viewTutorPost(@PathVariable Long id, Model model) {
-        TutorPost post = tutorPostService.findById(id);
-        model.addAttribute("tutorPost", post);
-        User currentUser = userService.getCurrentUser();
-        model.addAttribute("currentUser", currentUser);
-        return "tutor-posts/details";
+    public ResponseEntity<DisplayTutorPostDto> findById(@PathVariable Long id) {
+        return tutorPostApplicationService.findById(id)
+                .map(tutorPost -> ResponseEntity.ok().body(tutorPost))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/create")
-    public String showCreateForm(Model model) {
-        model.addAttribute("tutorPost", new TutorPost());
-        return "tutor-posts/form";
+    @PostMapping("/add")
+    public ResponseEntity<DisplayTutorPostDto> save(@RequestBody CreateTutorPostDto createTutorPostDto,
+                                                    Authentication authentication) {
+        return tutorPostApplicationService.save(createTutorPostDto, authentication.getName())
+                .map(ResponseEntity::ok)
+                .orElseGet(() -> ResponseEntity.badRequest().build());
     }
 
-    @PostMapping
-    public String createTutorPost(@ModelAttribute TutorPost tutorPost, Principal principal) {
-        tutorPostService.create(tutorPost, principal.getName());
-        return "redirect:/tutor-posts";
+    @PutMapping("/edit/{id}")
+    public ResponseEntity<DisplayTutorPostDto> update(@PathVariable Long id,
+                                                      @RequestBody CreateTutorPostDto createTutorPostDto) {
+        return tutorPostApplicationService.update(id, createTutorPostDto)
+                .map(tutorPost -> ResponseEntity.ok().body(tutorPost))
+                .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    @GetMapping("/edit/{id}")
-    public String showEditForm(@PathVariable Long id, Model model) {
-        TutorPost post = tutorPostService.findById(id);
-        model.addAttribute("tutorPost", post);
-        return "tutor-posts/form";
+    @DeleteMapping("/delete/{id}")
+    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
+        if (tutorPostApplicationService.findById(id).isPresent()) {
+            tutorPostApplicationService.deleteById(id);
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.notFound().build();
+        }
     }
 
-    @PostMapping("/update")
-    public String updateTutorPost(@ModelAttribute("tutorPost") TutorPost tutorPost) {
-        tutorPostService.update(tutorPost.getId(), tutorPost);
-        return "redirect:/tutor-posts";
-    }
-
-    @PostMapping("/delete/{id}")
-    public String deleteTutorPost(@PathVariable Long id) {
-        favoriteService.deleteAllByPostId(id);
-        tutorPostService.delete(id);
-        return "redirect:/tutor-posts";
+    @GetMapping("/search")
+    public List<DisplayTutorPostDto> search(@RequestParam(required = false) String tutorName,
+                                            @RequestParam(required = false) String subject) {
+        return tutorPostApplicationService.findByTutorNameAndSubject(tutorName, subject);
     }
 }
