@@ -6,7 +6,7 @@ import com.studentshub.model.enumerations.EventCategory;
 import com.studentshub.model.exceptions.ResourceNotFoundException;
 import com.studentshub.repository.EventPostRepository;
 import com.studentshub.service.domain.EventPostService;
-import com.studentshub.service.UserService;
+import com.studentshub.service.domain.UserService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

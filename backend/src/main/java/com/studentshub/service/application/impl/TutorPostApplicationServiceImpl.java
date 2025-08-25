@@ -5,7 +5,7 @@ import com.studentshub.dto.display.DisplayTutorPostDto;
 import com.studentshub.model.User;
 import com.studentshub.service.application.TutorPostApplicationService;
 import com.studentshub.service.domain.TutorPostService;
-import com.studentshub.service.UserService;
+import com.studentshub.service.domain.UserService;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;

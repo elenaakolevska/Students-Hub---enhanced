@@ -5,7 +5,7 @@ import com.studentshub.model.User;
 import com.studentshub.model.exceptions.PostNotFoundException;
 import com.studentshub.repository.TutorPostRepository;
 import com.studentshub.service.domain.TutorPostService;
-import com.studentshub.service.UserService;
+import com.studentshub.service.domain.UserService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

@@ -1,10 +1,10 @@
-package com.studentshub.service.impl;
+package com.studentshub.service.domain.impl;
 
 import com.studentshub.model.*;
 import com.studentshub.model.exceptions.DuplicateUsernameException;
 import com.studentshub.model.exceptions.ResourceNotFoundException;
 import com.studentshub.repository.UserRepository;
-import com.studentshub.service.UserService;
+import com.studentshub.service.domain.UserService;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;

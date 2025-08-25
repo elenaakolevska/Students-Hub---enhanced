@@ -1,69 +1,37 @@
 package com.studentshub.web;
-import com.studentshub.model.*;
-import com.studentshub.model.exceptions.DuplicateUsernameException;
-import com.studentshub.service.*;
-import jakarta.servlet.http.HttpServletRequest;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import com.studentshub.dto.create.CreateUserDto;
+import com.studentshub.dto.display.DisplayUserDto;
+import com.studentshub.service.application.UserApplicationService;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
-@Controller
+import java.util.List;
+@RestController
 @RequestMapping("/users")
 public class UserController {
 
-    private final UserService userService;
+    private final UserApplicationService userApplicationService;
 
-    public UserController(UserService userService) {
-        this.userService = userService;
+    public UserController(UserApplicationService userApplicationService) {
+        this.userApplicationService = userApplicationService;
     }
 
     @GetMapping
-    public String listUsers(Model model) {
-        model.addAttribute("users", userService.findAll());
-        return "users/list";
+    public List<DisplayUserDto> listUsers() {
+        return userApplicationService.findAll();
     }
 
     @GetMapping("/{id}")
-    public String getUserDetails(@PathVariable Long id, Model model) {
-        User user = userService.getUserById(id);
-        model.addAttribute("user", user);
-        return "users/details";
-    }
-
-    @GetMapping("/register")
-    public String showRegistrationForm(Model model) {
-        model.addAttribute("user", new User());
-        return "users/register";
+    public DisplayUserDto getUserDetails(@PathVariable Long id) {
+        return userApplicationService.findById(id).orElse(null);
     }
 
     @PostMapping("/register")
-    public String registerUser(@ModelAttribute User user,Model model) {
-        try {
-            User savedUser = userService.createUser(user);
-            return "redirect:/users/login";
-        } catch (DuplicateUsernameException e) {
-            model.addAttribute("errorMessage", e.getMessage());
-            model.addAttribute("user", user);
-            return "users/register";
-        }
-
-    }
-
-    @GetMapping("/login")
-    public String showLoginForm(Model model) {
-        model.addAttribute("user", new User());
-        return "users/login";
+    public DisplayUserDto registerUser(@RequestBody CreateUserDto dto) {
+        return userApplicationService.save(dto);
     }
 
     @GetMapping("/profile/{username}")
-    public String getUserProfile(@PathVariable String username, Model model) {
-        User user = userService.getUserByUsername(username);
-        if (user == null) {
-            // User not found - redirect with error param or show error page
-            return "redirect:/users?error=user_not_found";
-        }
-        model.addAttribute("user", user);
-        return "users/profileinfo";  // Template name, ensure this file exists
+    public DisplayUserDto getUserProfile(@PathVariable String username) {
+        return userApplicationService.findByUsername(username).orElse(null);
     }
-
-
 }

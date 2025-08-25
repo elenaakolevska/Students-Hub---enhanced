@@ -6,7 +6,7 @@ import com.studentshub.model.User;
 import com.studentshub.model.enumerations.EventCategory;
 import com.studentshub.service.application.EventPostApplicationService;
 import com.studentshub.service.domain.EventPostService;
-import com.studentshub.service.UserService;
+import com.studentshub.service.domain.UserService;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;

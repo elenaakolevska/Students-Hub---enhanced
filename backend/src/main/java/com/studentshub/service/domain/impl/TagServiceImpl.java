@@ -1,9 +1,9 @@
-package com.studentshub.service.impl;
+package com.studentshub.service.domain.impl;
 
 import com.studentshub.model.Tag;
 import com.studentshub.model.exceptions.ResourceNotFoundException;
 import com.studentshub.repository.TagRepository;
-import com.studentshub.service.TagService;
+import com.studentshub.service.domain.TagService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
