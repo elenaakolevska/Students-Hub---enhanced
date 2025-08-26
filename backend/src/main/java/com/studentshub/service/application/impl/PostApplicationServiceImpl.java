@@ -4,7 +4,7 @@ import com.studentshub.dto.create.CreatePostDto;
 import com.studentshub.dto.display.DisplayPostDto;
 import com.studentshub.model.User;
 import com.studentshub.model.enumerations.PostCategory;
-import com.studentshub.service.UserService;
+import com.studentshub.service.domain.UserService;
 import com.studentshub.service.application.PostApplicationService;
 import com.studentshub.service.domain.PostService;
 import org.springframework.stereotype.Service;

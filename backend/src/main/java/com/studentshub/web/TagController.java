@@ -1,41 +1,27 @@
 package com.studentshub.web;
-import com.studentshub.model.*;
-import com.studentshub.service.*;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import com.studentshub.dto.display.DisplayTagDto;
+import com.studentshub.dto.create.CreateTagDto;
+import com.studentshub.service.application.TagApplicationService;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
-@Controller
+import java.util.List;
+@RestController
 @RequestMapping("/tags")
 public class TagController {
-
-    private final TagService tagService;
-
-    public TagController(TagService tagService) {
-        this.tagService = tagService;
+    private final TagApplicationService tagApplicationService;
+    public TagController(TagApplicationService tagApplicationService) {
+        this.tagApplicationService = tagApplicationService;
     }
-
     @GetMapping
-    public String listTags(Model model) {
-        model.addAttribute("tags", tagService.getAllTags());
-        return "tags/list";
+    public List<DisplayTagDto> listTags() {
+        return tagApplicationService.findAll();
     }
-
-    @GetMapping("/create")
-    public String showCreateForm(Model model) {
-        model.addAttribute("tag", new Tag());
-        return "tags/create";
+    @PostMapping
+    public DisplayTagDto createTag(@RequestBody CreateTagDto dto) {
+        return tagApplicationService.save(dto);
     }
-
-    @PostMapping("/create")
-    public String createTag(@ModelAttribute Tag tag) {
-        tagService.createTag(tag);
-        return "redirect:/tags";
-    }
-
     @GetMapping("/{id}")
-    public String getTagDetails(@PathVariable Long id, Model model) {
-        Tag tag = tagService.getTagById(id);
-        model.addAttribute("tag", tag);
-        return "tags/details";
+    public DisplayTagDto getTagDetails(@PathVariable Long id) {
+        return tagApplicationService.findById(id).orElse(null);
     }
 }

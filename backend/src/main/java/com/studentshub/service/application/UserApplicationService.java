@@ -13,4 +13,5 @@ public interface UserApplicationService {
     Optional<DisplayUserDto> deleteById(Long id);
     Optional<DisplayUserDto> findByUsername(String username);
     Optional<DisplayUserDto> findByEmail(String email);
+    Optional<DisplayUserDto> updateProfile(String username, CreateUserDto dto);
 }

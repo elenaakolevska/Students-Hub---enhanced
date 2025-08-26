@@ -11,10 +11,15 @@ public record CreateUserDto(
     String password,
     String education,
     String profileImageUrl,
-    LocalDateTime createdAt
+    LocalDateTime createdAt,
+    String role
 ) {
     public User toUser() {
-        return new User(null, firstName, lastName, username, email, password, education, createdAt, null, null, null, null);
+        User user = new User(null, firstName, lastName, username, email, password, education, createdAt, null, null, null, null, role);
+        user.setProfileImageUrl(profileImageUrl);
+        return user;
+    }
+    public String role() {
+        return role;
     }
 }
-

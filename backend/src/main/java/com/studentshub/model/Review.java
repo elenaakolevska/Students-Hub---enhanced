@@ -8,6 +8,9 @@ import java.time.LocalDateTime;
 @Entity
 
 public class Review {
+    public Long getId() {
+        return id;
+    }
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;

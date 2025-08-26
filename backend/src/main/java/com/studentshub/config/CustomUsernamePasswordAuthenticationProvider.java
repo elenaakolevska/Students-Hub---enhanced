@@ -1,6 +1,6 @@
 package com.studentshub.config;
 
-import com.studentshub.service.UserService;
+import com.studentshub.service.domain.UserService;
 import com.studentshub.model.exceptions.ResourceNotFoundException;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;

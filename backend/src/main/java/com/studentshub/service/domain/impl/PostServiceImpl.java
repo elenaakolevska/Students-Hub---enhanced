@@ -6,7 +6,7 @@ import com.studentshub.model.enumerations.PostCategory;
 import com.studentshub.model.exceptions.PostNotFoundException;
 import com.studentshub.repository.PostRepository;
 import com.studentshub.service.domain.PostService;
-import com.studentshub.service.UserService;
+import com.studentshub.service.domain.UserService;
 import org.springframework.stereotype.Service;
 
 import java.util.EnumMap;

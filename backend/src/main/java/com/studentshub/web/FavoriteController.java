@@ -1,52 +1,38 @@
 package com.studentshub.web;
 
-import com.studentshub.model.*;
-import com.studentshub.service.FavoriteService;
-import com.studentshub.service.domain.PostService;
-import com.studentshub.service.UserService;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import com.studentshub.dto.create.CreateFavoriteDto;
+import com.studentshub.dto.display.DisplayFavoriteDto;
+import com.studentshub.service.application.FavoriteApplicationService;
 import org.springframework.web.bind.annotation.*;
 
-@Controller
+import java.util.List;
+
+@RestController
 @RequestMapping("/favorites")
 public class FavoriteController {
+    private final FavoriteApplicationService favoriteApplicationService;
 
-    private final FavoriteService favoriteService;
-    private final UserService userService;
-    private final PostService postService;
-
-    public FavoriteController(FavoriteService favoriteService, UserService userService, PostService postService) {
-        this.favoriteService = favoriteService;
-        this.userService = userService;
-        this.postService = postService;
+    public FavoriteController(FavoriteApplicationService favoriteApplicationService) {
+        this.favoriteApplicationService = favoriteApplicationService;
     }
 
     @GetMapping
-    public String listFavorites(Model model,
-                                @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.getUserByUsername(userDetails.getUsername());
-        model.addAttribute("favorites", favoriteService.getFavoritesByUser(user));
-        return "favorites/list";
+    public List<DisplayFavoriteDto> listFavorites(@RequestParam Long userId) {
+        return favoriteApplicationService.findByUserId(userId);
     }
 
-
-    @GetMapping("/favorites/add/{postId}")
-    public String addFavorite(@PathVariable Long postId,
-                              @AuthenticationPrincipal UserDetails userDetails) {
-        User user = userService.getUserByUsername(userDetails.getUsername());
-        Post post = postService.getPostById(postId);
-        favoriteService.addFavorite(user, post);
-        return "redirect:/favorites";
+    @GetMapping("/{id}")
+    public DisplayFavoriteDto getFavorite(@PathVariable Long id) {
+        return favoriteApplicationService.findById(id).orElse(null);
     }
 
+    @PostMapping
+    public DisplayFavoriteDto addFavorite(@RequestBody CreateFavoriteDto dto) {
+        return favoriteApplicationService.save(dto);
+    }
 
-    @PostMapping("/remove/{id}")
-    public String removeFavorite(@PathVariable Long id) {
-        favoriteService.removeFavorite(id);
-        return "redirect:/favorites";
+    @DeleteMapping("/{id}")
+    public DisplayFavoriteDto deleteFavorite(@PathVariable Long id) {
+        return favoriteApplicationService.deleteById(id).orElse(null);
     }
 }
-
