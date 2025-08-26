@@ -1,12 +1,9 @@
-import React, { useState, useEffect, useContext } from 'react';
-import { useParams, useNavigate, Link } from 'react-router-dom';
-import transportPostRepository from '../../../repository/transportPostRepository.js';
-import authContext from '../../../contexts/authContext.js';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import tutorPostRepository from '../../../repository/tutorPostRepository';
 
-const TransportPostDetails = () => {
+const TutorPostDetails = () => {
     const { id } = useParams();
-    const navigate = useNavigate();
-    const { user } = useContext(authContext);
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -14,35 +11,29 @@ const TransportPostDetails = () => {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const response = await transportPostRepository.findById(id);
+                setLoading(true);
+                const response = await tutorPostRepository.findById(id);
                 setPost(response.data);
+                setError(null);
             } catch (err) {
-                setError(err.message);
+                setError(err.response?.data?.message || err.message);
+                console.error("Error fetching tutor post:", err);
             } finally {
                 setLoading(false);
             }
         };
 
-        fetchPost();
-    }, [id]);
-
-    const handleDelete = async () => {
-        if (window.confirm('Дали сте сигурни дека сакате да го избришете превозот?')) {
-            try {
-                await transportPostRepository.delete(id);
-                navigate('/transport-posts');
-            } catch (err) {
-                console.error('Error deleting transport post:', err);
-            }
+        if (id) {
+            fetchPost();
         }
-    };
+    }, [id]);
 
     if (loading) {
         return (
             <div className="container my-5">
                 <div className="text-center">
                     <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Вчитување детали за превоз...</span>
+                        <span className="visually-hidden">Вчитување детали за тутор пост...</span>
                     </div>
                 </div>
             </div>
@@ -55,7 +46,7 @@ const TransportPostDetails = () => {
                 <div className="alert alert-danger" role="alert">
                     Грешка: {error}
                 </div>
-                <Link to="/transport-posts" className="btn btn-primary">
+                <Link to="/tutor-posts" className="btn btn-primary">
                     Назад кон листа
                 </Link>
             </div>
@@ -66,9 +57,9 @@ const TransportPostDetails = () => {
         return (
             <div className="container my-5">
                 <div className="alert alert-warning" role="alert">
-                    Превозот не е пронајден.
+                    Тутор постот не е пронајден.
                 </div>
-                <Link to="/transport-posts" className="btn btn-primary">
+                <Link to="/tutor-posts" className="btn btn-primary">
                     Назад кон листа
                 </Link>
             </div>
@@ -86,36 +77,22 @@ const TransportPostDetails = () => {
                         <div className="card-body">
                             <div className="row mb-4">
                                 <div className="col-md-6">
-                                    <h5 className="text-muted">Детали за превоз</h5>
+                                    <h5 className="text-muted">Информации за тутор</h5>
                                     <p className="mb-2">
-                                        <strong>Провајдер:</strong> <span>{post.providerName}</span>
+                                        <strong>Тутор:</strong> <span className="text-primary">{post.tutorName}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Од:</strong> <span>{post.locationFrom}</span>
+                                        <strong>Предмет:</strong> <span>{post.subject}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>До:</strong> <span>{post.locationTo}</span>
-                                    </p>
-                                    <p className="mb-2">
-                                        <strong>Цена:</strong> <span>{post.price} ден.</span>
-                                    </p>
-                                    <p className="mb-2">
-                                        <strong>Време на поаѓање:</strong>
-                                        <span>
-                                            {post.departureDatetime ?
-                                                new Date(post.departureDatetime).toLocaleString('mk-MK') :
-                                                'Нема податок'
-                                            }
+                                        <strong>Оцена:</strong>
+                                        <span className="ms-2">
+                                            {post.rating}/5
+                                            <span className="text-warning ms-1">
+                                                {'⭐'.repeat(parseInt(post.rating))}
+                                            </span>
                                         </span>
                                     </p>
-                                    <p className="mb-2">
-                                        <strong>Контакт:</strong> <span>{post.contactInfo}</span>
-                                    </p>
-                                    {post.category && (
-                                        <p className="mb-2">
-                                            <strong>Категорија:</strong> <span>{post.category}</span>
-                                        </p>
-                                    )}
                                 </div>
                             </div>
 
@@ -123,6 +100,17 @@ const TransportPostDetails = () => {
                                 <h5 className="text-muted">Опис</h5>
                                 <p className="lead">{post.description}</p>
                             </div>
+
+                            {post.tags && post.tags.length > 0 && (
+                                <div className="mb-4">
+                                    <h5 className="text-muted">Тагови</h5>
+                                    <div className="d-flex flex-wrap gap-2">
+                                        {post.tags.map((tag, index) => (
+                                            <span key={index} className="badge bg-secondary fs-6">{tag}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             <div className="mb-4">
                                 <h5 className="text-muted">Информации за постот</h5>
@@ -133,7 +121,7 @@ const TransportPostDetails = () => {
                                 )}
                                 {post.updatedAt && post.updatedAt !== post.createdAt && (
                                     <p className="mb-1">
-                                        <strong>Последно а��урирано:</strong> {new Date(post.updatedAt).toLocaleDateString('mk-MK')}
+                                        <strong>Последно ажурирано:</strong> {new Date(post.updatedAt).toLocaleDateString('mk-MK')}
                                     </p>
                                 )}
                             </div>
@@ -141,31 +129,16 @@ const TransportPostDetails = () => {
                         <div className="card-footer bg-light">
                             <div className="d-flex justify-content-between">
                                 <Link
-                                    to="/transport-posts"
+                                    to="/tutor-posts"
                                     className="btn btn-outline-primary"
                                 >
                                     ← Назад кон листа
                                 </Link>
                                 <div>
-                                    {user && user.id === post.userId && (
-                                        <>
-                                            <Link
-                                                to={`/transport-posts/edit/${post.id}`}
-                                                className="btn btn-outline-warning me-2"
-                                            >
-                                                Уреди
-                                            </Link>
-                                            <button
-                                                onClick={handleDelete}
-                                                className="btn btn-outline-danger me-2"
-                                            >
-                                                Избриши
-                                            </button>
-                                        </>
-                                    )}
                                     <button
                                         className="btn btn-outline-danger"
                                         onClick={() => {
+                                            // TODO: Implement favorites functionality
                                             console.log('Adding to favorites:', post.id);
                                         }}
                                     >
@@ -181,4 +154,4 @@ const TransportPostDetails = () => {
     );
 };
 
-export default TransportPostDetails;
+export default TutorPostDetails;

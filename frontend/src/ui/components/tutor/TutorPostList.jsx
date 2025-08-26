@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import useInternshipPosts from '../../../hooks/useInternshipPosts.js';
+import useTutorPosts from '../../../hooks/useTutorPosts';
 
-const InternshipPostList = () => {
-    const [facultyFilter, setFacultyFilter] = useState('');
-    const { internshipPosts, loading, error } = useInternshipPosts(facultyFilter);
+const TutorPostList = () => {
+    const [tutorName, setTutorName] = useState('');
+    const [subject, setSubject] = useState('');
+    const { tutorPosts, loading, error, refetch } = useTutorPosts(tutorName, subject);
 
-    const handleFacultyChange = (e) => {
-        setFacultyFilter(e.target.value);
+    const handleFilterSubmit = (e) => {
+        e.preventDefault();
+        refetch();
     };
 
     const addToFavorites = async (postId) => {
@@ -53,7 +55,7 @@ const InternshipPostList = () => {
                     display: 'inline-block',
                     paddingBottom: '1rem'
                 }}>
-                    Пракси
+                    Тутори
                     <div style={{
                         content: '',
                         position: 'absolute',
@@ -74,47 +76,66 @@ const InternshipPostList = () => {
                     marginLeft: 'auto',
                     marginRight: 'auto'
                 }}>
-                    Изгради се на професионално ниво и стекни ново искуство
+                    Најдете го идеалниот тутор за вашите потреби и факултет
                 </p>
             </div>
 
             <div className="mb-4 text-end">
-                <Link to="/internship-posts/create" className="btn btn-primary">
-                    + Додади нова пракса
+                <Link to="/tutor-posts/create" className="btn btn-primary">
+                    + Додади нов тутор
                 </Link>
             </div>
 
-            <form className="row g-3 align-items-center mb-4">
+            <form onSubmit={handleFilterSubmit} className="row g-3 align-items-center mb-4">
                 <div className="col-auto">
-                    <label htmlFor="faculty" className="col-form-label">Филтер по факултет:</label>
+                    <label htmlFor="tutorName" className="col-form-label">Филтер по име на тутор:</label>
                 </div>
                 <div className="col-auto">
                     <input
                         type="text"
-                        id="faculty"
-                        name="faculty"
+                        id="tutorName"
+                        name="tutorName"
                         className="form-control"
-                        placeholder="Пр. ФИНКИ, Економски"
-                        value={facultyFilter}
-                        onChange={handleFacultyChange}
+                        placeholder="Пр. Иван Иванов"
+                        value={tutorName}
+                        onChange={(e) => setTutorName(e.target.value)}
                     />
+                </div>
+
+                <div className="col-auto">
+                    <label htmlFor="subject" className="col-form-label">Филтер по предмет:</label>
+                </div>
+                <div className="col-auto">
+                    <input
+                        type="text"
+                        id="subject"
+                        name="subject"
+                        className="form-control"
+                        placeholder="Пр. Математика"
+                        value={subject}
+                        onChange={(e) => setSubject(e.target.value)}
+                    />
+                </div>
+
+                <div className="col-auto">
+                    <button type="submit" className="btn btn-outline-primary">Филтрирај</button>
                 </div>
             </form>
 
-            {internshipPosts.length === 0 ? (
+            {tutorPosts.length === 0 ? (
                 <div className="alert alert-info text-center">
-                    Нема пронајдени пракси.
+                    Нема пронајдени тутор постови.
                 </div>
             ) : (
                 <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                    {internshipPosts.map(post => (
+                    {tutorPosts.map(post => (
                         <div key={post.id} className="col">
                             <div className="card h-100">
                                 <div className="card-body d-flex flex-column">
                                     <h5 className="card-title">{post.title}</h5>
-                                    <p className="card-text"><strong>Компанија:</strong> <span>{post.company}</span></p>
-                                    <p className="card-text"><strong>Факултет:</strong> <span>{post.faculty}</span></p>
-                                    <p className="card-text"><strong>Локација:</strong> <span>{post.location}</span></p>
+                                    <p className="card-text"><strong>Тутор:</strong> <span>{post.tutorName}</span></p>
+                                    <p className="card-text"><strong>Предмет:</strong> <span>{post.subject}</span></p>
+                                    <p className="card-text"><strong>Оцена:</strong> <span>{post.rating}/5</span></p>
                                     <p className="card-text"><strong>Опис:</strong> <span>{post.description}</span></p>
 
                                     {post.tags && post.tags.length > 0 && (
@@ -126,7 +147,7 @@ const InternshipPostList = () => {
                                     )}
 
                                     <Link
-                                        to={`/internship-posts/${post.id}`}
+                                        to={`/tutor-posts/${post.id}`}
                                         className="btn btn-info mt-auto text-white"
                                     >
                                         Види детали
@@ -148,4 +169,4 @@ const InternshipPostList = () => {
     );
 };
 
-export default InternshipPostList;
+export default TutorPostList;

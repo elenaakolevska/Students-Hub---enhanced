@@ -15,8 +15,8 @@ const EventPostList = () => {
     };
 
     const addToFavorites = async (postId) => {
-        // Implement favorites functionality
         console.log('Adding to favorites:', postId);
+        // TODO: Implement favorites functionality
     };
 
     if (loading) {
@@ -24,7 +24,7 @@ const EventPostList = () => {
             <div className="container my-5">
                 <div className="text-center">
                     <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Loading...</span>
+                        <span className="visually-hidden">Вчитување...</span>
                     </div>
                 </div>
             </div>
@@ -35,7 +35,7 @@ const EventPostList = () => {
         return (
             <div className="container my-5">
                 <div className="alert alert-danger" role="alert">
-                    Грешка при вчитување: {error}
+                    Грешка: {error}
                 </div>
             </div>
         );
@@ -43,8 +43,12 @@ const EventPostList = () => {
 
     return (
         <div className="container my-5">
-            {/* Header */}
-            <div className="section-header mt-5" style={{ padding: '2rem 0', textAlign: 'center', marginBottom: '3rem' }}>
+            <div className="section-header mt-5" style={{
+                padding: '2rem 0',
+                position: 'relative',
+                marginBottom: '3rem',
+                textAlign: 'center'
+            }}>
                 <h2 className="section-title" style={{
                     fontSize: '2.5rem',
                     fontWeight: '700',
@@ -78,14 +82,12 @@ const EventPostList = () => {
                 </p>
             </div>
 
-            {/* Add New Event Button */}
             <div className="mb-4 text-end">
                 <Link to="/event-posts/create" className="btn btn-primary">
                     + Додади нов настан
                 </Link>
             </div>
 
-            {/* Filter Form */}
             <form className="row g-3 align-items-center mb-4">
                 <div className="col-auto">
                     <label htmlFor="category" className="col-form-label">Филтер по категорија:</label>
@@ -99,65 +101,54 @@ const EventPostList = () => {
                         onChange={handleCategoryChange}
                     >
                         <option value="">Сите категории</option>
-                        {eventCategories.map(cat => (
-                            <option key={cat} value={cat}>{cat}</option>
+                        {eventCategories.map(category => (
+                            <option key={category} value={category}>{category}</option>
                         ))}
                     </select>
                 </div>
             </form>
 
-            {/* Event Posts Grid */}
-            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                {eventPosts.map(post => (
-                    <div key={post.id} className="col">
-                        <div className="card h-100">
-                            <img
-                                src={post.imageUrl || '/images/default-event.jpg'}
-                                className="card-img-top"
-                                alt="Слика од настанот"
-                                style={{ height: '200px', objectFit: 'cover' }}
-                            />
-                            <div className="card-body d-flex flex-column">
-                                <h5 className="card-title">{post.title}</h5>
-                                <p className="card-text">
-                                    <strong>Категорија:</strong> {post.eventCategory}
-                                </p>
-                                <p className="card-text">
-                                    <strong>Локација:</strong> {post.location}
-                                </p>
-                                <p className="card-text">
-                                    <strong>Влез:</strong>
-                                    {post.free ? ' Слободен' : ` ${post.price} ден.`}
-                                </p>
-                                <p className="card-text">
-                                    <strong>Опис:</strong> {post.description}
-                                </p>
-                                <p className="card-text">
-                                    <strong>Организатор:</strong> {post.organizer}
-                                </p>
+            {eventPosts.length === 0 ? (
+                <div className="alert alert-info text-center">
+                    Нема пронајдени настани.
+                </div>
+            ) : (
+                <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {eventPosts.map(post => (
+                        <div key={post.id} className="col">
+                            <div className="card h-100">
+                                <div className="card-body d-flex flex-column">
+                                    <h5 className="card-title">{post.title}</h5>
+                                    <p className="card-text"><strong>Категорија:</strong> <span>{post.category}</span></p>
+                                    <p className="card-text"><strong>Датум:</strong> <span>{new Date(post.eventDate).toLocaleDateString('mk-MK')}</span></p>
+                                    <p className="card-text"><strong>Локација:</strong> <span>{post.location}</span></p>
+                                    <p className="card-text"><strong>Опис:</strong> <span>{post.description}</span></p>
 
-                                <Link
-                                    to={`/event-posts/${post.id}`}
-                                    className="btn btn-info mt-auto text-white"
-                                >
-                                    Види детали
-                                </Link>
+                                    {post.tags && post.tags.length > 0 && (
+                                        <div className="mb-2">
+                                            {post.tags.map((tag, index) => (
+                                                <span key={index} className="badge bg-secondary me-1">{tag}</span>
+                                            ))}
+                                        </div>
+                                    )}
 
-                                <button
-                                    onClick={() => addToFavorites(post.id)}
-                                    className="btn btn-outline-danger w-100 mt-2"
-                                >
-                                    Додај во омилени
-                                </button>
+                                    <Link
+                                        to={`/event-posts/${post.id}`}
+                                        className="btn btn-info mt-auto text-white"
+                                    >
+                                        Види детали
+                                    </Link>
+
+                                    <button
+                                        onClick={() => addToFavorites(post.id)}
+                                        className="btn btn-outline-danger w-100 mt-2"
+                                    >
+                                        ♥ Додај во омилени
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
-
-            {eventPosts.length === 0 && (
-                <div className="text-center mt-5">
-                    <p className="text-muted">Нема пронајдени настани за избраната категорија.</p>
+                    ))}
                 </div>
             )}
         </div>

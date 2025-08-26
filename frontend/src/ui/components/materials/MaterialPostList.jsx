@@ -13,6 +13,7 @@ const MaterialPostList = () => {
 
     const addToFavorites = async (postId) => {
         console.log('Adding to favorites:', postId);
+        // TODO: Implement favorites functionality
     };
 
     const handleDownload = async (postId) => {
@@ -35,7 +36,7 @@ const MaterialPostList = () => {
             <div className="container my-5">
                 <div className="text-center">
                     <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Loading...</span>
+                        <span className="visually-hidden">Вчитување...</span>
                     </div>
                 </div>
             </div>
@@ -46,7 +47,7 @@ const MaterialPostList = () => {
         return (
             <div className="container my-5">
                 <div className="alert alert-danger" role="alert">
-                    Грешка при вчитување: {error}
+                    Грешка: {error}
                 </div>
             </div>
         );
@@ -56,8 +57,9 @@ const MaterialPostList = () => {
         <div className="container my-5">
             <div className="section-header mt-5" style={{
                 padding: '2rem 0',
-                textAlign: 'center',
-                marginBottom: '3rem'
+                position: 'relative',
+                marginBottom: '3rem',
+                textAlign: 'center'
             }}>
                 <h2 className="section-title" style={{
                     fontSize: '2.5rem',
@@ -118,51 +120,54 @@ const MaterialPostList = () => {
                 </div>
             </form>
 
-            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                {materialPosts.map(post => (
-                    <div key={post.id} className="col">
-                        <div className="card h-100">
-                            <div className="card-body d-flex flex-column">
-                                <h5 className="card-title">{post.title}</h5>
-                                <p className="card-text">
-                                    <strong>Предмет:</strong> <span>{post.subject}</span>
-                                </p>
-                                <p className="card-text">
-                                    <strong>Опис:</strong> <span>{post.description}</span>
-                                </p>
-                                <p className="card-text">
-                                    <strong>Оцена:</strong> <span>{post.rating}</span>
-                                </p>
+            {materialPosts.length === 0 ? (
+                <div className="alert alert-info text-center">
+                    Нема пронајдени материјали.
+                </div>
+            ) : (
+                <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {materialPosts.map(post => (
+                        <div key={post.id} className="col">
+                            <div className="card h-100">
+                                <div className="card-body d-flex flex-column">
+                                    <h5 className="card-title">{post.title}</h5>
+                                    <p className="card-text"><strong>Предмет:</strong> <span>{post.subject}</span></p>
+                                    <p className="card-text"><strong>Категорија:</strong> <span>{post.category}</span></p>
+                                    <p className="card-text"><strong>Оцена:</strong> <span>{post.rating}/5</span></p>
+                                    <p className="card-text"><strong>Опис:</strong> <span>{post.description}</span></p>
 
-                                <Link
-                                    to={`/material-posts/${post.id}`}
-                                    className="btn btn-info mt-auto text-white"
-                                >
-                                    Види детали
-                                </Link>
+                                    {post.tags && post.tags.length > 0 && (
+                                        <div className="mb-2">
+                                            {post.tags.map((tag, index) => (
+                                                <span key={index} className="badge bg-secondary me-1">{tag}</span>
+                                            ))}
+                                        </div>
+                                    )}
 
-                                <button
-                                    onClick={() => handleDownload(post.id)}
-                                    className="btn btn-outline-success btn-sm mt-2"
-                                >
-                                    Преземи
-                                </button>
+                                    <Link
+                                        to={`/material-posts/${post.id}`}
+                                        className="btn btn-info mt-auto text-white"
+                                    >
+                                        Види детали
+                                    </Link>
 
-                                <button
-                                    onClick={() => addToFavorites(post.id)}
-                                    className="btn btn-outline-danger w-100 mt-2"
-                                >
-                                    Додај во омилени
-                                </button>
+                                    <button
+                                        onClick={() => handleDownload(post.id)}
+                                        className="btn btn-outline-success btn-sm mt-2"
+                                    >
+                                        Преземи
+                                    </button>
+
+                                    <button
+                                        onClick={() => addToFavorites(post.id)}
+                                        className="btn btn-outline-danger w-100 mt-2"
+                                    >
+                                        ♥ Додај во омилени
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
-
-            {materialPosts.length === 0 && (
-                <div className="text-center mt-5">
-                    <p className="text-muted">Нема пронајдени материјали за избраниот предмет.</p>
+                    ))}
                 </div>
             )}
         </div>

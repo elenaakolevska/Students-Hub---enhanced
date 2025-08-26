@@ -7,7 +7,7 @@ const MaterialPostDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user } = useContext(authContext);
-    const [materialPost, setMaterialPost] = useState(null);
+    const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
@@ -15,7 +15,7 @@ const MaterialPostDetails = () => {
         const fetchPost = async () => {
             try {
                 const response = await materialPostRepository.findById(id);
-                setMaterialPost(response.data);
+                setPost(response.data);
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -43,7 +43,7 @@ const MaterialPostDetails = () => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `${materialPost.title}`);
+            link.setAttribute('download', `${post.title}`);
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -57,96 +57,128 @@ const MaterialPostDetails = () => {
             <div className="container my-5">
                 <div className="text-center">
                     <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Loading...</span>
+                        <span className="visually-hidden">Вчитување детали за материјал...</span>
                     </div>
                 </div>
             </div>
         );
     }
 
-    if (error || !materialPost) {
+    if (error) {
         return (
             <div className="container my-5">
                 <div className="alert alert-danger" role="alert">
-                    Материјалот не е пронајден или има грешка при вчитување.
+                    Грешка: {error}
                 </div>
+                <Link to="/material-posts" className="btn btn-primary">
+                    Назад кон листа
+                </Link>
+            </div>
+        );
+    }
+
+    if (!post) {
+        return (
+            <div className="container my-5">
+                <div className="alert alert-warning" role="alert">
+                    Материјалот не е пронајден.
+                </div>
+                <Link to="/material-posts" className="btn btn-primary">
+                    Назад кон листа
+                </Link>
             </div>
         );
     }
 
     return (
-        <section className="container my-5">
-            <h2 className="mb-4 text-center fw-bold">{materialPost.title}</h2>
+        <div className="container my-5">
+            <div className="row justify-content-center">
+                <div className="col-lg-8">
+                    <div className="card">
+                        <div className="card-header bg-primary text-white">
+                            <h1 className="card-title mb-0">{post.title}</h1>
+                        </div>
+                        <div className="card-body">
+                            <div className="row mb-4">
+                                <div className="col-md-6">
+                                    <h5 className="text-muted">Детали за материјал</h5>
+                                    <p className="mb-2">
+                                        <strong>Предмет:</strong> <span>{post.subject}</span>
+                                    </p>
+                                    <p className="mb-2">
+                                        <strong>Оцена:</strong> <span>{post.rating}</span>
+                                    </p>
+                                    <p className="mb-2">
+                                        <strong>Фајл:</strong>
+                                        <button
+                                            onClick={handleDownload}
+                                            className="btn btn-outline-success btn-sm ms-2"
+                                        >
+                                            📥 Преземи
+                                        </button>
+                                    </p>
+                                </div>
+                            </div>
 
-            <div className="card" style={{
-                maxWidth: '700px',
-                margin: '0 auto',
-                boxShadow: '0 0.5rem 1rem rgba(0,0,0,0.15)',
-                borderRadius: '0.5rem',
-                overflow: 'hidden',
-                backgroundColor: '#fff'
-            }}>
-                <div className="card-body px-4 py-3">
-                    <p style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                        <strong>Предмет:</strong> <span>{materialPost.subject}</span>
-                    </p>
-                    <p style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                        <strong>Опис:</strong> <span>{materialPost.description}</span>
-                    </p>
-                    <p style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                        <strong>Оцена:</strong> <span>{materialPost.rating}</span>
-                    </p>
+                            <div className="mb-4">
+                                <h5 className="text-muted">Опис</h5>
+                                <p className="lead">{post.description}</p>
+                            </div>
 
-                    <p style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                        <strong>Фајл:</strong>
-                        <button
-                            onClick={handleDownload}
-                            className="btn btn-outline-success btn-sm ms-2"
-                        >
-                            Преземи
-                        </button>
-                    </p>
-
-                    <div className="mb-3">
-                        <strong>Објавил:</strong>
-                        <span className="ms-2">{materialPost.owner?.username}</span>
-                        <span className="ms-2 text-muted">
-                            {new Date(materialPost.createdAt).toLocaleDateString('mk-MK')}
-                        </span>
-                    </div>
-
-                    <div className="d-flex justify-content-center gap-3 mt-4" style={{ minWidth: '100px' }}>
-                        <Link
-                            to={`/chat/${materialPost.owner?.username}`}
-                            className="btn btn-warning"
-                        >
-                            Прати порака
-                        </Link>
-
-                        {user && user.username === materialPost.owner?.username && (
-                            <>
+                            <div className="mb-4">
+                                <h5 className="text-muted">Информации за постот</h5>
+                                {post.createdAt && (
+                                    <p className="mb-1">
+                                        <strong>Создадено:</strong> {new Date(post.createdAt).toLocaleDateString('mk-MK')}
+                                    </p>
+                                )}
+                                {post.updatedAt && post.updatedAt !== post.createdAt && (
+                                    <p className="mb-1">
+                                        <strong>Последно ажурирано:</strong> {new Date(post.updatedAt).toLocaleDateString('mk-MK')}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        <div className="card-footer bg-light">
+                            <div className="d-flex justify-content-between">
                                 <Link
-                                    to={`/material-posts/edit/${materialPost.id}`}
-                                    className="btn btn-primary"
+                                    to="/material-posts"
+                                    className="btn btn-outline-primary"
                                 >
-                                    Уреди
+                                    ← Назад кон листа
                                 </Link>
-                                <button
-                                    onClick={handleDelete}
-                                    className="btn btn-danger"
-                                >
-                                    Избриши
-                                </button>
-                            </>
-                        )}
-
-                        <Link to="/material-posts" className="btn btn-secondary">
-                            Назад
-                        </Link>
+                                <div>
+                                    {user && user.id === post.userId && (
+                                        <>
+                                            <Link
+                                                to={`/material-posts/edit/${post.id}`}
+                                                className="btn btn-outline-warning me-2"
+                                            >
+                                                Уреди
+                                            </Link>
+                                            <button
+                                                onClick={handleDelete}
+                                                className="btn btn-outline-danger me-2"
+                                            >
+                                                Избриши
+                                            </button>
+                                        </>
+                                    )}
+                                    <button
+                                        className="btn btn-outline-danger"
+                                        onClick={() => {
+                                            console.log('Adding to favorites:', post.id);
+                                        }}
+                                    >
+                                        ♥ Додај во омилени
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     );
 };
 

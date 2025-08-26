@@ -61,7 +61,7 @@ const EventPostForm = () => {
 
     const handleChange = (e) => {
         const { name, value, type, checked } = e.target;
-        setFormData((prev) => ({
+        setFormData(prev => ({
             ...prev,
             [name]: type === 'checkbox' ? checked : value
         }));
@@ -71,19 +71,23 @@ const EventPostForm = () => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
         try {
-            const payload = {
+            const dataToSend = {
                 ...formData,
-                price: formData.isFree ? null : (formData.price ? parseInt(formData.price) : null)
+                tags: formData.tagsString.split(',').map(t => t.trim()).filter(Boolean),
+                price: formData.isFree ? 0 : parseFloat(formData.price) || 0
             };
+            delete dataToSend.tagsString;
+
             if (isEdit) {
-                await eventPostRepository.update(id, payload);
+                await eventPostRepository.update(id, dataToSend);
             } else {
-                await eventPostRepository.save({ ...payload, userId: user?.id });
+                await eventPostRepository.save(dataToSend);
             }
             navigate('/event-posts');
         } catch (err) {
-            setError('Грешка при зачувување на настанот');
+            setError(err.response?.data?.message || 'Грешка при зачувување');
         } finally {
             setLoading(false);
         }

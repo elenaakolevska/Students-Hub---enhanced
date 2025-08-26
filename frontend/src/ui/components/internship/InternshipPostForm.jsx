@@ -51,9 +51,9 @@ const InternshipPostForm = () => {
             if (isEdit) {
                 await internshipPostRepository.update(id, formData);
             } else {
-                await internshipPostRepository.save({ ...formData, userId: user.id });
+                await internshipPostRepository.save(formData);
             }
-            navigate('/internships');
+            navigate('/internship-posts');
         } catch (err) {
             setError('Грешка при зачувување на праксата');
             console.error('Error saving internship post:', err);
@@ -63,57 +63,91 @@ const InternshipPostForm = () => {
     };
 
     return (
-        <div className="internship-post-form">
-            <h2>{isEdit ? 'Уреди пракса' : 'Креирај пракса'}</h2>
-            {error && <div className="error">{error}</div>}
+        <div className="container my-5">
+            <h2>{isEdit ? 'Уреди Пракса' : 'Додади Нова Пракса'}</h2>
+            {error && <div className="alert alert-danger">{error}</div>}
             <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    name="title"
-                    value={formData.title}
-                    onChange={handleChange}
-                    placeholder="Наслов"
-                    required
-                />
-                <input
-                    type="text"
-                    name="company"
-                    value={formData.company}
-                    onChange={handleChange}
-                    placeholder="Компанија"
-                    required
-                />
-                <input
-                    type="text"
-                    name="facultyFilter"
-                    value={formData.facultyFilter}
-                    onChange={handleChange}
-                    placeholder="Факултет (филтер)"
-                />
-                <input
-                    type="text"
-                    name="position"
-                    value={formData.position}
-                    onChange={handleChange}
-                    placeholder="Позиција"
-                    required
-                />
-                <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleChange}
-                    placeholder="Опис"
-                    required
-                />
-                <input
-                    type="text"
-                    name="logoUrl"
-                    value={formData.logoUrl}
-                    onChange={handleChange}
-                    placeholder="Лого URL"
-                />
-                <button type="submit" disabled={loading}>
-                    {loading ? 'Се зачувува...' : isEdit ? 'Зачувај промени' : 'Креирај'}
+                <div className="mb-3">
+                    <label htmlFor="title" className="form-label">Наслов</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="title"
+                        name="title"
+                        value={formData.title}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="mb-3">
+                    <label htmlFor="company" className="form-label">Компанија</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="company"
+                        name="company"
+                        value={formData.company}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="mb-3">
+                    <label htmlFor="facultyFilter" className="form-label">Факултет</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="facultyFilter"
+                        name="facultyFilter"
+                        value={formData.facultyFilter}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="mb-3">
+                    <label htmlFor="position" className="form-label">Позиција</label>
+                    <input
+                        type="text"
+                        className="form-control"
+                        id="position"
+                        name="position"
+                        value={formData.position}
+                        onChange={handleChange}
+                        required
+                    />
+                </div>
+                <div className="mb-3">
+                    <label htmlFor="description" className="form-label">Опис</label>
+                    <textarea
+                        className="form-control"
+                        id="description"
+                        name="description"
+                        rows="3"
+                        value={formData.description}
+                        onChange={handleChange}
+                        required
+                    ></textarea>
+                </div>
+                <div className="mb-3">
+                    <label htmlFor="logoUrl" className="form-label">Лого URL</label>
+                    <input
+                        type="url"
+                        className="form-control"
+                        id="logoUrl"
+                        name="logoUrl"
+                        value={formData.logoUrl}
+                        onChange={handleChange}
+                        placeholder="https://example.com/logo.png"
+                    />
+                </div>
+                <button type="submit" className="btn btn-primary" disabled={loading}>
+                    {loading ? 'Се зачувува...' : (isEdit ? 'Ажурирај' : 'Зачувај')}
+                </button>
+                <button
+                    type="button"
+                    className="btn btn-secondary ms-2"
+                    onClick={() => navigate('/internship-posts')}
+                >
+                    Откажи
                 </button>
             </form>
         </div>
