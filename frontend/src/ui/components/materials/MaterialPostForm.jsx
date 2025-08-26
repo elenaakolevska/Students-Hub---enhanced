@@ -47,7 +47,7 @@ const MaterialPostForm = () => {
                         subject: post.subject || '',
                         rating: post.rating || '',
                         category: post.category || '',
-                        tagsString: post.tags ? post.tags.join(',') : '',
+                        tagsString: post.tags ? post.tags.join(', ') : '',
                         file: null,
                         originalFileName: post.originalFileName || ''
                     });
@@ -61,183 +61,202 @@ const MaterialPostForm = () => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData((prev) => ({ ...prev, [name]: value }));
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
     };
 
     const handleFileChange = (e) => {
-        const file = e.target.files?.[0] || null;
-        setFormData(prev => ({
-            ...prev,
-            file: file,
-            originalFileName: file ? file.name : ''
-        }));
+        const file = e.target.files[0];
+        if (file) {
+            setFormData(prev => ({
+                ...prev,
+                file: file,
+                originalFileName: file.name
+            }));
+        }
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
         setLoading(true);
         setError('');
+
         try {
-            const data = new FormData();
-            data.append('title', formData.title);
-            data.append('description', formData.description);
-            data.append('subject', formData.subject);
-            data.append('rating', formData.rating);
-            data.append('category', formData.category);
-            data.append('originalFileName', formData.originalFileName);
-            if (formData.file) data.append('file', formData.file);
-            // Convert tagsString to array and append as comma-separated string
-            const tagsArray = formData.tagsString.split(',').map(t => t.trim()).filter(Boolean);
-            if (tagsArray.length > 0) {
-                data.append('tags', tagsArray.join(','));
+            const formDataToSend = new FormData();
+            formDataToSend.append('title', formData.title);
+            formDataToSend.append('description', formData.description);
+            formDataToSend.append('subject', formData.subject);
+            formDataToSend.append('rating', formData.rating);
+            formDataToSend.append('category', formData.category);
+
+            const tags = formData.tagsString.split(',').map(t => t.trim()).filter(Boolean);
+            formDataToSend.append('tags', JSON.stringify(tags));
+
+            if (formData.file) {
+                formDataToSend.append('file', formData.file);
             }
+
             if (isEdit) {
-                await materialPostRepository.update(id, data);
+                await materialPostRepository.update(id, formDataToSend);
             } else {
-                await materialPostRepository.save(data);
+                await materialPostRepository.save(formDataToSend);
             }
             navigate('/material-posts');
         } catch (err) {
-            setError('Грешка при зачувување на материјалот');
+            setError(err.response?.data?.message || 'Грешка при зачувување');
         } finally {
             setLoading(false);
         }
     };
 
-    if (!user) {
-        return (
-            <div className="container my-5">
-                <div className="alert alert-warning text-center">
-                    Мора да бидете најавени за да креирате материјал.
-                </div>
-            </div>
-        );
-    }
-
     return (
-        <div className="container">
-            <div style={{
-                maxWidth: '600px',
-                margin: 'auto',
-                padding: '2rem',
-                background: 'white',
-                borderRadius: '0.5rem',
-                boxShadow: '0 0.25rem 1rem rgba(0,0,0,0.1)',
-                marginTop: '3rem',
-                marginBottom: '3rem'
-            }}>
-                <h2 style={{
-                    textAlign: 'center',
-                    marginBottom: '1.5rem',
-                    fontWeight: '600'
-                }}>
-                    {isEdit ? 'Измени материјал' : 'Креирај нов материјал'}
-                </h2>
+        <div className="container my-5">
+            <div className="row justify-content-center">
+                <div className="col-md-8">
+                    <div className="card">
+                        <div className="card-header">
+                            <h2 className="mb-0">{isEdit ? 'Уреди материјал' : 'Додади нов материјал'}</h2>
+                        </div>
+                        <div className="card-body">
+                            {error && (
+                                <div className="alert alert-danger" role="alert">
+                                    {error}
+                                </div>
+                            )}
 
-                {error && (
-                    <div className="alert alert-danger" role="alert">
-                        {error}
-                    </div>
-                )}
+                            <form onSubmit={handleSubmit}>
+                                <div className="mb-3">
+                                    <label htmlFor="title" className="form-label">Наслов:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="title"
+                                        name="title"
+                                        value={formData.title}
+                                        onChange={handleChange}
+                                        required
+                                        placeholder="Внесете наслов на материјалот"
+                                    />
+                                </div>
 
-                <form onSubmit={handleSubmit} encType="multipart/form-data">
-                    <div className="mb-3">
-                        <label htmlFor="title" className="form-label">Наслов:</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            id="title"
-                            name="title"
-                            value={formData.title}
-                            onChange={handleChange}
-                            required
-                        />
+                                <div className="mb-3">
+                                    <label htmlFor="subject" className="form-label">Предмет:</label>
+                                    <select
+                                        className="form-select"
+                                        id="subject"
+                                        name="subject"
+                                        value={formData.subject}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="">Изберете предмет</option>
+                                        {subjects.map(subject => (
+                                            <option key={subject} value={subject}>{subject}</option>
+                                        ))}
+                                    </select>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="category" className="form-label">Категорија:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="category"
+                                        name="category"
+                                        value={formData.category}
+                                        onChange={handleChange}
+                                        required
+                                        placeholder="Пр. Презентации, Книги, Белешки"
+                                    />
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="rating" className="form-label">Оцена (1-5):</label>
+                                    <select
+                                        className="form-select"
+                                        id="rating"
+                                        name="rating"
+                                        value={formData.rating}
+                                        onChange={handleChange}
+                                        required
+                                    >
+                                        <option value="">Изберете оцена</option>
+                                        <option value="1">1 - Слаба</option>
+                                        <option value="2">2 - Добра</option>
+                                        <option value="3">3 - Многу добра</option>
+                                        <option value="4">4 - Одлична</option>
+                                        <option value="5">5 - Совршена</option>
+                                    </select>
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="description" className="form-label">Опис:</label>
+                                    <textarea
+                                        className="form-control"
+                                        id="description"
+                                        name="description"
+                                        value={formData.description}
+                                        onChange={handleChange}
+                                        rows="4"
+                                        required
+                                        placeholder="Опишете го материјалот..."
+                                    />
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="file" className="form-label">Прикачи датотека:</label>
+                                    <input
+                                        type="file"
+                                        className="form-control"
+                                        id="file"
+                                        onChange={handleFileChange}
+                                        accept=".pdf,.doc,.docx,.ppt,.pptx,.txt"
+                                    />
+                                    {formData.originalFileName && (
+                                        <small className="form-text text-muted">
+                                            Тековна датотека: {formData.originalFileName}
+                                        </small>
+                                    )}
+                                </div>
+
+                                <div className="mb-3">
+                                    <label htmlFor="tagsString" className="form-label">Тагови (одделени со запирка):</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="tagsString"
+                                        name="tagsString"
+                                        value={formData.tagsString}
+                                        onChange={handleChange}
+                                        placeholder="пр. презентации, скрипти, испити"
+                                    />
+                                    <small className="form-text text-muted">
+                                        Одделете ги таговите со запирка
+                                    </small>
+                                </div>
+
+                                <div className="d-grid gap-2 d-md-flex justify-content-md-end">
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary me-md-2"
+                                        onClick={() => navigate('/material-posts')}
+                                    >
+                                        Откажи
+                                    </button>
+                                    <button
+                                        type="submit"
+                                        className="btn btn-primary"
+                                        disabled={loading}
+                                    >
+                                        {loading ? 'Се зачувува...' : (isEdit ? 'Ажурирај' : 'Создади')}
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
                     </div>
-                    <div className="mb-3">
-                        <label htmlFor="description" className="form-label">Опис:</label>
-                        <textarea
-                            className="form-control"
-                            id="description"
-                            name="description"
-                            rows="3"
-                            value={formData.description}
-                            onChange={handleChange}
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="subject" className="form-label">Предмет:</label>
-                        <select
-                            className="form-select"
-                            id="subject"
-                            name="subject"
-                            value={formData.subject}
-                            onChange={handleChange}
-                            required
-                        >
-                            <option value="">Избери предмет</option>
-                            {subjects.map(sub => (
-                                <option key={sub} value={sub}>{sub}</option>
-                            ))}
-                        </select>
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="rating" className="form-label">Оцена:</label>
-                        <input
-                            type="number"
-                            className="form-control"
-                            id="rating"
-                            name="rating"
-                            value={formData.rating}
-                            onChange={handleChange}
-                            min="0"
-                            max="10"
-                            step="0.1"
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="category" className="form-label">Категорија:</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            id="category"
-                            name="category"
-                            value={formData.category}
-                            onChange={handleChange}
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="tags" className="form-label">Тагови (разделени со запирка):</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            id="tags"
-                            name="tagsString"
-                            value={formData.tagsString}
-                            onChange={handleChange}
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <label htmlFor="file" className="form-label">Датотека:</label>
-                        <input
-                            type="file"
-                            className="form-control"
-                            id="file"
-                            name="file"
-                            onChange={handleFileChange}
-                            accept=".pdf,.doc,.docx,.txt,.jpg,.png,.jpeg"
-                        />
-                        {formData.originalFileName && (
-                            <small className="text-muted">Избрана датотека: {formData.originalFileName}</small>
-                        )}
-                    </div>
-                    <button
-                        type="submit"
-                        className="btn btn-primary w-100"
-                        disabled={loading}
-                    >
-                        {loading ? 'Се зачувува...' : isEdit ? 'Зачувај промени' : 'Креирај'}
-                    </button>
-                </form>
+                </div>
             </div>
         </div>
     );

@@ -42,118 +42,139 @@ const HousingPostDetails = () => {
             <div className="container my-5">
                 <div className="text-center">
                     <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Loading...</span>
+                        <span className="visually-hidden">Вчитување детали за сместување...</span>
                     </div>
                 </div>
             </div>
         );
     }
 
-    if (error || !post) {
+    if (error) {
         return (
             <div className="container my-5">
                 <div className="alert alert-danger" role="alert">
-                    Сместувањето не е пронајдено или има грешка при вчитување.
+                    Грешка: {error}
                 </div>
+                <Link to="/housing-posts" className="btn btn-primary">
+                    Назад
+                </Link>
+            </div>
+        );
+    }
+
+    if (!post) {
+        return (
+            <div className="container my-5">
+                <div className="alert alert-warning" role="alert">
+                    Објавата за сместување не е пронајдена.
+                </div>
+                <Link to="/housing-posts" className="btn btn-primary">
+                    Назад
+                </Link>
             </div>
         );
     }
 
     return (
-        <section className="container my-5">
-            <h2 className="mb-4 text-center fw-bold">{post.title}</h2>
+        <div className="container my-5">
+            <div className="row justify-content-center">
+                <div className="col-lg-8">
+                    <div className="card">
+                        <div className="card-header bg-primary text-white">
+                            <h1 className="card-title mb-0">{post.title}</h1>
+                        </div>
+                        <div className="card-body">
+                            <div className="row mb-4">
+                                <div className="col-md-6">
+                                    <h5 className="text-muted">Детали за сместување</h5>
+                                    <p className="mb-2">
+                                        <strong>Локација:</strong> <span>{post.location}</span>
+                                    </p>
+                                    <p className="mb-2">
+                                        <strong>Општина:</strong> <span>{post.municipality}</span>
+                                    </p>
+                                    <p className="mb-2">
+                                        <strong>Цена:</strong> <span>{post.price} ден.</span>
+                                    </p>
+                                    <p className="mb-2">
+                                        <strong>Статус:</strong>
+                                        <span className={`ms-2 badge ${post.found ? 'bg-success' : 'bg-warning'}`}>
+                                            {post.found ? 'Пронајдено' : 'Достапно'}
+                                        </span>
+                                    </p>
+                                </div>
+                            </div>
 
-            <div className="card" style={{
-                maxWidth: '700px',
-                margin: '0 auto',
-                boxShadow: '0 0.5rem 1rem rgba(0,0,0,0.15)',
-                borderRadius: '0.5rem',
-                overflow: 'hidden',
-                backgroundColor: '#fff'
-            }}>
-                {/* Multiple images */}
-                {post.images && post.images.length > 0 && (
-                    <div style={{
-                        display: 'flex',
-                        gap: '0.5rem',
-                        marginBottom: '1rem',
-                        overflowX: 'auto',
-                        paddingLeft: '1rem',
-                        paddingTop: '1rem'
-                    }}>
-                        {post.images.map((img, index) => (
-                            <img
-                                key={index}
-                                src={img}
-                                alt="Слика"
-                                style={{
-                                    maxHeight: '180px',
-                                    objectFit: 'cover',
-                                    borderRadius: '0.3rem'
-                                }}
-                            />
-                        ))}
-                    </div>
-                )}
+                            <div className="mb-4">
+                                <h5 className="text-muted">Опис</h5>
+                                <p className="lead">{post.description}</p>
+                            </div>
 
-                <div className="card-body px-4 py-3">
-                    <p style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                        <strong>Локација:</strong> <span>{post.location}</span>
-                    </p>
-                    <p style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                        <strong>Општина:</strong> <span>{post.municipality}</span>
-                    </p>
-                    <p style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                        <strong>Цена:</strong> <span>{post.price} ден.</span>
-                    </p>
-                    <p style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                        <strong>Опис:</strong> <span>{post.description}</span>
-                    </p>
-                    <p style={{ fontSize: '1.1rem', marginBottom: '0.75rem' }}>
-                        <strong>Статус:</strong>
-                        <span>{post.found ? ' Веќе најдено' : ' Слободно'}</span>
-                    </p>
+                            {post.tags && post.tags.length > 0 && (
+                                <div className="mb-4">
+                                    <h5 className="text-muted">Тагови</h5>
+                                    <div className="d-flex flex-wrap gap-2">
+                                        {post.tags.map((tag, index) => (
+                                            <span key={index} className="badge bg-secondary fs-6">{tag}</span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
-                    <div className="mb-3">
-                        <strong>Објавил:</strong>
-                        <span className="ms-2">{post.owner?.username}</span>
-                        <span className="ms-2 text-muted">
-                            {new Date(post.createdAt).toLocaleDateString('mk-MK')}
-                        </span>
-                    </div>
-
-                    <div className="d-flex justify-content-center gap-3 mt-4" style={{ minWidth: '100px' }}>
-                        <Link
-                            to={`/chat/${post.owner?.username}`}
-                            className="btn btn-warning"
-                        >
-                            Прати порака
-                        </Link>
-
-                        {user && user.username === post.owner?.username && (
-                            <>
+                            <div className="mb-4">
+                                <h5 className="text-muted">Информации за постот</h5>
+                                {post.createdAt && (
+                                    <p className="mb-1">
+                                        <strong>Создадено:</strong> {new Date(post.createdAt).toLocaleDateString('mk-MK')}
+                                    </p>
+                                )}
+                                {post.updatedAt && post.updatedAt !== post.createdAt && (
+                                    <p className="mb-1">
+                                        <strong>Последно ажурирано:</strong> {new Date(post.updatedAt).toLocaleDateString('mk-MK')}
+                                    </p>
+                                )}
+                            </div>
+                        </div>
+                        <div className="card-footer bg-light">
+                            <div className="d-flex justify-content-between">
                                 <Link
-                                    to={`/housing-posts/edit/${post.id}`}
-                                    className="btn btn-primary"
+                                    to="/housing-posts"
+                                    className="btn btn-outline-primary"
                                 >
-                                    Уреди
+                                    ← Назад кон листа
                                 </Link>
-                                <button
-                                    onClick={handleDelete}
-                                    className="btn btn-danger"
-                                >
-                                    Избриши
-                                </button>
-                            </>
-                        )}
-
-                        <Link to="/housing-posts" className="btn btn-secondary">
-                            Назад
-                        </Link>
+                                <div>
+                                    {user && user.id === post.userId && (
+                                        <>
+                                            <Link
+                                                to={`/housing-posts/edit/${post.id}`}
+                                                className="btn btn-outline-warning me-2"
+                                            >
+                                                Уреди
+                                            </Link>
+                                            <button
+                                                onClick={handleDelete}
+                                                className="btn btn-outline-danger me-2"
+                                            >
+                                                Избриши
+                                            </button>
+                                        </>
+                                    )}
+                                    <button
+                                        className="btn btn-outline-danger"
+                                        onClick={() => {
+                                            console.log('Adding to favorites:', post.id);
+                                        }}
+                                    >
+                                        ♥ Додај во омилени
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
     );
 };
 

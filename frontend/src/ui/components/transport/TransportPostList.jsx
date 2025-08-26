@@ -35,6 +35,7 @@ const TransportPostList = () => {
 
     const addToFavorites = async (postId) => {
         console.log('Adding to favorites:', postId);
+        // TODO: Implement favorites functionality
     };
 
     if (loading) {
@@ -42,7 +43,7 @@ const TransportPostList = () => {
             <div className="container my-5">
                 <div className="text-center">
                     <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Loading...</span>
+                        <span className="visually-hidden">Вчитување...</span>
                     </div>
                 </div>
             </div>
@@ -53,7 +54,7 @@ const TransportPostList = () => {
         return (
             <div className="container my-5">
                 <div className="alert alert-danger" role="alert">
-                    {error}
+                    Грешка: {error}
                 </div>
             </div>
         );
@@ -63,8 +64,9 @@ const TransportPostList = () => {
         <div className="container my-5">
             <div className="section-header mt-5" style={{
                 padding: '2rem 0',
-                textAlign: 'center',
-                marginBottom: '3rem'
+                position: 'relative',
+                marginBottom: '3rem',
+                textAlign: 'center'
             }}>
                 <h2 className="section-title" style={{
                     fontSize: '2.5rem',
@@ -74,7 +76,7 @@ const TransportPostList = () => {
                     display: 'inline-block',
                     paddingBottom: '1rem'
                 }}>
-                    Транспорт
+                    Превоз
                     <div style={{
                         content: '',
                         position: 'absolute',
@@ -113,12 +115,14 @@ const TransportPostList = () => {
                     <input
                         type="text"
                         id="locationFrom"
+                        name="locationFrom"
                         className="form-control"
                         placeholder="Пр. Скопје"
                         value={locationFrom}
                         onChange={handleLocationFromChange}
                     />
                 </div>
+
                 <div className="col-auto">
                     <label htmlFor="locationTo" className="col-form-label">До локација:</label>
                 </div>
@@ -126,6 +130,7 @@ const TransportPostList = () => {
                     <input
                         type="text"
                         id="locationTo"
+                        name="locationTo"
                         className="form-control"
                         placeholder="Пр. Охрид"
                         value={locationTo}
@@ -134,51 +139,49 @@ const TransportPostList = () => {
                 </div>
             </form>
 
-            <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                {transportPosts.map(post => (
-                    <div key={post.id} className="col">
-                        <div className="card h-100">
-                            <div className="card-body d-flex flex-column">
-                                <h5 className="card-title">{post.title}</h5>
-                                <p className="card-text">
-                                    <strong>Провајдер:</strong> <span>{post.providerName}</span>
-                                </p>
-                                <p className="card-text">
-                                    <strong>Од:</strong> <span>{post.locationFrom}</span>
-                                </p>
-                                <p className="card-text">
-                                    <strong>До:</strong> <span>{post.locationTo}</span>
-                                </p>
-                                <p className="card-text">
-                                    <strong>Цена:</strong> <span>{post.price} ден.</span>
-                                </p>
-                                <p className="card-text">
-                                    <strong>Време на поаѓање:</strong> <span>{post.departureDatetime ? new Date(post.departureDatetime).toLocaleString('mk-MK') : 'Нема податок'}</span>
-                                </p>
-                                <p className="card-text">
-                                    <strong>Контакт:</strong> <span>{post.contactInfo}</span>
-                                </p>
-                                <Link
-                                    to={`/transport-posts/${post.id}`}
-                                    className="btn btn-info mt-auto text-white"
-                                >
-                                    Види детали
-                                </Link>
-                                <button
-                                    onClick={() => addToFavorites(post.id)}
-                                    className="btn btn-outline-danger w-100 mt-2"
-                                >
-                                    Додај во омилени
-                                </button>
+            {transportPosts.length === 0 ? (
+                <div className="alert alert-info text-center">
+                    Нема пронајдени понуди за превоз.
+                </div>
+            ) : (
+                <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+                    {transportPosts.map(post => (
+                        <div key={post.id} className="col">
+                            <div className="card h-100">
+                                <div className="card-body d-flex flex-column">
+                                    <h5 className="card-title">{post.title}</h5>
+                                    <p className="card-text"><strong>Од:</strong> <span>{post.locationFrom}</span></p>
+                                    <p className="card-text"><strong>До:</strong> <span>{post.locationTo}</span></p>
+                                    <p className="card-text"><strong>Датум:</strong> <span>{new Date(post.departureDate).toLocaleDateString('mk-MK')}</span></p>
+                                    <p className="card-text"><strong>Време:</strong> <span>{post.departureTime}</span></p>
+                                    <p className="card-text"><strong>Цена:</strong> <span>{post.price} ден.</span></p>
+                                    <p className="card-text"><strong>Опис:</strong> <span>{post.description}</span></p>
+
+                                    {post.tags && post.tags.length > 0 && (
+                                        <div className="mb-2">
+                                            {post.tags.map((tag, index) => (
+                                                <span key={index} className="badge bg-secondary me-1">{tag}</span>
+                                            ))}
+                                        </div>
+                                    )}
+
+                                    <Link
+                                        to={`/transport-posts/${post.id}`}
+                                        className="btn btn-info mt-auto text-white"
+                                    >
+                                        Види детали
+                                    </Link>
+
+                                    <button
+                                        onClick={() => addToFavorites(post.id)}
+                                        className="btn btn-outline-danger w-100 mt-2"
+                                    >
+                                        ♥ Додај во омилени
+                                    </button>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                ))}
-            </div>
-
-            {transportPosts.length === 0 && (
-                <div className="text-center mt-5">
-                    <p className="text-muted">Нема пронајдени понуди за превоз за избраните локации.</p>
+                    ))}
                 </div>
             )}
         </div>
@@ -186,4 +189,3 @@ const TransportPostList = () => {
 };
 
 export default TransportPostList;
-
