@@ -15,11 +15,8 @@ public record CreateUserDto(
     String role
 ) {
     public User toUser() {
-        User user = new User(null, firstName, lastName, username, email, password, education, createdAt, null, null, null, null, role);
+        User user = new User(null, firstName, lastName, username, email, password, education, createdAt, null, null, null, null);
         user.setProfileImageUrl(profileImageUrl);
         return user;
-    }
-    public String role() {
-        return role;
     }
 }

@@ -38,18 +38,7 @@ public class UserApplicationServiceImpl implements UserApplicationService {
 
     @Override
     public DisplayUserDto save(CreateUserDto dto) {
-        User user = new User(
-                dto.username(),
-                dto.email(),
-                dto.password(),
-                dto.firstName(),
-                dto.lastName(),
-                dto.role()
-        );
-        // Optionally set createdAt, profileImageUrl, education if needed
-        user.setCreatedAt(dto.createdAt());
-        user.setProfileImageUrl(dto.profileImageUrl());
-        user.setEducation(dto.education());
+        User user = dto.toUser();
         User saved = userService.createUser(user);
         return DisplayUserDto.from(saved);
     }
@@ -63,7 +52,9 @@ public class UserApplicationServiceImpl implements UserApplicationService {
             existing.setPassword(dto.password());
             existing.setFirstName(dto.firstName());
             existing.setLastName(dto.lastName());
-            existing.setRole(dto.role());
+            existing.setEducation(dto.education());
+            existing.setProfileImageUrl(dto.profileImageUrl());
+            existing.setCreatedAt(dto.createdAt());
             User updated = userService.updateUser(existing);
             return Optional.of(DisplayUserDto.from(updated));
         } catch (Exception e) {
@@ -114,7 +105,6 @@ public class UserApplicationServiceImpl implements UserApplicationService {
             existing.setPassword(dto.password());
             existing.setFirstName(dto.firstName());
             existing.setLastName(dto.lastName());
-            existing.setRole(dto.role());
             existing.setEducation(dto.education());
             existing.setProfileImageUrl(dto.profileImageUrl());
             existing.setCreatedAt(dto.createdAt());
