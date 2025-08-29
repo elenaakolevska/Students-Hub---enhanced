@@ -28,7 +28,6 @@ public class User implements UserDetails {
     private String education;
     private String profileImageUrl;
     private LocalDateTime createdAt;
-    private String role;
 
 
     @OneToMany(mappedBy = "owner")
@@ -47,7 +46,7 @@ public class User implements UserDetails {
 
         }
 
-    public User(Long id, String firstName, String lastName, String username, String email, String password, String education, LocalDateTime createdAt, List<Post> posts, List<Favorite> favorites, List<Message> sentMessages, List<GroupChatMembers> groupMemberships, String role) {
+    public User(Long id, String firstName, String lastName, String username, String email, String password, String education, LocalDateTime createdAt, List<Post> posts, List<Favorite> favorites, List<Message> sentMessages, List<GroupChatMembers> groupMemberships) {
         this.id = id;
         this.firstName = firstName;
         this.lastName = lastName;
@@ -60,16 +59,6 @@ public class User implements UserDetails {
         this.favorites = favorites;
         this.sentMessages = sentMessages;
         this.groupMemberships = groupMemberships;
-        this.role = role;
-    }
-
-    public User(String username, String email, String password, String firstName, String lastName, String role) {
-        this.username = username;
-        this.email = email;
-        this.password = password;
-        this.firstName = firstName;
-        this.lastName = lastName;
-        this.role = role;
     }
 
     public Long getId() {
@@ -199,14 +188,6 @@ public class User implements UserDetails {
 
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public String getRole() {
-        return role;
-    }
-
-    public void setRole(String role) {
-        this.role = role;
     }
 
 
