@@ -7,6 +7,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -190,5 +191,25 @@ public class User implements UserDetails {
         this.password = password;
     }
 
+//damjan nadolu
+    @OneToMany(mappedBy = "sender")
+    private List<Message> sentMessagess = new ArrayList<>();
 
+    @OneToMany(mappedBy = "receiver")
+    private List<Message> receivedMessages = new ArrayList<>();
+
+    public List<Message> getMessages() {
+        List<Message> all = new ArrayList<>(sentMessages);
+        all.addAll(receivedMessages);
+        return all;
+    }
+
+    public void addSentMessage(Message message) {
+        sentMessages.add(message);
+    }
+
+    public void addReceivedMessage(Message message) {
+        receivedMessages.add(message);
+    }
+    //------
 }
