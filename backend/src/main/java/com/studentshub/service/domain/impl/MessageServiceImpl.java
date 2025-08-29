@@ -1,10 +1,10 @@
-package com.studentshub.service.impl;
+package com.studentshub.service.domain.impl;
 
 import com.studentshub.model.GroupChat;
 import com.studentshub.model.Message;
 import com.studentshub.model.User;
 import com.studentshub.repository.MessageRepository;
-import com.studentshub.service.MessageService;
+import com.studentshub.service.domain.MessageService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;

@@ -73,6 +73,7 @@ import com.studentshub.model.*;
 import com.studentshub.service.*;
 import com.studentshub.repository.UserRepository;
 import com.studentshub.service.application.ChatApplicationService;
+import com.studentshub.service.domain.MessageService;
 import com.studentshub.service.domain.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

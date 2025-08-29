@@ -3,7 +3,7 @@ package com.studentshub.web;
 //import com.studentshub.model.Message;
 //import com.studentshub.model.User;
 //import com.studentshub.repository.UserRepository;
-//import com.studentshub.service.ChatService;
+//import com.studentshub.service.domain.ChatService;
 //import org.springframework.beans.factory.annotation.Autowired;
 //import org.springframework.stereotype.Controller;
 //import org.springframework.ui.Model;

@@ -5,7 +5,6 @@ import com.studentshub.model.User;
 import com.studentshub.repository.MessageRepository;
 import com.studentshub.repository.UserRepository;
 import com.studentshub.service.application.ChatApplicationService;
-import com.studentshub.service.domain.ChatService;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
