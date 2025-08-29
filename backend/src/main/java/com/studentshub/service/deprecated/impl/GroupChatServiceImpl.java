@@ -1,4 +1,4 @@
-package com.studentshub.service.impl;
+package com.studentshub.service.deprecated.impl;
 
 import com.studentshub.model.GroupChat;
 import com.studentshub.model.GroupChatMembers;
@@ -6,7 +6,6 @@ import com.studentshub.model.User;
 import com.studentshub.model.exceptions.PostNotFoundException;
 import com.studentshub.repository.GroupChatMembersRepository;
 import com.studentshub.repository.GroupChatRepository;
-import com.studentshub.service.GroupChatService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

@@ -70,9 +70,9 @@
 package com.studentshub.web;
 
 import com.studentshub.model.*;
-import com.studentshub.service.*;
 import com.studentshub.repository.UserRepository;
 import com.studentshub.service.application.ChatApplicationService;
+import com.studentshub.service.deprecated.impl.GroupChatService;
 import com.studentshub.service.domain.MessageService;
 import com.studentshub.service.domain.UserService;
 import lombok.RequiredArgsConstructor;
@@ -123,11 +123,12 @@ public class MessageController {
     @GetMapping("/chat/partners")
     public List<Map<String, Object>> getChatPartners(Principal principal) {
         User currentUser = getCurrentUser(principal);
-        List<User> partners = chatService.getChatPartners(currentUser);
+        com.studentshub.dto.display.DisplayUserDto currentUserDto = com.studentshub.dto.display.DisplayUserDto.from(currentUser);
+        List<com.studentshub.dto.display.DisplayUserDto> partners = chatService.getChatPartners(currentUserDto);
         return partners.stream()
                 .map(u -> Map.<String, Object>of(
-                        "id", u.getId(),
-                        "username", u.getUsername()
+                        "id", u.id(),
+                        "username", u.username()
                 ))
                 .toList();
     }
@@ -135,12 +136,12 @@ public class MessageController {
     @GetMapping("/chat/{username}")
     public Map<String, Object> getChatWith(@PathVariable String username, Principal principal) {
         User currentUser = getCurrentUser(principal);
+        com.studentshub.dto.display.DisplayUserDto currentUserDto = com.studentshub.dto.display.DisplayUserDto.from(currentUser);
         User other = userRepo.findByUsername(username)
                 .orElseThrow(() -> new NoSuchElementException("User not found"));
-
-        chatService.markMessagesAsRead(other, currentUser);
-        List<Message> messages = chatService.getChat(currentUser, other);
-
+        com.studentshub.dto.display.DisplayUserDto otherDto = com.studentshub.dto.display.DisplayUserDto.from(other);
+        chatService.markMessagesAsRead(otherDto, currentUserDto);
+        List<com.studentshub.dto.display.DisplayMessageDto> messages = chatService.getChat(currentUserDto, otherDto);
         return Map.of(
                 "currentUser", Map.of("id", currentUser.getId(), "username", currentUser.getUsername()),
                 "receiver", Map.of("id", other.getId(), "username", other.getUsername()),
@@ -156,8 +157,11 @@ public class MessageController {
         User sender = getCurrentUser(principal);
         User receiver = userRepo.findByUsername(receiverUsername)
                 .orElseThrow(() -> new NoSuchElementException("Receiver not found"));
-
-        chatService.sendMessage(sender, receiver, content);
+        chatService.sendMessage(
+            com.studentshub.dto.display.DisplayUserDto.from(sender),
+            com.studentshub.dto.display.DisplayUserDto.from(receiver),
+            content
+        );
         return Map.of("status", "ok", "receiver", receiverUsername);
     }
 

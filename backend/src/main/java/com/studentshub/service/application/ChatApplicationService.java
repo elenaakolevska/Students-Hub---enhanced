@@ -1,7 +1,7 @@
 package com.studentshub.service.application;
 
-import com.studentshub.model.Message;
-import com.studentshub.model.User;
+import com.studentshub.dto.display.DisplayMessageDto;
+import com.studentshub.dto.display.DisplayUserDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -10,19 +10,19 @@ import java.util.Optional;
 
 public interface ChatApplicationService {
 
-    List<Message> getChat(User u1, User u2);
+    List<DisplayMessageDto> getChat(DisplayUserDto u1, DisplayUserDto u2);
 
 
-    void sendMessage(User sender, User receiver, String content);
+    void sendMessage(DisplayUserDto sender, DisplayUserDto receiver, String content);
 
 
-    List<User> getChatPartners(User user);
+    List<DisplayUserDto> getChatPartners(DisplayUserDto user);
 
 
-    Map<User, Long> getUnreadMessageCounts(User currentUser);
+    Map<DisplayUserDto, Long> getUnreadMessageCounts(DisplayUserDto currentUser);
 
 
-    void markMessagesAsRead(User sender, User receiver);
+    void markMessagesAsRead(DisplayUserDto sender, DisplayUserDto receiver);
 
-    Optional<LocalDateTime> getLastMessageTimestamp(User user1, User user2);
+    Optional<LocalDateTime> getLastMessageTimestamp(DisplayUserDto user1, DisplayUserDto user2);
 }

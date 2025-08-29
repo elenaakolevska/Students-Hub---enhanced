@@ -1,6 +1,6 @@
 package com.studentshub.web;
 import com.studentshub.model.*;
-import com.studentshub.service.GroupChatService;
+import com.studentshub.service.deprecated.impl.GroupChatService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;

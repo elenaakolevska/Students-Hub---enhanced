@@ -1,10 +1,14 @@
 package com.studentshub.service.application.impl;
 
+import com.studentshub.dto.display.DisplayMessageDto;
+import com.studentshub.dto.display.DisplayUserDto;
 import com.studentshub.model.Message;
 import com.studentshub.model.User;
 import com.studentshub.repository.MessageRepository;
 import com.studentshub.repository.UserRepository;
 import com.studentshub.service.application.ChatApplicationService;
+import com.studentshub.service.domain.ChatService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -12,70 +16,71 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class ChatApplicationServiceImpl implements ChatApplicationService {
     private final MessageRepository messageRepo;
     private final UserRepository userRepo;
-    private final ChatService chatDomainService;
+    @Autowired
+    private ChatService chatDomainService;
 
     public ChatApplicationServiceImpl(MessageRepository messageRepo,
-                                      UserRepository userRepo,
-                                      ChatService chatDomainService) {
+                                      UserRepository userRepo) {
         this.messageRepo = messageRepo;
         this.userRepo = userRepo;
-        this.chatDomainService = chatDomainService;
     }
 
     @Override
-    public List<Message> getChat(User u1, User u2) {
-        // Persistence query from repository
-        return messageRepo.findChatBetweenUsers(u1, u2);
+    public List<DisplayMessageDto> getChat(DisplayUserDto u1, DisplayUserDto u2) {
+        User user1 = userRepo.findById(u1.id()).orElseThrow();
+        User user2 = userRepo.findById(u2.id()).orElseThrow();
+        List<Message> messages = messageRepo.findChatBetweenUsers(user1, user2);
+        return messages.stream().map(DisplayMessageDto::fromMessage).collect(Collectors.toList());
     }
 
     @Override
-    public void sendMessage(User sender, User receiver, String content) {
-        // Let domain handle business rules + enrich entity
-        chatDomainService.sendMessage(sender, receiver, content);
-
-        // Persist entity changes (messages are already created in domain)
-        // Depending on your model, you might need to extract the latest message and save
-        messageRepo.saveAll(sender.getSentMessages());
-//        messageRepo.saveAll(receiver.getReceivedMessages());
+    public void sendMessage(DisplayUserDto sender, DisplayUserDto receiver, String content) {
+        User senderEntity = userRepo.findById(sender.id()).orElseThrow();
+        User receiverEntity = userRepo.findById(receiver.id()).orElseThrow();
+        chatDomainService.send(senderEntity, receiverEntity, content);
     }
 
     @Override
-    public List<User> getChatPartners(User user) {
-        // Could also query repository directly for performance
+    public List<DisplayUserDto> getChatPartners(DisplayUserDto user) {
+        User userEntity = userRepo.findById(user.id()).orElseThrow();
         List<User> allUsers = userRepo.findAll();
-        allUsers.removeIf(u -> u.getId().equals(user.getId()));
-        return allUsers;
+        allUsers.removeIf(u -> u.getId().equals(userEntity.getId()));
+        return DisplayUserDto.from(allUsers);
     }
 
     @Override
-    public Map<User, Long> getUnreadMessageCounts(User currentUser) {
-        List<User> chatPartners = getChatPartners(currentUser);
-        Map<User, Long> unreadCounts = new HashMap<>();
+    public Map<DisplayUserDto, Long> getUnreadMessageCounts(DisplayUserDto currentUser) {
+        User currentUserEntity = userRepo.findById(currentUser.id()).orElseThrow();
+        List<User> chatPartners = userRepo.findAll();
+        chatPartners.removeIf(u -> u.getId().equals(currentUserEntity.getId()));
+        Map<DisplayUserDto, Long> unreadCounts = new HashMap<>();
         for (User partner : chatPartners) {
-            long count = messageRepo.countUnreadMessages(partner, currentUser);
-            unreadCounts.put(partner, count);
+            long count = messageRepo.countUnreadMessages(partner, currentUserEntity);
+            unreadCounts.put(DisplayUserDto.from(partner), count);
         }
         return unreadCounts;
     }
 
     @Override
-    public void markMessagesAsRead(User sender, User receiver) {
-        // Delegate to domain service to mark in memory
-        chatDomainService.markMessagesAsRead(sender, receiver);
-
-        // Persist updated messages
-        List<Message> updated = messageRepo.findChatBetweenUsers(sender, receiver);
+    public void markMessagesAsRead(DisplayUserDto sender, DisplayUserDto receiver) {
+        User senderEntity = userRepo.findById(sender.id()).orElseThrow();
+        User receiverEntity = userRepo.findById(receiver.id()).orElseThrow();
+        chatDomainService.markMessagesAsRead(senderEntity, receiverEntity);
+        List<Message> updated = messageRepo.findChatBetweenUsers(senderEntity, receiverEntity);
         messageRepo.saveAll(updated);
     }
 
     @Override
-    public Optional<LocalDateTime> getLastMessageTimestamp(User u1, User u2) {
-        return getChat(u1, u2).stream()
+    public Optional<LocalDateTime> getLastMessageTimestamp(DisplayUserDto u1, DisplayUserDto u2) {
+        User user1 = userRepo.findById(u1.id()).orElseThrow();
+        User user2 = userRepo.findById(u2.id()).orElseThrow();
+        return messageRepo.findChatBetweenUsers(user1, user2).stream()
                 .map(Message::getTimestamp)
                 .max(LocalDateTime::compareTo);
     }

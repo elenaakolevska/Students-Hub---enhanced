@@ -1,4 +1,4 @@
-package com.studentshub.service;
+package com.studentshub.service.deprecated.impl;
 
 import com.studentshub.model.GroupChat;
 import com.studentshub.model.User;

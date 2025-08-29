@@ -1,6 +1,5 @@
 package com.studentshub.web;
 //
-//import com.studentshub.model.Message;
 //import com.studentshub.model.User;
 //import com.studentshub.repository.UserRepository;
 //import com.studentshub.service.domain.ChatService;
@@ -104,7 +103,8 @@ package com.studentshub.web;
 
 
 
-import com.studentshub.model.Message;
+import com.studentshub.dto.display.DisplayMessageDto;
+import com.studentshub.dto.display.DisplayUserDto;
 import com.studentshub.model.User;
 import com.studentshub.repository.UserRepository;
 import com.studentshub.service.application.ChatApplicationService;
@@ -128,23 +128,24 @@ public class ChatController {
     @GetMapping("/partners")
     public List<Map<String, Object>> getChatPartners(Principal principal) {
         User currentUser = getCurrentUser(principal);
-        List<User> partners = chatService.getChatPartners(currentUser);
+        DisplayUserDto currentUserDto = DisplayUserDto.from(currentUser);
+        List<DisplayUserDto> partners = chatService.getChatPartners(currentUserDto);
 
         // Sort partners by latest message timestamp
         partners.sort((u1, u2) -> {
-            LocalDateTime t1 = chatService.getLastMessageTimestamp(currentUser, u1).orElse(LocalDateTime.MIN);
-            LocalDateTime t2 = chatService.getLastMessageTimestamp(currentUser, u2).orElse(LocalDateTime.MIN);
+            LocalDateTime t1 = chatService.getLastMessageTimestamp(currentUserDto, u1).orElse(LocalDateTime.MIN);
+            LocalDateTime t2 = chatService.getLastMessageTimestamp(currentUserDto, u2).orElse(LocalDateTime.MIN);
             return t2.compareTo(t1);
         });
 
         // Get unread counts
-        Map<User, Long> unreadCounts = chatService.getUnreadMessageCounts(currentUser);
+        Map<DisplayUserDto, Long> unreadCounts = chatService.getUnreadMessageCounts(currentUserDto);
 
         // Map each partner to a simple JSON-friendly structure
         return partners.stream()
                 .map(u -> Map.<String, Object>of(
-                        "id", u.getId(),
-                        "username", u.getUsername(),
+                        "id", u.id(),
+                        "username", u.username(),
                         "unreadCount", unreadCounts.getOrDefault(u, 0L)
                 ))
                 .collect(Collectors.toList());
@@ -155,18 +156,19 @@ public class ChatController {
     @GetMapping("/messages/{username}")
     public Map<String, Object> getChatWith(@PathVariable String username, Principal principal) {
         User currentUser = getCurrentUser(principal);
+        DisplayUserDto currentUserDto = DisplayUserDto.from(currentUser);
 
         Optional<User> optionalOther = userRepo.findByUsername(username);
         if (optionalOther.isEmpty()) {
             throw new NoSuchElementException("User not found: " + username);
         }
         User other = optionalOther.get();
+        DisplayUserDto otherDto = DisplayUserDto.from(other);
 
         // Mark messages as read
-        chatService.markMessagesAsRead(other, currentUser);
+        chatService.markMessagesAsRead(otherDto, currentUserDto);
 
-        // Return chat messages + info
-        List<Message> messages = chatService.getChat(currentUser, other);
+        List<DisplayMessageDto> messages = chatService.getChat(currentUserDto, otherDto);
 
         return Map.of(
                 "currentUser", Map.of("id", currentUser.getId(), "username", currentUser.getUsername()),
@@ -184,7 +186,7 @@ public class ChatController {
         User receiver = userRepo.findByUsername(receiverUsername)
                 .orElseThrow(() -> new NoSuchElementException("Receiver not found"));
 
-        chatService.sendMessage(sender, receiver, content);
+        chatService.sendMessage(DisplayUserDto.from(sender), DisplayUserDto.from(receiver), content);
     }
 
     // Helper method to fetch current user from Principal
