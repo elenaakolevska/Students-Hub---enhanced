@@ -46,8 +46,8 @@
             <button type="submit" class="btn btn-primary btn-lg">Најави се</button>
           </div>
         </form>
-        <div th:if="${session.error}">
-          <p style="color: red;" th:text="${session.error}"></p>
+        <div th:if="${param.error}">
+          <p style="color: red;">Invalid username or password.</p>
         </div>
 
         <div class="mt-3 text-center">

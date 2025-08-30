@@ -1,7 +1,6 @@
 package com.studentshub.web;
 import com.studentshub.dto.create.CreateUserDto;
 import com.studentshub.dto.display.DisplayUserDto;
-import com.studentshub.dto.create.LoginDto;
 import org.springframework.http.ResponseEntity;
 import com.studentshub.service.application.UserApplicationService;
 
@@ -42,11 +41,9 @@ public class UserController {
         return ResponseEntity.ok(user);
     }
 
-    @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginDto loginDto) {
-        return userApplicationService.authenticate(loginDto.getUsername(), loginDto.getPassword())
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.status(401).<DisplayUserDto>body(null));
+    @GetMapping("/login")
+    public String loginPage() {
+        return "users/login";
     }
 
     @GetMapping("/profile/{username}")
