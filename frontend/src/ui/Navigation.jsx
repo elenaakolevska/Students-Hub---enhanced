@@ -59,6 +59,9 @@ const Navigation = () => {
                                     <Link className="nav-link" to="/my-posts">Мои објави</Link>
                                 </li>
                                 <li className="nav-item">
+                                    <Link className="nav-link" to="/chat">Chat</Link>
+                                </li>
+                                <li className="nav-item">
                                     <span className="nav-link">Добредојде, {user.username}</span>
                                 </li>
                                 <li className="nav-item">

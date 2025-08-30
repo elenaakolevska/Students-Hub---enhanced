@@ -18,12 +18,12 @@ public record DisplayUserDto(
     public static DisplayUserDto from(User user) {
         return new DisplayUserDto(
             user.getId(),
-            user.getFirstName(),
-            user.getLastName(),
-            user.getUsername(),
-            user.getEmail(),
-            user.getEducation(),
-            user.getProfileImageUrl(),
+            user.getFirstName() != null ? user.getFirstName() : "Unknown",
+            user.getLastName() != null ? user.getLastName() : "Unknown",
+            user.getUsername() != null ? user.getUsername() : "Unknown",
+            user.getEmail() != null ? user.getEmail() : "Unknown",
+            user.getEducation() != null ? user.getEducation() : "",
+            user.getProfileImageUrl() != null ? user.getProfileImageUrl() : "",
             user.getCreatedAt()
         );
     }
@@ -31,4 +31,3 @@ public record DisplayUserDto(
         return users.stream().map(DisplayUserDto::from).collect(Collectors.toList());
     }
 }
-
