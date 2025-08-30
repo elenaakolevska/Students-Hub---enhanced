@@ -4,7 +4,14 @@ import axios from '../axios/axios';
 const chatRepository = {
   getChatPartners: async () => {
     const res = await axios.get('/api/chat/partners', { withCredentials: true });
-    return res.data;
+    // Ensure the result is always an array
+    if (Array.isArray(res.data)) {
+      return res.data;
+    } else if (res.data && Array.isArray(res.data.partners)) {
+      return res.data.partners;
+    } else {
+      return [];
+    }
   },
   getChatWith: async (username) => {
     const res = await axios.get(`/api/chat/messages/${username}`, { withCredentials: true });

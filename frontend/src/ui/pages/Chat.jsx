@@ -27,24 +27,50 @@ const Chat = () => {
     const fetchPartners = async () => {
       try {
         const data = await chatRepository.getChatPartners();
-        if (data && data.length > 0) {
-          setPartners(data);
+        // Only exclude the logged-in user by id, fallback to username if id is not available
+        let filtered = [];
+        if (Array.isArray(data)) {
+          if (user.id !== undefined && user.id !== null) {
+            filtered = data.filter(u => u.id !== user.id);
+          } else if (user.username) {
+            filtered = data.filter(u => u.username !== user.username);
+          } else {
+            filtered = data;
+          }
+        }
+        if (filtered.length === 0) {
+          console.log('No partners found. Raw data:', data);
+        }
+        if (filtered.length > 0) {
+          setPartners(filtered);
         } else {
           const allUsers = await userRepository.getAllUsers();
-          console.log('Current user:', user);
-          console.log('Fetched all users:', allUsers);
-          allUsers.forEach((u, i) => console.log(`User[${i}]:`, u));
-          // Only filter out the current user by username and email
-          const filtered = allUsers.filter(u => u.username !== user.username && u.email !== user.email);
+          if (user.id !== undefined && user.id !== null) {
+            filtered = allUsers.filter(u => u.id !== user.id);
+          } else if (user.username) {
+            filtered = allUsers.filter(u => u.username !== user.username);
+          } else {
+            filtered = allUsers;
+          }
+          if (filtered.length === 0) {
+            console.log('No partners found in allUsers. Raw data:', allUsers);
+          }
           setPartners(filtered);
         }
       } catch (err) {
         try {
           const allUsers = await userRepository.getAllUsers();
-          console.log('Current user:', user);
-          console.log('Fetched all users (error fallback):', allUsers);
-          allUsers.forEach((u, i) => console.log(`User[${i}]:`, u));
-          const filtered = allUsers.filter(u => u.username !== user.username && u.email !== user.email);
+          let filtered = [];
+          if (user.id !== undefined && user.id !== null) {
+            filtered = allUsers.filter(u => u.id !== user.id);
+          } else if (user.username) {
+            filtered = allUsers.filter(u => u.username !== user.username);
+          } else {
+            filtered = allUsers;
+          }
+          if (filtered.length === 0) {
+            console.log('No partners found in allUsers (error fallback). Raw data:', allUsers);
+          }
           setPartners(filtered);
         } catch {
           setPartners([]);
@@ -102,10 +128,10 @@ const Chat = () => {
           <div className="col-md-3 border-end">
             <h5>Chat Partners</h5>
             <ul className="list-group">
-              {partners.length === 0 ? (
+              {(Array.isArray(partners) ? partners : []).length === 0 ? (
                 <li className="list-group-item text-muted">No other users available to chat.</li>
               ) : (
-                partners.map((partner) => (
+                (Array.isArray(partners) ? partners : []).map((partner) => (
                   <li
                     key={partner.id || partner._id || partner.userId || partner.email}
                     className={`list-group-item list-group-item-action${selectedPartner && (selectedPartner.id === partner.id || selectedPartner._id === partner._id || selectedPartner.userId === partner.userId || selectedPartner.email === partner.email) ? ' active' : ''}`}
