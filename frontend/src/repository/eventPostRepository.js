@@ -3,18 +3,18 @@ import axiosInstance from "../axios/axios";
 const eventPostRepository = {
     findAll: (category = null) => {
         const params = category ? `?category=${category}` : '';
-        return axiosInstance.get(`/event-posts${params}`);
+        return axiosInstance.get(`/api/event-posts${params}`);
     },
 
-    findById: (id) => axiosInstance.get(`/event-posts/${id}`),
+    findById: (id) => axiosInstance.get(`/api/event-posts/${id}`),
 
-    save: (eventPost) => axiosInstance.post('/event-posts/add', eventPost),
+    save: (eventPost) => axiosInstance.post('/api/event-posts/add', eventPost),
 
-    update: (id, eventPost) => axiosInstance.put(`/event-posts/edit/${id}`, eventPost),
+    update: (id, eventPost) => axiosInstance.put(`/api/event-posts/edit/${id}`, eventPost),
 
-    delete: (id) => axiosInstance.delete(`/event-posts/delete/${id}`),
+    delete: (id) => axiosInstance.delete(`/api/event-posts/delete/${id}`),
 
-    findByCategory: (category) => axiosInstance.get(`/event-posts/category/${category}`)
+    findByCategory: (category) => axiosInstance.get(`/api/event-posts/category/${category}`)
 };
 
 export default eventPostRepository;

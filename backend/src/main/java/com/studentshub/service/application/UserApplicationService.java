@@ -14,4 +14,9 @@ public interface UserApplicationService {
     Optional<DisplayUserDto> findByUsername(String username);
     Optional<DisplayUserDto> findByEmail(String email);
     Optional<DisplayUserDto> updateProfile(String username, CreateUserDto dto);
+
+    /**
+     * Authenticate user by username and password. Returns DisplayUserDto if successful, empty otherwise.
+     */
+    Optional<DisplayUserDto> authenticate(String username, String password);
 }

@@ -10,10 +10,10 @@ const transportPostRepository = {
     delete: (id) => axiosInstance.delete(`${BASE_URL}/delete/${id}`),
     findByLocation: (locationFrom, locationTo) => {
         const params = [];
-        if (locationFrom) params.push(`from=${encodeURIComponent(locationFrom)}`);
-        if (locationTo) params.push(`to=${encodeURIComponent(locationTo)}`);
+        if (locationFrom) params.push(`locationFrom=${encodeURIComponent(locationFrom)}`);
+        if (locationTo) params.push(`locationTo=${encodeURIComponent(locationTo)}`);
         const query = params.length ? `?${params.join('&')}` : '';
-        return axiosInstance.get(`${BASE_URL}/location${query}`);
+        return axiosInstance.get(`${BASE_URL}${query}`);
     }
 };
 

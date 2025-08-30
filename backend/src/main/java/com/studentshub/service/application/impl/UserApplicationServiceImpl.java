@@ -1,3 +1,4 @@
+// ...existing code...
 package com.studentshub.service.application.impl;
 
 import com.studentshub.dto.create.CreateUserDto;
@@ -5,6 +6,8 @@ import com.studentshub.dto.display.DisplayUserDto;
 import com.studentshub.model.User;
 import com.studentshub.service.domain.UserService;
 import com.studentshub.service.application.UserApplicationService;
+
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,12 +16,28 @@ import java.util.Optional;
 @Service
 public class UserApplicationServiceImpl implements UserApplicationService {
 
-    private final UserService userService;
 
-    public UserApplicationServiceImpl(UserService userService) {
+    private final UserService userService;
+    private final PasswordEncoder passwordEncoder;
+
+    public UserApplicationServiceImpl(UserService userService, PasswordEncoder passwordEncoder) {
         this.userService = userService;
+        this.passwordEncoder = passwordEncoder;
     }
 
+    @Override
+    public Optional<DisplayUserDto> authenticate(String username, String password) {
+        try {
+            User user = userService.getUserByUsername(username);
+            if (user != null && user.getPassword() != null && passwordEncoder.matches(password, user.getPassword())) {
+                return Optional.of(DisplayUserDto.from(user));
+            }
+            return Optional.empty();
+        } catch (Exception e) {
+            return Optional.empty();
+        }
+    }
+    
     @Override
     public List<DisplayUserDto> findAll() {
         return userService.findAll().stream()

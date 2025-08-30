@@ -6,7 +6,7 @@ const tutorPostRepository = {
         if (tutorName) params.append('tutorName', tutorName);
         if (subject) params.append('subject', subject);
         const queryString = params.toString();
-        return axiosInstance.get(`/tutor-posts${queryString ? `?${queryString}` : ''}`);
+        return axiosInstance.get(`/api/tutor-posts${queryString ? `?${queryString}` : ''}`);
     },
 
     findById: (id) => axiosInstance.get(`/tutor-posts/${id}`),

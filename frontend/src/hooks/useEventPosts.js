@@ -20,11 +20,11 @@ const useEventPosts = (category = null) => {
                 setLoading(false);
             }
         };
-
         fetchEventPosts();
     }, [category]);
 
-    return { eventPosts, loading, error, refetch: () => fetchEventPosts() };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    return { eventPosts, loading, error };
 };
 
 export default useEventPosts;

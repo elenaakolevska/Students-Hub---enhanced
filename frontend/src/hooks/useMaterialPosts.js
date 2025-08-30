@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import materialPostRepository from "../../repository/materialPostRepository.js";
+import materialPostRepository from "../repository/materialPostRepository.js";
 
 const useMaterialPosts = (subject = null) => {
     const [materialPosts, setMaterialPosts] = useState([]);

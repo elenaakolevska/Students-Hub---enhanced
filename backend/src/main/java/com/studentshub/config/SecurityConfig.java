@@ -9,11 +9,8 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
+
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 
@@ -25,52 +22,30 @@ public class SecurityConfig {
     private final PasswordEncoder passwordEncoder;
     private final CustomUsernamePasswordAuthenticationProvider authProvider;
 
-    private final CustomAuthenticationFailureHandler failureHandler;
 
-    public SecurityConfig(PasswordEncoder passwordEncoder,
-                          CustomUsernamePasswordAuthenticationProvider authProvider,
-                          CustomAuthenticationFailureHandler failureHandler) {
-        this.passwordEncoder = passwordEncoder;
-        this.authProvider = authProvider;
-        this.failureHandler = failureHandler;
-    }
+        public SecurityConfig(PasswordEncoder passwordEncoder,
+                                                  CustomUsernamePasswordAuthenticationProvider authProvider) {
+                this.passwordEncoder = passwordEncoder;
+                this.authProvider = authProvider;
+        }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-
-        http
-                .csrf(AbstractHttpConfigurer::disable)
-                .headers((headers) -> headers
-                        .frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin)
-                )
-                .authorizeHttpRequests((requests) -> requests
-
-
-                        .requestMatchers("/", "/users/*", "/assets/**", "/register","/*","/","/home", "/css/**", "/js/**", "/images/**", "/webjars/**","/uploads/**","/messages/**","/chat/**")
-
-
-                        .permitAll()
-                        .requestMatchers("/admin/**").hasRole("ADMIN")
-                        .anyRequest()
-                        .authenticated()
-                )
-                .formLogin((form) -> form
-                        .loginPage("/users/login")
-                        .permitAll()
-                        .failureHandler(failureHandler)
-                        .failureUrl("/users/login?error=BadCredentials")
-                        .defaultSuccessUrl("/", true)
-                )
-                .logout((logout) -> logout
-                        .logoutUrl("/logout")
-                        .clearAuthentication(true)
-                        .invalidateHttpSession(true)
-                        .deleteCookies("JSESSIONID")
-                        .logoutSuccessUrl("/users/login")
-                );
-
-        return http.build();
-    }
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+                http
+                        .cors()
+                        .and()
+                        .csrf(AbstractHttpConfigurer::disable)
+                        .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
+                        .authorizeHttpRequests(requests -> requests
+                                .requestMatchers("/users/register", "/users/login", "/uploads/**", "/assets/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                                .requestMatchers("/api/**").permitAll()
+                                .requestMatchers("/admin/**").hasRole("ADMIN")
+                                .anyRequest().permitAll()
+                        )
+                        .formLogin(AbstractHttpConfigurer::disable)
+                        .logout(AbstractHttpConfigurer::disable);
+                return http.build();
+        }
 
 
 
