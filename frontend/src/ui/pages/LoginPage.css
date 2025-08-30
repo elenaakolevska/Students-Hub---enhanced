@@ -1,0 +1,29 @@
+/* Custom styles for the login page grid and image */
+.login-grid {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 70vh;
+  gap: 3rem;
+}
+.login-image {
+  max-width: 350px;
+  width: 100%;
+  height: auto;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.10);
+  background: none;
+  padding: 0;
+  border-radius: 0;
+  display: block;
+  object-fit: contain;
+}
+@media (max-width: 992px) {
+  .login-grid {
+    flex-direction: column;
+    gap: 2rem;
+  }
+  .login-image {
+    margin-bottom: 2rem;
+    max-width: 220px;
+  }
+}

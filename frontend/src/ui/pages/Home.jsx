@@ -24,7 +24,7 @@ const Home = () => {
   return (
     <div className="d-flex flex-column min-vh-100">
       {/* Navbar */}
-      <NavigationBar />
+
 
       <main className="flex-grow-1">
         {/* Hero Section */}
