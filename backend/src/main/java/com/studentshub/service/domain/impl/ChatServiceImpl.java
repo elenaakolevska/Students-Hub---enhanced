@@ -27,7 +27,9 @@ public class ChatServiceImpl implements ChatService {
 
     @Override
     public void send(User sender, User receiver, String content) {
-
+        if (sender == null || receiver == null || content == null || content.trim().isEmpty()) {
+            throw new IllegalArgumentException("Sender, receiver, and content must not be null or empty");
+        }
         Message msg = new Message();
         msg.setSender(sender);
         msg.setReceiver(receiver);

@@ -3,6 +3,7 @@ import Navigation from '../Navigation';
 import Footer from '../Footer';
 import chatRepository from '../../repository/chatRepository';
 import authContext from '../../contexts/authContext';
+import userRepository from '../../repository/userRepository';
 
 const Chat = () => {
 
@@ -12,19 +13,46 @@ const Chat = () => {
   const [messages, setMessages] = useState([]); // [{sender, receiver, content}]
   const [messageInput, setMessageInput] = useState('');
   const [loading, setLoading] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
+
+  // Helper to check if a user object matches the current user
+  const isCurrentUser = (u, user) => {
+    const props = [u.username, u.name, u.email, u.id, u._id, u.userId];
+    return props.includes(user.username) || props.includes(user.name) || props.includes(user.email);
+  };
 
   // Fetch chat partners on mount
   useEffect(() => {
     const fetchPartners = async () => {
       try {
         const data = await chatRepository.getChatPartners();
-        setPartners(data);
+        if (data && data.length > 0) {
+          setPartners(data);
+        } else {
+          const allUsers = await userRepository.getAllUsers();
+          console.log('Current user:', user);
+          console.log('Fetched all users:', allUsers);
+          allUsers.forEach((u, i) => console.log(`User[${i}]:`, u));
+          // Only filter out the current user by username and email
+          const filtered = allUsers.filter(u => u.username !== user.username && u.email !== user.email);
+          setPartners(filtered);
+        }
       } catch (err) {
-        setPartners([]);
+        try {
+          const allUsers = await userRepository.getAllUsers();
+          console.log('Current user:', user);
+          console.log('Fetched all users (error fallback):', allUsers);
+          allUsers.forEach((u, i) => console.log(`User[${i}]:`, u));
+          const filtered = allUsers.filter(u => u.username !== user.username && u.email !== user.email);
+          setPartners(filtered);
+        } catch {
+          setPartners([]);
+        }
       }
     };
     fetchPartners();
-  }, []);
+  }, [user]);
 
   // Fetch messages when a partner is selected
   useEffect(() => {
@@ -47,40 +75,50 @@ const Chat = () => {
   // Handle sending a message
   const handleSend = async (e) => {
     e.preventDefault();
+    setSendError('');
     if (!messageInput.trim() || !selectedPartner) return;
+    setSending(true);
     try {
-      await chatRepository.sendMessage(selectedPartner.username, messageInput);
-      // Refresh messages after sending
-      const data = await chatRepository.getChatWith(selectedPartner.username);
+      // Use the correct property for sending messages
+      const receiver = selectedPartner.username || selectedPartner.name || selectedPartner.email;
+      await chatRepository.sendMessage(user.username, receiver, messageInput);
+      const data = await chatRepository.getChatWith(receiver);
       setMessages(data.messages || []);
       setMessageInput('');
     } catch (err) {
-      // Optionally handle error
+      console.error('Send message error:', err?.response?.data || err);
+      setSendError('Failed to send message. Please try again.');
+    } finally {
+      setSending(false);
     }
   };
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      <Navigation />
+
       <main className="container flex-grow-1 py-4">
         <div className="row">
           {/* Chat partners list */}
           <div className="col-md-3 border-end">
             <h5>Chat Partners</h5>
             <ul className="list-group">
-              {partners.map((partner) => (
-                <li
-                  key={partner.id}
-                  className={`list-group-item list-group-item-action${selectedPartner && selectedPartner.id === partner.id ? ' active' : ''}`}
-                  onClick={() => setSelectedPartner(partner)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  {partner.username}
-                  {partner.unreadCount > 0 && (
-                    <span className="badge bg-danger ms-2">{partner.unreadCount}</span>
-                  )}
-                </li>
-              ))}
+              {partners.length === 0 ? (
+                <li className="list-group-item text-muted">No other users available to chat.</li>
+              ) : (
+                partners.map((partner) => (
+                  <li
+                    key={partner.id || partner._id || partner.userId || partner.email}
+                    className={`list-group-item list-group-item-action${selectedPartner && (selectedPartner.id === partner.id || selectedPartner._id === partner._id || selectedPartner.userId === partner.userId || selectedPartner.email === partner.email) ? ' active' : ''}`}
+                    onClick={() => setSelectedPartner(partner)}
+                    style={{ cursor: 'pointer' }}
+                  >
+                    {partner.username || partner.name || partner.email}
+                    {partner.unreadCount > 0 && (
+                      <span className="badge bg-danger ms-2">{partner.unreadCount}</span>
+                    )}
+                  </li>
+                ))
+              )}
             </ul>
           </div>
           {/* Chat window */}
@@ -108,8 +146,11 @@ const Chat = () => {
                     onChange={(e) => setMessageInput(e.target.value)}
                     disabled={loading}
                   />
-                  <button className="btn btn-primary" type="submit" disabled={loading}>Send</button>
+                  <button className="btn btn-primary" type="submit" disabled={sending}>
+                    {sending ? 'Sending...' : 'Send'}
+                  </button>
                 </form>
+                {sendError && <div className="text-danger mt-2">{sendError}</div>}
               </>
             ) : (
               <div className="text-muted">Select a chat partner to start chatting.</div>
@@ -117,6 +158,7 @@ const Chat = () => {
           </div>
         </div>
       </main>
+
       <Footer />
     </div>
   );

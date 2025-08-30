@@ -156,19 +156,20 @@
 <body>
 <div class="chat-container">
     <div class="chat-header">
-        Chat with <span th:text="${receiver.username}">Receiver</span>
+        Chat with <span th:text="${receiver.username != null ? receiver.username : 'Unknown'}">Receiver</span>
     </div>
     <div id="message-container">
         <div th:each="message : ${messages}"
              th:classappend="${message.sender.username == #authentication.name} ? 'message sender' : 'message receiver'">
-            <div class="username" th:text="${message.sender.username}">Username</div>
-            <div th:text="${message.content}">Message content</div>
+            <div class="username" th:text="${message.sender.username != null ? message.sender.username : 'Unknown'}">Username</div>
+            <div th:text="${message.content != null ? message.content : '[No content]'}">Message content</div>
         </div>
     </div>
     <div class="chat-input-area">
         <input id="message-input" type="text" placeholder="Type a message..." autocomplete="off" />
         <button id="send-btn" type="button" onclick="sendMessage()">Send</button>
     </div>
+    <div id="error-message" style="color: red; margin: 10px 0; display: none;"></div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
@@ -176,6 +177,13 @@
 <script th:inline="javascript">
     let sender = /*[[${#authentication.name}]]*/ 'me';
     let receiver = /*[[${receiver.username}]]*/ 'you';
+
+    function showError(msg) {
+        const errorDiv = document.getElementById('error-message');
+        errorDiv.textContent = msg;
+        errorDiv.style.display = 'block';
+        setTimeout(() => errorDiv.style.display = 'none', 4000);
+    }
 
     let socket = new SockJS('/ws');
     let stompClient = Stomp.over(socket);
@@ -204,7 +212,10 @@
     function sendMessage() {
         let input = document.getElementById("message-input");
         let content = input.value.trim();
-        if(content === '') return;
+        if(content === '') {
+            showError("Message content cannot be empty");
+            return;
+        }
         stompClient.send("/app/chat", {}, JSON.stringify({
             sender: sender,
             receiver: receiver,

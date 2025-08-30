@@ -3,6 +3,7 @@ import Navigation from '../Navigation';
 import Footer from '../Footer';
 import { login as loginApi } from '../../repository/userRepository';
 import authContext from '../../contexts/authContext';
+import { useNavigate } from 'react-router-dom';
 import './LoginPage.css';
 
 const Login = () => {
@@ -10,6 +11,7 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const { setUser } = useContext(authContext);
+  const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -18,7 +20,7 @@ const Login = () => {
     try {
       const user = await loginApi(username, password);
       setUser(user); // Save user in context
-      // Optionally redirect, e.g. window.location = '/';
+      navigate('/'); // Redirect to home after login
     } catch (err) {
       setError('Invalid credentials');
     }

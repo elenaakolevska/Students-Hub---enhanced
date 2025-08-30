@@ -24,6 +24,7 @@ import Home from './ui/pages/Home';
 import Chat from './ui/pages/Chat';
 import Login from './ui/pages/Login';
 import Register from './ui/pages/Register';
+import PrivateRoute from './ui/PrivateRoute';
 
 
 function App() {
@@ -50,7 +51,11 @@ function App() {
       <Navigation />
       <Routes>
         <Route path="/" element={<Home />} />
-        <Route path="/chat" element={<Chat />} />
+        <Route path="/chat" element={
+          <PrivateRoute>
+            <Chat />
+          </PrivateRoute>
+        } />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/event-posts" element={

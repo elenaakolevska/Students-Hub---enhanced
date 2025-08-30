@@ -10,8 +10,12 @@ const chatRepository = {
     const res = await axios.get(`/api/chat/messages/${username}`, { withCredentials: true });
     return res.data;
   },
-  sendMessage: async (receiverUsername, content) => {
-    await axios.post(`/api/chat/send/${receiverUsername}`, content, {
+  sendMessage: async (senderUsername, receiverUsername, content) => {
+    await axios.post(`/api/chat/send/${receiverUsername}`, {
+      sender: senderUsername,
+      receiver: receiverUsername,
+      content
+    }, {
       headers: { 'Content-Type': 'application/json' },
       withCredentials: true
     });

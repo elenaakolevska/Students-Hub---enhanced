@@ -29,8 +29,17 @@ public class UserController {
 
 
     @PostMapping("/register")
-    public DisplayUserDto registerUser(@RequestBody CreateUserDto dto) {
-        return userApplicationService.save(dto);
+    public ResponseEntity<?> registerUser(@RequestBody CreateUserDto dto) {
+        // Validate required fields
+        if (dto.firstName() == null || dto.firstName().trim().isEmpty() ||
+            dto.lastName() == null || dto.lastName().trim().isEmpty() ||
+            dto.username() == null || dto.username().trim().isEmpty() ||
+            dto.email() == null || dto.email().trim().isEmpty() ||
+            dto.password() == null || dto.password().trim().isEmpty()) {
+            return ResponseEntity.badRequest().body("Missing required user fields");
+        }
+        DisplayUserDto user = userApplicationService.save(dto);
+        return ResponseEntity.ok(user);
     }
 
     @PostMapping("/login")

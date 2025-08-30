@@ -25,7 +25,13 @@ export const register = async (formData) => {
   return response.data;
 };
 
+export const getAllUsers = async () => {
+  const response = await axios.get('/users');
+  return response.data;
+};
+
 export default {
   login,
   register,
+  getAllUsers
 };
