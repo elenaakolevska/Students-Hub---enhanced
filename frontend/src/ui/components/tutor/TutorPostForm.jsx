@@ -1,17 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import tutorPostRepository from '../../../repository/tutorPostRepository';
+import { toast } from 'react-toastify';
 
 const TutorPostForm = () => {
     const navigate = useNavigate();
     const { id } = useParams();
     const isEdit = Boolean(id);
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
     const [formData, setFormData] = useState({
         title: '',
         description: '',
         tutorName: '',
         subject: '',
-        rating: '',
+        rating: '3', // Default to middle rating
         tagsString: ''
     });
     
@@ -22,14 +25,19 @@ const TutorPostForm = () => {
                     setLoading(true);
                     const response = await tutorPostRepository.findById(id);
                     const post = response.data;
-                    setFormData({
+                    
+                    // Ensure the rating is a string and not a number
+                    const ratingAsString = post.rating ? post.rating.toString() : '3';
+                    
+                    const updatedFormData = {
                         title: post.title || '',
                         description: post.description || '',
                         tutorName: post.tutorName || '',
                         subject: post.subject || '',
-                        rating: post.rating || '',
+                        rating: ratingAsString,
                         tagsString: post.tags ? post.tags.join(', ') : ''
-                    });
+                    };
+                    setFormData(updatedFormData);
                     setError(null);
                 } catch (err) {
                     setError(err.response?.data?.message || err.message);
@@ -42,45 +50,65 @@ const TutorPostForm = () => {
         }
     }, [id, isEdit]);
 
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState(null);
-
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({
-            ...prev,
+        const updatedFormData = {
+            ...formData,
             [name]: value
-        }));
+        };
+        setFormData(updatedFormData);
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        
+        // Check if title is empty
+        if (!formData.title.trim()) {
+            setError("Насловот е задолжително поле");
+            return;
+        }
+        
+        // Check if rating is selected
+        if (!formData.rating) {
+            setError("Оцената е задолжително поле");
+            return;
+        }
+        
         setLoading(true);
         setError(null);
 
         try {
             const dataToSend = {
-                title: formData.title,
-                description: formData.description,
-                tutorName: formData.tutorName,
-                subject: formData.subject,
+                title: formData.title.trim(),
+                description: formData.description.trim(),
+                tutorName: formData.tutorName.trim(),
+                subject: formData.subject.trim(),
                 rating: formData.rating,
                 tags: formData.tagsString.split(',').map(t => t.trim()).filter(Boolean)
             };
 
             if (isEdit) {
-                const response = await tutorPostRepository.update(id, dataToSend);
+                await tutorPostRepository.update(id, dataToSend);
+                
+                // Show success message
+                toast.success("Тутор постот беше успешно ажуриран!");
+                
                 // Navigate to the details page of the updated post
                 navigate(`/tutor-posts/${id}`);
             } else {
                 const response = await tutorPostRepository.save(dataToSend);
+                
+                // Show success message
+                toast.success("Тутор постот беше успешно креиран!");
+                
                 // Navigate to the details page of the newly created post
                 const newId = response.data.id;
                 navigate(`/tutor-posts/${newId}`);
             }
         } catch (err) {
-            setError(err.response?.data?.message || err.message);
-            console.error('Error saving tutor post:', err);
+            const errorMessage = err.response?.data?.message || err.message || 'Грешка при зачувување на постот';
+            toast.error(errorMessage);
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -150,11 +178,10 @@ const TutorPostForm = () => {
                                         className="form-select"
                                         id="rating"
                                         name="rating"
-                                        value={formData.rating}
+                                        value={formData.rating || '3'} /* Default to 3 if empty */
                                         onChange={handleChange}
                                         required
                                     >
-                                        <option value="">Изберете оцена</option>
                                         <option value="1">1 - Слаба</option>
                                         <option value="2">2 - Добра</option>
                                         <option value="3">3 - Многу добра</option>

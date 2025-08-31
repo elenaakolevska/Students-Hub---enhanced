@@ -270,15 +270,17 @@ const Home = () => {
                           </span>
                         )}
                         <p className="card-text">
-                          {post.description.length > 100 
+                          {post.description && post.description.length > 100 
                             ? `${post.description.substring(0, 100)}...` 
-                            : post.description}
+                            : post.description || 'Нема опис'}
                         </p>
                       </div>
                       <div className="card-footer bg-transparent">
                         <div className="d-flex justify-content-between align-items-center">
                           <div>
-                            <p className="text-muted mb-0"><small><i className="bi bi-calendar3"></i> {new Date(post.createdAt).toLocaleDateString('mk-MK')}</small></p>
+                            {post.createdAt && (
+                              <p className="text-muted mb-0"><small><i className="bi bi-calendar3"></i> {new Date(post.createdAt).toLocaleDateString('mk-MK')}</small></p>
+                            )}
                             {post.ownerUsername && (
                               <p className="text-muted mb-0"><small><i className="bi bi-person"></i> {post.ownerUsername}</small></p>
                             )}

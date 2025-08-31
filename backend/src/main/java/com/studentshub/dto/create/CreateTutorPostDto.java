@@ -13,7 +13,7 @@ public record CreateTutorPostDto(
         String subject
 ) {
     public TutorPost toTutorPost(User owner) {
-        return new TutorPost(
+        TutorPost tutorPost = new TutorPost(
                 tutorName,
                 faculty,
                 worksOnline,
@@ -21,5 +21,8 @@ public record CreateTutorPostDto(
                 subject,
                 owner
         );
+        tutorPost.setTitle(title);
+        tutorPost.setDescription(description);
+        return tutorPost;
     }
 }

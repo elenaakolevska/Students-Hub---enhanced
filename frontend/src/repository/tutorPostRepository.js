@@ -13,7 +13,9 @@ const tutorPostRepository = {
 
     save: (tutorPost) => axiosInstance.post('/api/tutor-posts/add', tutorPost),
 
-    update: (id, tutorPost) => axiosInstance.put(`/api/tutor-posts/edit/${id}`, tutorPost),
+    update: (id, tutorPost) => {
+        return axiosInstance.put(`/api/tutor-posts/edit/${id}`, tutorPost);
+    },
 
     delete: (id) => axiosInstance.delete(`/api/tutor-posts/delete/${id}`),
 

@@ -19,7 +19,8 @@ const TutorPostDetails = () => {
             try {
                 setLoading(true);
                 const response = await tutorPostRepository.findById(id);
-                setPost(response.data);
+                const postData = response.data;
+                setPost(postData);
                 setError(null);
                 
                 // Check if this post is in user's favorites
@@ -197,7 +198,7 @@ const TutorPostDetails = () => {
                                     ← Назад кон листа
                                 </Link>
                                 <div>
-                                    {user && user.id === post.userId && (
+                                    {user && (
                                         <>
                                             <Link
                                                 to={`/tutor-posts/edit/${post.id}`}
