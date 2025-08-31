@@ -1,7 +1,35 @@
-import axios from 'axios';
+// import axios from 'axios';
 
-const instance = axios.create({
- baseURL: 'http://localhost:8080',
+// const instance = axios.create({
+//  baseURL: 'http://localhost:8080',
+// });
+
+// export default instance;
+import axios from "axios";
+
+const axiosInstance = axios.create({
+    baseURL: 'http://localhost:8080',
+    headers: {
+        "Content-Type": "application/json",
+    },
 });
 
-export default instance;
+axiosInstance.interceptors.request.use(
+    (config) => {
+        const jwtToken = localStorage.getItem("token");
+        if (jwtToken) {
+            config.headers.Authorization = `Bearer ${jwtToken}`;
+        }
+        return config;
+    },
+    (error) => {
+        if (error.response.status === 401 || error.response.status === 403) {
+            console.log("Invalid token");
+            localStorage.removeItem("token");
+            window.location.href = "/login";
+        }
+        return Promise.reject(error);
+    },
+);
+
+export default axiosInstance;

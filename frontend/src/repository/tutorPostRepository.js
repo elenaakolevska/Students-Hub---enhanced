@@ -9,19 +9,19 @@ const tutorPostRepository = {
         return axiosInstance.get(`/api/tutor-posts${queryString ? `?${queryString}` : ''}`);
     },
 
-    findById: (id) => axiosInstance.get(`/tutor-posts/${id}`),
+    findById: (id) => axiosInstance.get(`/api/tutor-posts/${id}`),
 
-    save: (tutorPost) => axiosInstance.post('/tutor-posts/add', tutorPost),
+    save: (tutorPost) => axiosInstance.post('/api/tutor-posts/add', tutorPost),
 
-    update: (id, tutorPost) => axiosInstance.put(`/tutor-posts/edit/${id}`, tutorPost),
+    update: (id, tutorPost) => axiosInstance.put(`/api/tutor-posts/edit/${id}`, tutorPost),
 
-    delete: (id) => axiosInstance.delete(`/tutor-posts/delete/${id}`),
+    delete: (id) => axiosInstance.delete(`/api/tutor-posts/delete/${id}`),
 
     search: (tutorName, subject) => {
         const params = new URLSearchParams();
         if (tutorName) params.append('tutorName', tutorName);
         if (subject) params.append('subject', subject);
-        return axiosInstance.get(`/tutor-posts/search?${params.toString()}`);
+        return axiosInstance.get(`/api/tutor-posts/search?${params.toString()}`);
     }
 };
 

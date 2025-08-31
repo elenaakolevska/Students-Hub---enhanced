@@ -1,15 +1,46 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useParams } from 'react-router-dom';
 import tutorPostRepository from '../../../repository/tutorPostRepository';
 
-const TutorPostForm = ({ post = null, onSuccess, onCancel }) => {
+const TutorPostForm = () => {
+    const navigate = useNavigate();
+    const { id } = useParams();
+    const isEdit = Boolean(id);
     const [formData, setFormData] = useState({
-        title: post?.title || '',
-        description: post?.description || '',
-        tutorName: post?.tutorName || '',
-        subject: post?.subject || '',
-        rating: post?.rating || '',
-        tagsString: post?.tags ? post.tags.join(', ') : ''
+        title: '',
+        description: '',
+        tutorName: '',
+        subject: '',
+        rating: '',
+        tagsString: ''
     });
+    
+    useEffect(() => {
+        if (isEdit) {
+            const fetchPost = async () => {
+                try {
+                    setLoading(true);
+                    const response = await tutorPostRepository.findById(id);
+                    const post = response.data;
+                    setFormData({
+                        title: post.title || '',
+                        description: post.description || '',
+                        tutorName: post.tutorName || '',
+                        subject: post.subject || '',
+                        rating: post.rating || '',
+                        tagsString: post.tags ? post.tags.join(', ') : ''
+                    });
+                    setError(null);
+                } catch (err) {
+                    setError(err.response?.data?.message || err.message);
+                    console.error('Error fetching tutor post:', err);
+                } finally {
+                    setLoading(false);
+                }
+            };
+            fetchPost();
+        }
+    }, [id, isEdit]);
 
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -37,15 +68,19 @@ const TutorPostForm = ({ post = null, onSuccess, onCancel }) => {
                 tags: formData.tagsString.split(',').map(t => t.trim()).filter(Boolean)
             };
 
-            if (post) {
-                await tutorPostRepository.update(post.id, dataToSend);
+            if (isEdit) {
+                const response = await tutorPostRepository.update(id, dataToSend);
+                // Navigate to the details page of the updated post
+                navigate(`/tutor-posts/${id}`);
             } else {
-                await tutorPostRepository.save(dataToSend);
+                const response = await tutorPostRepository.save(dataToSend);
+                // Navigate to the details page of the newly created post
+                const newId = response.data.id;
+                navigate(`/tutor-posts/${newId}`);
             }
-
-            onSuccess && onSuccess();
         } catch (err) {
             setError(err.response?.data?.message || err.message);
+            console.error('Error saving tutor post:', err);
         } finally {
             setLoading(false);
         }
@@ -57,7 +92,7 @@ const TutorPostForm = ({ post = null, onSuccess, onCancel }) => {
                 <div className="col-md-8">
                     <div className="card">
                         <div className="card-header">
-                            <h2 className="mb-0">{post ? 'Уреди тутор пост' : 'Создади тутор пост'}</h2>
+                            <h2 className="mb-0">{isEdit ? 'Уреди тутор пост' : 'Создади тутор пост'}</h2>
                         </div>
                         <div className="card-body">
                             {error && (
@@ -159,21 +194,19 @@ const TutorPostForm = ({ post = null, onSuccess, onCancel }) => {
                                 </div>
 
                                 <div className="d-grid gap-2 d-md-flex justify-content-md-end">
-                                    {onCancel && (
-                                        <button
-                                            type="button"
-                                            className="btn btn-secondary me-md-2"
-                                            onClick={onCancel}
-                                        >
-                                            Откажи
-                                        </button>
-                                    )}
+                                    <button
+                                        type="button"
+                                        className="btn btn-secondary me-md-2"
+                                        onClick={() => navigate('/tutor-posts')}
+                                    >
+                                        Откажи
+                                    </button>
                                     <button
                                         type="submit"
                                         className="btn btn-primary"
                                         disabled={loading}
                                     >
-                                        {loading ? 'Се зачувува...' : (post ? 'Ажурирај' : 'Создади')}
+                                        {loading ? 'Се зачувува...' : (isEdit ? 'Ажурирај' : 'Создади')}
                                     </button>
                                 </div>
                             </form>
