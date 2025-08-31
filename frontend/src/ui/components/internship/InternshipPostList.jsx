@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import useInternshipPosts from '../../../hooks/useInternshipPosts.js';
+import authContext from '../../../contexts/authContext';
+import favoriteRepository from '../../../repository/favoriteRepository';
+import { toast } from 'react-toastify';
 
 const InternshipPostList = () => {
     const [facultyFilter, setFacultyFilter] = useState('');
     const { internshipPosts, loading, error } = useInternshipPosts(facultyFilter);
+    const { user } = useContext(authContext);
 
     const handleFacultyChange = (e) => {
         setFacultyFilter(e.target.value);
@@ -12,7 +16,19 @@ const InternshipPostList = () => {
 
     const addToFavorites = async (postId) => {
         console.log('Adding to favorites:', postId);
-        // TODO: Implement favorites functionality
+        
+        if (!user || !user.sub) {
+            toast.error('Мора да бидете најавени за да додадете во омилени');
+            return;
+        }
+        
+        try {
+            const response = await favoriteRepository.addFavorite(user.sub, postId);
+            toast.success('Додадено во омилени');
+        } catch (err) {
+            toast.error('Грешка при додавање во омилени');
+            console.error('Error adding to favorites:', err);
+        }
     };
 
     if (loading) {

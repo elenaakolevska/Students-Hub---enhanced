@@ -1,10 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import useHousingPosts from '../../../hooks/useHousingPosts.js';
+import authContext from '../../../contexts/authContext';
+import favoriteRepository from '../../../repository/favoriteRepository';
+import { toast } from 'react-toastify';
 
 const HousingPostList = () => {
     const [selectedMunicipality, setSelectedMunicipality] = useState('');
     const { housingPosts, municipalities, loading, error } = useHousingPosts(selectedMunicipality);
+    const { user } = useContext(authContext);
 
     const handleMunicipalityChange = (e) => {
         setSelectedMunicipality(e.target.value);
@@ -12,7 +16,19 @@ const HousingPostList = () => {
 
     const addToFavorites = async (postId) => {
         console.log('Adding to favorites:', postId);
-        // TODO: Implement favorites functionality
+        
+        if (!user || !user.sub) {
+            toast.error('Мора да бидете најавени за да додадете во омилени');
+            return;
+        }
+        
+        try {
+            const response = await favoriteRepository.addFavorite(user.sub, postId);
+            toast.success('Додадено во омилени');
+        } catch (err) {
+            toast.error('Грешка при додавање во омилени');
+            console.error('Error adding to favorites:', err);
+        }
     };
 
     if (loading) {

@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
 import transportPostRepository from '../../../repository/transportPostRepository.js';
+import favoriteRepository from '../../../repository/favoriteRepository.js';
+import authContext from '../../../contexts/authContext.js';
+import { toast } from 'react-toastify';
 
 const TransportPostList = () => {
+    const { user } = useContext(authContext);
     const [locationFrom, setLocationFrom] = useState('');
     const [locationTo, setLocationTo] = useState('');
     const [transportPosts, setTransportPosts] = useState([]);
@@ -34,8 +38,18 @@ const TransportPostList = () => {
     };
 
     const addToFavorites = async (postId) => {
-        console.log('Adding to favorites:', postId);
-        // TODO: Implement favorites functionality
+        if (!user) {
+            toast.error('Ве молиме најавете се за да додавате во омилени');
+            return;
+        }
+        
+        try {
+            await favoriteRepository.addFavorite(user.sub, postId);
+            toast.success('Успешно додадено во омилени!');
+        } catch (error) {
+            console.error('Error adding to favorites:', error);
+            toast.error('Грешка при додавање во омилени');
+        }
     };
 
     if (loading) {

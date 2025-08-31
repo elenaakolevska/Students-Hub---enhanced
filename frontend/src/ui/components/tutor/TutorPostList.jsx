@@ -1,11 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import useTutorPosts from '../../../hooks/useTutorPosts';
+import useTutorPosts from '../../../hooks/useTutorPosts.js';
+import authContext from '../../../contexts/authContext';
+import favoriteRepository from '../../../repository/favoriteRepository';
+import { toast } from 'react-toastify';
 
 const TutorPostList = () => {
     const [tutorName, setTutorName] = useState('');
     const [subject, setSubject] = useState('');
     const { tutorPosts, loading, error, refetch } = useTutorPosts(tutorName, subject);
+    const { user } = useContext(authContext);
 
     const handleFilterSubmit = (e) => {
         e.preventDefault();
@@ -14,7 +18,19 @@ const TutorPostList = () => {
 
     const addToFavorites = async (postId) => {
         console.log('Adding to favorites:', postId);
-        // TODO: Implement favorites functionality
+        
+        if (!user || !user.sub) {
+            toast.error('Мора да бидете најавени за да додадете во омилени');
+            return;
+        }
+        
+        try {
+            const response = await favoriteRepository.addFavorite(user.sub, postId);
+            toast.success('Додадено во омилени');
+        } catch (err) {
+            toast.error('Грешка при додавање во омилени');
+            console.error('Error adding to favorites:', err);
+        }
     };
 
     if (loading) {

@@ -59,7 +59,11 @@ const Navigation = () => {
                                     <Link className="nav-link" to="/my-posts">Мои објави</Link>
                                 </li>
                                 <li className="nav-item">
-                                    <span className="nav-link">Добредојде, {user.username}</span>
+                                    <Link className="nav-link" to="/favorites">
+                                        <i className="bi bi-star-fill me-1"></i>Омилени
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
                                 </li>
                                 <li className="nav-item">
                                     <button className="btn btn-outline-light btn-sm" onClick={handleLogout}>

@@ -8,12 +8,18 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/favorites")
+@RequestMapping("/api/favorites")
 public class FavoriteController {
     private final FavoriteApplicationService favoriteApplicationService;
 
     public FavoriteController(FavoriteApplicationService favoriteApplicationService) {
         this.favoriteApplicationService = favoriteApplicationService;
+    }
+    
+    // Test endpoint to check if the controller is responding
+    @GetMapping("/test")
+    public String testFavoritesEndpoint() {
+        return "Favorites API is working!";
     }
 
     @GetMapping

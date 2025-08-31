@@ -1,13 +1,14 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import postRepository from '../../repository/postRepository';
-import NavigationBar from '../Navigation';
+import favoriteRepository from '../../repository/favoriteRepository';
 import Footer from '../Footer';
 import authContext from '../../contexts/authContext';
 import { toast } from 'react-toastify';
 
 const MyPosts = () => {
   const [posts, setPosts] = useState([]);
+  const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { user } = useContext(authContext);
@@ -26,6 +27,8 @@ const MyPosts = () => {
     }
   };
 
+
+
   useEffect(() => {
     // Check if user is authenticated
     if (!user) {
@@ -37,8 +40,23 @@ const MyPosts = () => {
     const fetchMyPosts = async () => {
       try {
         setLoading(true);
-        const response = await postRepository.getMyPosts();
-        setPosts(response.data);
+        // First, fetch posts
+        const postsResponse = await postRepository.getMyPosts();
+        setPosts(postsResponse.data);
+        
+        // Only attempt to fetch favorites if user.sub exists (that's the username in JWT)
+        if (user.sub) {
+          try {
+            const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+            setFavorites(favoritesResponse.data);
+          } catch (favError) {
+            console.error('Error fetching favorites:', favError);
+            // Don't set the main error state, just log it
+          }
+        } else {
+          console.warn('Username is undefined, skipping favorites fetch');
+        }
+        
         setError(null);
       } catch (err) {
         setError(err.response?.data?.message || 'Грешка при вчитување на објавите');
@@ -55,7 +73,7 @@ const MyPosts = () => {
   const handleDeletePost = async (id) => {
     if (window.confirm('Дали сте сигурни дека сакате да ја избришете оваа објава?')) {
       try {
-        await postRepository.deleteById(id);
+        await postRepository.delete(id);
         toast.success('Објавата е успешно избришана');
         // Update posts list after deletion
         setPosts(posts.filter(post => post.id !== id));
@@ -66,9 +84,36 @@ const MyPosts = () => {
     }
   };
 
+  const handleFavoriteToggle = async (postId) => {
+    // Check if user is authenticated and has a username (sub is the username in JWT)
+    if (!user || !user.sub) {
+      toast.error('Мора да бидете најавени за да додадете во омилени');
+      return;
+    }
+    
+    const username = user.sub;
+    
+    try {
+      const existingFavorite = favorites.find(f => f.postId === postId);
+      if (existingFavorite) {
+        // Remove from favorites
+        await favoriteRepository.removeFavorite(username, existingFavorite.id);
+        setFavorites(favorites.filter(f => f.postId !== postId));
+        toast.success('Отстрането од омилени');
+      } else {
+        // Add to favorites
+        const response = await favoriteRepository.addFavorite(username, postId);
+        setFavorites([...favorites, response.data]);
+        toast.success('Додадено во омилени');
+      }
+    } catch (err) {
+      toast.error(err.message || 'Грешка при додавање/отстранување од омилени');
+      console.error('Error toggling favorite:', err);
+    }
+  };
+
   return (
     <div className="d-flex flex-column min-vh-100">
-      <NavigationBar />
       <main className="flex-grow-1">
         <section className="container my-5">
           <div className="mb-4">
@@ -139,24 +184,12 @@ const MyPosts = () => {
                           <i className="bi bi-calendar me-1"></i>
                           {new Date(post.createdAt).toLocaleDateString('mk-MK')}
                         </small>
-                        <div className="btn-group">
-                          <Link
-                            to={`/${post.category?.toLowerCase()}-posts/${post.id}`} 
-                            className="btn btn-sm btn-outline-primary"
-                          >
-                            <i className="bi bi-eye"></i>
-                          </Link>
-                          <Link
-                            to={`/${post.category?.toLowerCase()}-posts/edit/${post.id}`} 
-                            className="btn btn-sm btn-outline-secondary"
-                          >
-                            <i className="bi bi-pencil"></i>
-                          </Link>
+                        <div className="d-flex gap-2">
                           <button
                             onClick={() => handleDeletePost(post.id)}
                             className="btn btn-sm btn-outline-danger"
                           >
-                            <i className="bi bi-trash"></i>
+                            <i className="bi bi-trash"></i> Избриши
                           </button>
                         </div>
                       </div>

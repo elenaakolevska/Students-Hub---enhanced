@@ -26,6 +26,7 @@ import Login from './ui/pages/Login';
 import Register from './ui/pages/Register';
 import About from './ui/pages/About';
 import MyPosts from './ui/pages/MyPosts';
+import Favorites from './ui/pages/Favorites';
 
 
 function App() {
@@ -57,6 +58,7 @@ function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/about" element={<About />} />
         <Route path="/my-posts" element={<MyPosts />} />
+        <Route path="/favorites" element={<Favorites />} />
         <Route path="/event-posts" element={
           loading ? (
             <div className="container my-5 text-center">

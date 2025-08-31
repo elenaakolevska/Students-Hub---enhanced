@@ -1,8 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useContext } from 'react';
 import { Link } from 'react-router-dom';
-import useEventPosts from '../../../hooks/useEventPosts.js';
+import useEventPosts from '../../../hooks/useEventPosts';
+import authContext from '../../../contexts/authContext';
+import favoriteRepository from '../../../repository/favoriteRepository';
+import { toast } from 'react-toastify';
 
 const EventPostList = () => {
+    const { user } = useContext(authContext);
     const [selectedCategory, setSelectedCategory] = useState('');
     const { eventPosts, loading, error } = useEventPosts(selectedCategory);
 
@@ -16,7 +20,19 @@ const EventPostList = () => {
 
     const addToFavorites = async (postId) => {
         console.log('Adding to favorites:', postId);
-        // TODO: Implement favorites functionality
+        
+        if (!user || !user.sub) {
+            toast.error('Мора да бидете најавени за да додадете во омилени');
+            return;
+        }
+        
+        try {
+            const response = await favoriteRepository.addFavorite(user.sub, postId);
+            toast.success('Додадено во омилени');
+        } catch (err) {
+            toast.error('Грешка при додавање во омилени');
+            console.error('Error adding to favorites:', err);
+        }
     };
 
     if (loading) {
