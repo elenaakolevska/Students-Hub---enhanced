@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import eventPostRepository from '../../../repository/eventPostRepository.js';
 import authContext from '../../../contexts/authContext.js';
+import { toast } from 'react-toastify';
 
 const EventPostForm = () => {
     const { id } = useParams();
@@ -17,22 +18,19 @@ const EventPostForm = () => {
         isFree: true,
         price: '',
         organizer: '',
-        imageUrl: ''
+        imageUrl: '',
+        tagsString: ''
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
     // Event categories based on backend enum
     const eventCategories = [
-        'CONFERENCE',
-        'WORKSHOP',
-        'SEMINAR',
-        'NETWORKING',
-        'COMPETITION',
-        'PARTY',
-        'CULTURAL',
-        'SPORTS',
-        'OTHER'
+        'WORKSHOP', 
+        'DISCUSSION', 
+        'PARTY', 
+        'HACKATHON', 
+        'COMPETITION'
     ];
 
     useEffect(() => {
@@ -49,7 +47,8 @@ const EventPostForm = () => {
                         isFree: post.isFree !== undefined ? post.isFree : true,
                         price: post.price || '',
                         organizer: post.organizer || '',
-                        imageUrl: post.imageUrl || ''
+                        imageUrl: post.imageUrl || '',
+                        tagsString: post.tags ? post.tags.join(', ') : ''
                     });
                 } catch (err) {
                     setError('Грешка при вчитување на настанот');
@@ -75,19 +74,23 @@ const EventPostForm = () => {
         try {
             const dataToSend = {
                 ...formData,
-                tags: formData.tagsString.split(',').map(t => t.trim()).filter(Boolean),
+                tags: formData.tagsString ? formData.tagsString.split(',').map(t => t.trim()).filter(Boolean) : [],
                 price: formData.isFree ? 0 : parseFloat(formData.price) || 0
             };
             delete dataToSend.tagsString;
 
             if (isEdit) {
                 await eventPostRepository.update(id, dataToSend);
+                toast.success('Настанот беше успешно ажуриран!');
             } else {
                 await eventPostRepository.save(dataToSend);
+                toast.success('Настанот беше успешно креиран!');
             }
             navigate('/event-posts');
         } catch (err) {
-            setError(err.response?.data?.message || 'Грешка при зачувување');
+            const errorMessage = err.response?.data?.message || err.message || 'Грешка при зачувување на настанот';
+            toast.error(errorMessage);
+            setError(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -237,6 +240,35 @@ const EventPostForm = () => {
                             onChange={handleChange}
                             placeholder="https://example.com/image.jpg"
                         />
+                        {formData.imageUrl && (
+                            <div className="mt-2">
+                                <img 
+                                    src={formData.imageUrl} 
+                                    alt="Preview" 
+                                    className="img-thumbnail" 
+                                    style={{ maxHeight: '200px', maxWidth: '100%' }}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = "https://placehold.co/600x400?text=Invalid+Image+URL";
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                    <div className="mb-3">
+                        <label htmlFor="tagsString" className="form-label">Тагови (одделени со запирка):</label>
+                        <input
+                            type="text"
+                            className="form-control"
+                            id="tagsString"
+                            name="tagsString"
+                            value={formData.tagsString}
+                            onChange={handleChange}
+                            placeholder="настан, студенти, работилница"
+                        />
+                        <small className="form-text text-muted">
+                            Одделете ги таговите со запирка
+                        </small>
                     </div>
                     <button
                         type="submit"

@@ -138,6 +138,20 @@ const InternshipPostForm = () => {
                         onChange={handleChange}
                         placeholder="https://example.com/logo.png"
                     />
+                    {formData.logoUrl && (
+                        <div className="mt-2">
+                            <img 
+                                src={formData.logoUrl} 
+                                alt="Company Logo Preview" 
+                                className="img-thumbnail" 
+                                style={{ maxHeight: '150px', maxWidth: '100%' }}
+                                onError={(e) => {
+                                    e.target.onerror = null;
+                                    e.target.src = "https://placehold.co/300x150?text=Invalid+Logo+URL";
+                                }}
+                            />
+                        </div>
+                    )}
                 </div>
                 <button type="submit" className="btn btn-primary" disabled={loading}>
                     {loading ? 'Се зачувува...' : (isEdit ? 'Ажурирај' : 'Зачувај')}

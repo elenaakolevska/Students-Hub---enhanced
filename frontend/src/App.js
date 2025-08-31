@@ -16,6 +16,7 @@ import TutorPostForm from './ui/components/tutor/TutorPostForm';
 
 import EventPostList from './ui/components/events/EventPostList';
 import EventPostDetails from './ui/components/events/EventPostDetails';
+import EventPostForm from './ui/components/events/EventPostForm';
 import React, { useEffect, useState } from 'react';
 import Navigation from './ui/Navigation';
 import eventPostRepository from './repository/eventPostRepository';
@@ -59,21 +60,9 @@ function App() {
         <Route path="/about" element={<About />} />
         <Route path="/my-posts" element={<MyPosts />} />
         <Route path="/favorites" element={<Favorites />} />
-        <Route path="/event-posts" element={
-          loading ? (
-            <div className="container my-5 text-center">
-              <div className="spinner-border" role="status">
-                <span className="visually-hidden">Вчитување...</span>
-              </div>
-            </div>
-          ) : error ? (
-            <div className="container my-5">
-              <div className="alert alert-danger" role="alert">{error}</div>
-            </div>
-          ) : (
-            <EventPostList eventPosts={eventPosts} />
-          )
-        } />
+        <Route path="/event-posts" element={<EventPostList />} />
+        <Route path="/event-posts/create" element={<EventPostForm />} />
+        <Route path="/event-posts/edit/:id" element={<EventPostForm />} />
         <Route path="/event-posts/:id" element={<EventPostDetails />} />
         {/* Internship posts */}
         <Route path="/internship-posts" element={<InternshipPostList />} />

@@ -141,13 +141,13 @@ const InternshipPostList = () => {
 
             <form className="row g-3 align-items-center mb-4">
                 <div className="col-auto">
-                    <label htmlFor="faculty" className="col-form-label">Филтер по факултет:</label>
+                    <label htmlFor="facultyFilter" className="col-form-label">Филтер по факултет:</label>
                 </div>
                 <div className="col-auto">
                     <input
                         type="text"
-                        id="faculty"
-                        name="faculty"
+                        id="facultyFilter"
+                        name="facultyFilter"
                         className="form-control"
                         placeholder="Пр. ФИНКИ, Економски"
                         value={facultyFilter}
@@ -165,12 +165,26 @@ const InternshipPostList = () => {
                     {internshipPosts.map(post => (
                         <div key={post.id} className="col">
                             <div className="card h-100">
+                                {post.logoUrl && (
+                                    <img 
+                                        src={post.logoUrl} 
+                                        className="card-img-top" 
+                                        alt={`${post.company} logo`}
+                                        style={{ height: '180px', objectFit: 'contain', padding: '15px', backgroundColor: '#f8f9fa' }}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = "https://placehold.co/600x400?text=No+Logo";
+                                        }}
+                                    />
+                                )}
                                 <div className="card-body d-flex flex-column">
                                     <h5 className="card-title">{post.title}</h5>
                                     <p className="card-text"><strong>Компанија:</strong> <span>{post.company}</span></p>
-                                    <p className="card-text"><strong>Факултет:</strong> <span>{post.faculty}</span></p>
-                                    <p className="card-text"><strong>Локација:</strong> <span>{post.location}</span></p>
-                                    <p className="card-text"><strong>Опис:</strong> <span>{post.description}</span></p>
+                                    <p className="card-text"><strong>Факултет:</strong> <span>{post.facultyFilter}</span></p>
+                                    <p className="card-text"><strong>Позиција:</strong> <span>{post.position}</span></p>
+                                    <p className="card-text"><strong>Опис:</strong> <span>{post.description?.length > 100 
+                                      ? `${post.description.substring(0, 100)}...` 
+                                      : post.description}</span></p>
 
                                     {post.tags && post.tags.length > 0 && (
                                         <div className="mb-2">

@@ -14,8 +14,13 @@ const useEventPosts = (category = null) => {
                 setEventPosts(response.data);
                 setError(null);
             } catch (err) {
-                setError(err.message);
+                setError(err.response?.data?.message || err.message || "Грешка при вчитување на настаните");
                 console.error("Error fetching event posts:", err);
+                
+                // Reset category if it causes an error (invalid enum value)
+                if (category && err.response?.status === 400) {
+                    console.warn("Invalid category value. Consider updating your filters.");
+                }
             } finally {
                 setLoading(false);
             }

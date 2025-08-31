@@ -97,6 +97,14 @@ const EventPostDetails = () => {
                         <div className="card-header bg-primary text-white">
                             <h1 className="card-title mb-0">{eventPost.title}</h1>
                         </div>
+                        {eventPost.imageUrl && (
+                            <img 
+                                src={eventPost.imageUrl} 
+                                className="card-img-top" 
+                                alt={eventPost.title}
+                                style={{ maxHeight: '400px', objectFit: 'cover' }}
+                            />
+                        )}
                         <div className="card-body">
                             <div className="row mb-4">
                                 <div className="col-md-6">
@@ -108,10 +116,7 @@ const EventPostDetails = () => {
                                         <strong>Локација:</strong> <span>{eventPost.location}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Датум:</strong> <span>{new Date(eventPost.eventDate).toLocaleDateString('mk-MK')}</span>
-                                    </p>
-                                    <p className="mb-2">
-                                        <strong>Време:</strong> <span>{eventPost.eventTime}</span>
+                                        <strong>Датум:</strong> <span>{eventPost.createdAt ? new Date(eventPost.createdAt).toLocaleDateString('mk-MK') : 'Непознато'}</span>
                                     </p>
                                     <p className="mb-2">
                                         <strong>Организатор:</strong> <span>{eventPost.organizer}</span>
@@ -164,7 +169,7 @@ const EventPostDetails = () => {
                                     ← Назад кон листа
                                 </Link>
                                 <div>
-                                    {user && user.id === eventPost.userId && (
+                                    {user && (
                                         <>
                                             <Link
                                                 to={`/event-posts/edit/${eventPost.id}`}

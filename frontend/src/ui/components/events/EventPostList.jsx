@@ -12,7 +12,7 @@ const EventPostList = () => {
     const [favorites, setFavorites] = useState([]);
 
     const eventCategories = [
-        'ACADEMIC', 'CULTURAL', 'SPORTS', 'SOCIAL', 'WORKSHOP', 'CONFERENCE'
+        'WORKSHOP', 'DISCUSSION', 'PARTY', 'HACKATHON', 'COMPETITION'
     ];
 
     // Load user's favorites when component mounts or user changes
@@ -172,12 +172,22 @@ const EventPostList = () => {
                     {eventPosts.map(post => (
                         <div key={post.id} className="col">
                             <div className="card h-100">
+                                {post.imageUrl && (
+                                    <img 
+                                        src={post.imageUrl} 
+                                        className="card-img-top" 
+                                        alt={post.title}
+                                        style={{ height: '180px', objectFit: 'cover' }}
+                                    />
+                                )}
                                 <div className="card-body d-flex flex-column">
                                     <h5 className="card-title">{post.title}</h5>
-                                    <p className="card-text"><strong>Категорија:</strong> <span>{post.category}</span></p>
-                                    <p className="card-text"><strong>Датум:</strong> <span>{new Date(post.eventDate).toLocaleDateString('mk-MK')}</span></p>
+                                    <p className="card-text"><strong>Категорија:</strong> <span>{post.eventCategory}</span></p>
+                                    <p className="card-text"><strong>Датум:</strong> <span>{new Date(post.createdAt).toLocaleDateString('mk-MK')}</span></p>
                                     <p className="card-text"><strong>Локација:</strong> <span>{post.location}</span></p>
-                                    <p className="card-text"><strong>Опис:</strong> <span>{post.description}</span></p>
+                                    <p className="card-text"><strong>Опис:</strong> <span>{post.description?.length > 100 
+                                      ? `${post.description.substring(0, 100)}...` 
+                                      : post.description}</span></p>
 
                                     {post.tags && post.tags.length > 0 && (
                                         <div className="mb-2">

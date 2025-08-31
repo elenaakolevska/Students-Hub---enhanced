@@ -99,6 +99,48 @@ const HousingPostDetails = () => {
                         <div className="card-header bg-primary text-white">
                             <h1 className="card-title mb-0">{post.title}</h1>
                         </div>
+                        {post.images && post.images.length > 0 && (
+                            <div className="image-gallery">
+                                <img 
+                                    src={post.images[0]} 
+                                    className="card-img-top" 
+                                    alt={post.title}
+                                    style={{ maxHeight: '400px', objectFit: 'cover' }}
+                                    onError={(e) => {
+                                        e.target.onerror = null;
+                                        e.target.src = "https://placehold.co/600x400?text=No+Image";
+                                    }}
+                                />
+                                {post.images.length > 1 && (
+                                    <div className="d-flex overflow-auto py-2" style={{ scrollSnapType: 'x mandatory' }}>
+                                        {post.images.map((img, index) => (
+                                            <img 
+                                                key={index}
+                                                src={img} 
+                                                alt={`${post.title} image ${index+1}`}
+                                                className="me-2"
+                                                style={{ 
+                                                    height: '80px', 
+                                                    minWidth: '120px',
+                                                    objectFit: 'cover', 
+                                                    cursor: 'pointer',
+                                                    scrollSnapAlign: 'start',
+                                                    border: '2px solid #eee',
+                                                    borderRadius: '4px'
+                                                }}
+                                                onClick={(e) => {
+                                                    document.querySelector('.card-img-top').src = e.target.src;
+                                                }}
+                                                onError={(e) => {
+                                                    e.target.onerror = null;
+                                                    e.target.src = "https://placehold.co/120x80?text=Error";
+                                                }}
+                                            />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                         <div className="card-body">
                             <div className="row mb-4">
                                 <div className="col-md-6">

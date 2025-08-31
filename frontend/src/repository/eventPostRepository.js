@@ -2,7 +2,8 @@ import axiosInstance from "../axios/axios";
 
 const eventPostRepository = {
     findAll: (category = null) => {
-        const params = category ? `?category=${category}` : '';
+        // Don't send empty strings as category
+        const params = category && category.trim() !== '' ? `?category=${category}` : '';
         return axiosInstance.get(`/api/event-posts${params}`);
     },
 

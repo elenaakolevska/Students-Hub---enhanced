@@ -168,12 +168,26 @@ const HousingPostList = () => {
                     {housingPosts.map(post => (
                         <div key={post.id} className="col">
                             <div className="card h-100">
+                                {post.images && post.images.length > 0 && (
+                                    <img 
+                                        src={post.images[0]} 
+                                        className="card-img-top" 
+                                        alt={post.title}
+                                        style={{ height: '180px', objectFit: 'cover' }}
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = "https://placehold.co/600x400?text=No+Image";
+                                        }}
+                                    />
+                                )}
                                 <div className="card-body d-flex flex-column">
                                     <h5 className="card-title">{post.title}</h5>
                                     <p className="card-text"><strong>Локација:</strong> <span>{post.location}</span></p>
                                     <p className="card-text"><strong>Општина:</strong> <span>{post.municipality}</span></p>
                                     <p className="card-text"><strong>Цена:</strong> <span>{post.price} ден.</span></p>
-                                    <p className="card-text"><strong>Опис:</strong> <span>{post.description}</span></p>
+                                    <p className="card-text"><strong>Опис:</strong> <span>{post.description?.length > 100 
+                                      ? `${post.description.substring(0, 100)}...` 
+                                      : post.description}</span></p>
 
                                     {post.tags && post.tags.length > 0 && (
                                         <div className="mb-2">
