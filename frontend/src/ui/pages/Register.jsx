@@ -1,21 +1,30 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import Navigation from '../Navigation';
-import Footer from '../Footer';
-import { register as registerApi } from '../../repository/userRepository';
-import './LoginPage.css';
+import React, { useState } from "react";
+import {
+  Box,
+  TextField,
+  Button,
+  Typography,
+  Container,
+  Paper,
+  Alert,
+  Divider,
+  Fade,
+  CircularProgress,
+} from "@mui/material";
+import { useNavigate } from "react-router-dom";
+import { register as registerApi } from "../../repository/userRepository";
 
 const initialFormData = {
-  username: '',
-  email: '',
-  password: '',
-  repeatPassword: '',
+  username: "",
+  email: "",
+  password: "",
+  repeatPassword: "",
 };
 
 const Register = () => {
   const [formData, setFormData] = useState(initialFormData);
-  const [error, setError] = useState('');
-  const [success, setSuccess] = useState('');
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
@@ -26,130 +35,165 @@ const Register = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError('');
-    setSuccess('');
+    setError("");
+    setSuccess("");
     setLoading(true);
 
-    // Email validation
+    // validations
     if (!formData.email.match(/^\S+@\S+\.\S+$/)) {
-      setError('Please enter a valid email address');
+      setError("Please enter a valid email address");
       setLoading(false);
       return;
     }
     if (formData.password !== formData.repeatPassword) {
-      setError('Passwords do not match');
+      setError("Passwords do not match");
       setLoading(false);
       return;
     }
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters long');
+      setError("Password must be at least 6 characters long");
       setLoading(false);
       return;
     }
+
     try {
       await registerApi({
         username: formData.username,
         email: formData.email,
         password: formData.password,
       });
-      setSuccess('Registration successful! You can now log in.');
-      setTimeout(() => {
-        navigate('/login');
-      }, 1500);
+      setSuccess("Registration successful! Redirecting to login...");
+      setTimeout(() => navigate("/login"), 2000);
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError("Registration failed. Please try again.");
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="d-flex flex-column min-vh-100">
-      <Navigation />
-      <main className="container flex-grow-1 py-5">
-        <div className="login-grid">
-          <div className="d-flex align-items-center justify-content-center" style={{flex: 1}}>
-            <img
-              src={process.env.PUBLIC_URL + '/images/login.png'}
-              alt="Register Illustration"
-              className="login-image"
-            />
-          </div>
-          <div className="row justify-content-center" style={{flex: 1}}>
-            <div className="col-md-12 col-lg-10">
-              <div className="card shadow p-4">
-                <h3 className="mb-4 text-center">Register</h3>
-                {error && <div className="alert alert-danger">{error}</div>}
-                {success && <div className="alert alert-success">{success}</div>}
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-3">
-                    <label className="form-label">Username</label>
-                    <input
-                      type="text"
-                      className="form-control"
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Email</label>
-                    <input
-                      type="email"
-                      className="form-control"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      required
-                      disabled={loading}
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Password</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      required
-                      disabled={loading}
-                      minLength="6"
-                    />
-                  </div>
-                  <div className="mb-3">
-                    <label className="form-label">Repeat Password</label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      name="repeatPassword"
-                      value={formData.repeatPassword}
-                      onChange={handleChange}
-                      required
-                      disabled={loading}
-                      minLength="6"
-                    />
-                  </div>
-                  <button
-                    type="submit"
-                    className="btn btn-primary w-100"
-                    disabled={loading}
-                  >
-                    {loading ? 'Registering...' : 'Register'}
-                  </button>
-                </form>
-                <div className="mt-3 text-center">
-                  <a href="/login">Already have an account? Login</a>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </main>
-      <Footer />
-    </div>
+    <Box
+      sx={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(135deg, #ece9e6, #ffffff)",
+      }}
+    >
+      <Container maxWidth="xs">
+        <Fade in timeout={600}>
+          <Paper
+            elevation={6}
+            sx={{
+              p: 4,
+              borderRadius: 4,
+              background: "linear-gradient(145deg, #fdfbfb, #ebedee)",
+            }}
+          >
+            <Typography
+              variant="h5"
+              align="center"
+              gutterBottom
+              fontWeight="bold"
+            >
+              Create Account
+            </Typography>
+            <Typography
+              variant="body2"
+              align="center"
+              color="text.secondary"
+              mb={2}
+            >
+              Join us and get started today
+            </Typography>
+
+            {error && (
+              <Alert severity="error" sx={{ mb: 2 }}>
+                {error}
+              </Alert>
+            )}
+            {success && (
+              <Alert severity="success" sx={{ mb: 2 }}>
+                {success}
+              </Alert>
+            )}
+
+            <Box component="form" onSubmit={handleSubmit}>
+              <TextField
+                fullWidth
+                label="Username"
+                name="username"
+                margin="normal"
+                required
+                value={formData.username}
+                onChange={handleChange}
+                disabled={loading}
+              />
+              <TextField
+                fullWidth
+                label="Email"
+                name="email"
+                type="email"
+                margin="normal"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                disabled={loading}
+              />
+              <TextField
+                fullWidth
+                label="Password"
+                name="password"
+                type="password"
+                margin="normal"
+                required
+                value={formData.password}
+                onChange={handleChange}
+                disabled={loading}
+              />
+              <TextField
+                fullWidth
+                label="Repeat Password"
+                name="repeatPassword"
+                type="password"
+                margin="normal"
+                required
+                value={formData.repeatPassword}
+                onChange={handleChange}
+                disabled={loading}
+              />
+
+              <Button
+                fullWidth
+                variant="contained"
+                type="submit"
+                sx={{ mt: 3, py: 1.2, borderRadius: 3, textTransform: "none" }}
+                disabled={loading}
+              >
+                {loading ? (
+                  <CircularProgress size={24} color="inherit" />
+                ) : (
+                  "Register"
+                )}
+              </Button>
+
+              <Divider sx={{ my: 3 }}>or</Divider>
+
+              <Button
+                fullWidth
+                variant="outlined"
+                sx={{ py: 1.2, borderRadius: 3, textTransform: "none" }}
+                onClick={() => navigate("/login")}
+                disabled={loading}
+              >
+                Already have an account? Login
+              </Button>
+            </Box>
+          </Paper>
+        </Fade>
+      </Container>
+    </Box>
   );
 };
 

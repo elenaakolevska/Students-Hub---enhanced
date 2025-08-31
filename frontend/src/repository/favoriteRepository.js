@@ -14,9 +14,22 @@ const favoriteRepository = {
             const storedFavorites = localStorage.getItem(key);
             console.log('Raw localStorage value:', storedFavorites);
             
-            const favorites = storedFavorites ? JSON.parse(storedFavorites) : [];
-            console.log('Parsed favorites:', favorites);
+            // Always ensure we return an array, even if parsing fails
+            let favorites = [];
+            try {
+                if (storedFavorites) {
+                    favorites = JSON.parse(storedFavorites);
+                    // Ensure it's actually an array
+                    if (!Array.isArray(favorites)) {
+                        console.warn('Stored favorites is not an array, resetting to empty array');
+                        favorites = [];
+                    }
+                }
+            } catch (parseError) {
+                console.error('Failed to parse favorites from localStorage:', parseError);
+            }
             
+            console.log('Parsed favorites:', favorites);
             return { data: favorites };
         } catch (error) {
             console.error("Error getting favorites from localStorage:", error);

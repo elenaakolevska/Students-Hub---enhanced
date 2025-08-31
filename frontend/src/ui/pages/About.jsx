@@ -189,7 +189,7 @@ const About = () => {
       </main>
 
       {/* Add style for hover effect */}
-      <style jsx>{`
+      <style>{`
         .hover-card {
           transition: all 0.3s ease;
           border-radius: 10px;

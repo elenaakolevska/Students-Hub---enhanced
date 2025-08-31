@@ -37,6 +37,15 @@ const MyPosts = () => {
       return;
     }
 
+    // Debug user object structure to understand any differences between users
+    console.log('User object for MyPosts:', {
+      user: user,
+      username: user.username,
+      sub: user.sub,
+      hasUsername: !!user.username,
+      hasSub: !!user.sub
+    });
+
     const fetchMyPosts = async () => {
       try {
         setLoading(true);
@@ -44,17 +53,24 @@ const MyPosts = () => {
         const postsResponse = await postRepository.getMyPosts();
         setPosts(postsResponse.data);
         
-        // Only attempt to fetch favorites if user.sub exists (that's the username in JWT)
-        if (user.sub) {
+        // Try to get the username from any available property
+        const userIdentifier = user.sub || user.username || user.preferred_username || user.email;
+        
+        if (userIdentifier) {
           try {
-            const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+            console.log('Using identifier for favorites:', userIdentifier);
+            const favoritesResponse = await favoriteRepository.getMyFavorites(userIdentifier);
             setFavorites(favoritesResponse.data);
           } catch (favError) {
             console.error('Error fetching favorites:', favError);
             // Don't set the main error state, just log it
+            // Initialize with empty array to prevent errors
+            setFavorites([]);
           }
         } else {
-          console.warn('Username is undefined, skipping favorites fetch');
+          console.warn('No user identifier found, skipping favorites fetch');
+          // Initialize with empty array to prevent errors
+          setFavorites([]);
         }
         
         setError(null);
@@ -85,25 +101,33 @@ const MyPosts = () => {
   };
 
   const handleFavoriteToggle = async (postId) => {
-    // Check if user is authenticated and has a username (sub is the username in JWT)
-    if (!user || !user.sub) {
+    // Check if user is authenticated
+    if (!user) {
       toast.error('Мора да бидете најавени за да додадете во омилени');
       return;
     }
     
-    const username = user.sub;
+    // Try to get the username from any available property
+    const username = user.sub || user.username || user.preferred_username || user.email;
+    if (!username) {
+      toast.error('Не може да се идентификува корисникот');
+      return;
+    }
     
     try {
-      const existingFavorite = favorites.find(f => f.postId === postId);
+      // Ensure favorites is an array before operating on it
+      const favoritesArray = Array.isArray(favorites) ? favorites : [];
+      const existingFavorite = favoritesArray.find(f => f.postId === postId);
+      
       if (existingFavorite) {
         // Remove from favorites
         await favoriteRepository.removeFavorite(username, existingFavorite.id);
-        setFavorites(favorites.filter(f => f.postId !== postId));
+        setFavorites(favoritesArray.filter(f => f.postId !== postId));
         toast.success('Отстрането од омилени');
       } else {
         // Add to favorites
         const response = await favoriteRepository.addFavorite(username, postId);
-        setFavorites([...favorites, response.data]);
+        setFavorites([...favoritesArray, response.data]);
         toast.success('Додадено во омилени');
       }
     } catch (err) {
