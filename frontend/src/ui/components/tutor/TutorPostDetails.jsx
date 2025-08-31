@@ -1,12 +1,18 @@
-import React, { useState, useEffect } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import React, { useState, useEffect, useContext } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import tutorPostRepository from '../../../repository/tutorPostRepository';
+import favoriteRepository from '../../../repository/favoriteRepository';
+import authContext from '../../../contexts/authContext';
+import { toast } from 'react-toastify';
 
 const TutorPostDetails = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const { user } = useContext(authContext);
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isFavorite, setIsFavorite] = useState(false);
 
     useEffect(() => {
         const fetchPost = async () => {
@@ -15,6 +21,19 @@ const TutorPostDetails = () => {
                 const response = await tutorPostRepository.findById(id);
                 setPost(response.data);
                 setError(null);
+                
+                // Check if this post is in user's favorites
+                if (user && user.sub) {
+                    try {
+                        const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+                        const favorites = favoritesResponse.data || [];
+                        setIsFavorite(favorites.some(fav => 
+                            fav.postId === id || fav.postId === Number(id)
+                        ));
+                    } catch (favError) {
+                        console.error('Error checking favorites status:', favError);
+                    }
+                }
             } catch (err) {
                 setError(err.response?.data?.message || err.message);
                 console.error("Error fetching tutor post:", err);
@@ -26,7 +45,50 @@ const TutorPostDetails = () => {
         if (id) {
             fetchPost();
         }
-    }, [id]);
+    }, [id, user]);
+    
+    const handleDelete = async () => {
+        if (window.confirm('Дали сте сигурни дека сакате да го избришете тутор огласот?')) {
+            try {
+                await tutorPostRepository.delete(id);
+                navigate('/tutor-posts');
+            } catch (err) {
+                console.error('Error deleting tutor post:', err);
+            }
+        }
+    };
+    
+    const toggleFavorite = async () => {
+        if (!user || !user.sub) {
+            toast.error('Мора да бидете најавени за да додадете во омилени');
+            return;
+        }
+        
+        try {
+            if (isFavorite) {
+                // Find the favorite ID
+                const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+                const favorites = favoritesResponse.data || [];
+                const favorite = favorites.find(fav => 
+                    fav.postId === id || fav.postId === Number(id)
+                );
+                
+                if (favorite) {
+                    await favoriteRepository.removeFavorite(user.sub, favorite.id);
+                    setIsFavorite(false);
+                    toast.success('Отстрането од омилени');
+                }
+            } else {
+                // Add to favorites
+                await favoriteRepository.addFavorite(user.sub, id);
+                setIsFavorite(true);
+                toast.success('Додадено во омилени');
+            }
+        } catch (err) {
+            toast.error('Грешка при ажурирање на омилени');
+            console.error('Error updating favorites:', err);
+        }
+    };
 
     if (loading) {
         return (
@@ -135,14 +197,30 @@ const TutorPostDetails = () => {
                                     ← Назад кон листа
                                 </Link>
                                 <div>
+                                    {user && user.id === post.userId && (
+                                        <>
+                                            <Link
+                                                to={`/tutor-posts/edit/${post.id}`}
+                                                className="btn btn-outline-warning me-2"
+                                            >
+                                                Уреди
+                                            </Link>
+                                            <button
+                                                onClick={handleDelete}
+                                                className="btn btn-outline-danger me-2"
+                                            >
+                                                Избриши
+                                            </button>
+                                        </>
+                                    )}
                                     <button
-                                        className="btn btn-outline-danger"
-                                        onClick={() => {
-                                            // TODO: Implement favorites functionality
-                                            console.log('Adding to favorites:', post.id);
-                                        }}
+                                        className={`btn ${isFavorite ? 'btn-danger' : 'btn-outline-danger'}`}
+                                        onClick={toggleFavorite}
                                     >
-                                        ♥ Додај во омилени
+                                        {isFavorite 
+                                            ? <><i className="bi bi-heart-fill"></i> Отстрани од омилени</>
+                                            : <><i className="bi bi-heart"></i> Додај во омилени</>
+                                        }
                                     </button>
                                 </div>
                             </div>

@@ -12,7 +12,16 @@ const TransportPostList = () => {
     const [transportPosts, setTransportPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [favorites, setFavorites] = useState([]);
 
+    // Helper function to check if a post is in favorites
+    const isPostFavorite = (postId) => {
+        return favorites.some(fav => 
+            // Handle both string and number IDs
+            String(fav.postId) === String(postId)
+        );
+    };
+    
     useEffect(() => {
         const fetchPosts = async () => {
             setLoading(true);
@@ -28,6 +37,20 @@ const TransportPostList = () => {
         };
         fetchPosts();
     }, [locationFrom, locationTo]);
+    
+    useEffect(() => {
+        if (user && user.sub) {
+            const fetchFavorites = async () => {
+                try {
+                    const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+                    setFavorites(favoritesResponse.data || []);
+                } catch (error) {
+                    console.error('Error fetching favorites:', error);
+                }
+            };
+            fetchFavorites();
+        }
+    }, [user]);
 
     const handleLocationFromChange = (e) => {
         setLocationFrom(e.target.value);
@@ -37,18 +60,32 @@ const TransportPostList = () => {
         setLocationTo(e.target.value);
     };
 
-    const addToFavorites = async (postId) => {
-        if (!user) {
-            toast.error('Ве молиме најавете се за да додавате во омилени');
+    const toggleFavorite = async (postId) => {
+        if (!user || !user.sub) {
+            toast.error('Мора да бидете најавени за да додадете во омилени');
             return;
         }
         
         try {
-            await favoriteRepository.addFavorite(user.sub, postId);
-            toast.success('Успешно додадено во омилени!');
-        } catch (error) {
-            console.error('Error adding to favorites:', error);
-            toast.error('Грешка при додавање во омилени');
+            if (isPostFavorite(postId)) {
+                // Find the favorite ID
+                const favorite = favorites.find(f => String(f.postId) === String(postId));
+                if (favorite) {
+                    await favoriteRepository.removeFavorite(user.sub, favorite.id);
+                    // Update local state
+                    setFavorites(favorites.filter(f => f.id !== favorite.id));
+                    toast.success('Отстрането од омилени');
+                }
+            } else {
+                // Add to favorites
+                const response = await favoriteRepository.addFavorite(user.sub, postId);
+                // Update local state
+                setFavorites([...favorites, response.data]);
+                toast.success('Додадено во омилени');
+            }
+        } catch (err) {
+            toast.error('Грешка при ажурирање на омилени');
+            console.error('Error updating favorites:', err);
         }
     };
 
@@ -187,10 +224,13 @@ const TransportPostList = () => {
                                     </Link>
 
                                     <button
-                                        onClick={() => addToFavorites(post.id)}
-                                        className="btn btn-outline-danger w-100 mt-2"
+                                        onClick={() => toggleFavorite(post.id)}
+                                        className={`btn ${isPostFavorite(post.id) ? 'btn-danger' : 'btn-outline-danger'} w-100 mt-2`}
                                     >
-                                        ♥ Додај во омилени
+                                        {isPostFavorite(post.id) 
+                                            ? <><i className="bi bi-heart-fill"></i> Отстрани од омилени</>
+                                            : <><i className="bi bi-heart"></i> Додај во омилени</>
+                                        }
                                     </button>
                                 </div>
                             </div>

@@ -9,29 +9,68 @@ const EventPostList = () => {
     const { user } = useContext(authContext);
     const [selectedCategory, setSelectedCategory] = useState('');
     const { eventPosts, loading, error } = useEventPosts(selectedCategory);
+    const [favorites, setFavorites] = useState([]);
 
     const eventCategories = [
         'ACADEMIC', 'CULTURAL', 'SPORTS', 'SOCIAL', 'WORKSHOP', 'CONFERENCE'
     ];
 
+    // Load user's favorites when component mounts or user changes
+    useEffect(() => {
+        const fetchFavorites = async () => {
+            if (user && user.sub) {
+                try {
+                    const response = await favoriteRepository.getMyFavorites(user.sub);
+                    setFavorites(response.data || []);
+                } catch (err) {
+                    console.error('Error fetching favorites:', err);
+                }
+            }
+        };
+        
+        fetchFavorites();
+    }, [user]);
+    
     const handleCategoryChange = (e) => {
         setSelectedCategory(e.target.value);
     };
 
-    const addToFavorites = async (postId) => {
-        console.log('Adding to favorites:', postId);
-        
+    const isPostFavorite = (postId) => {
+        return Array.isArray(favorites) && favorites.some(fav => 
+            fav.postId === postId || fav.postId === Number(postId)
+        );
+    };
+
+    const toggleFavorite = async (postId) => {
         if (!user || !user.sub) {
             toast.error('Мора да бидете најавени за да додадете во омилени');
             return;
         }
         
+        const isFavorite = isPostFavorite(postId);
+        const username = user.sub;
+        
         try {
-            const response = await favoriteRepository.addFavorite(user.sub, postId);
-            toast.success('Додадено во омилени');
+            if (isFavorite) {
+                // Find and remove from favorites
+                const existingFav = favorites.find(f => 
+                    f.postId === postId || f.postId === Number(postId)
+                );
+                
+                if (existingFav) {
+                    await favoriteRepository.removeFavorite(username, existingFav.id);
+                    setFavorites(favorites.filter(f => f.id !== existingFav.id));
+                    toast.success('Отстрането од омилени');
+                }
+            } else {
+                // Add to favorites
+                const response = await favoriteRepository.addFavorite(username, postId);
+                setFavorites([...favorites, response.data]);
+                toast.success('Додадено во омилени');
+            }
         } catch (err) {
-            toast.error('Грешка при додавање во омилени');
-            console.error('Error adding to favorites:', err);
+            toast.error('Грешка при додавање/отстранување од омилени');
+            console.error('Error toggling favorite:', err);
         }
     };
 
@@ -156,10 +195,10 @@ const EventPostList = () => {
                                     </Link>
 
                                     <button
-                                        onClick={() => addToFavorites(post.id)}
-                                        className="btn btn-outline-danger w-100 mt-2"
+                                        onClick={() => toggleFavorite(post.id)}
+                                        className={`btn w-100 mt-2 ${isPostFavorite(post.id) ? 'btn-danger' : 'btn-outline-danger'}`}
                                     >
-                                        ♥ Додај во омилени
+                                        ♥ {isPostFavorite(post.id) ? 'Отстрани од омилени' : 'Додај во омилени'}
                                     </button>
                                 </div>
                             </div>

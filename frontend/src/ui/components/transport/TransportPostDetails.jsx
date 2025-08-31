@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import transportPostRepository from '../../../repository/transportPostRepository.js';
+import favoriteRepository from '../../../repository/favoriteRepository';
 import authContext from '../../../contexts/authContext.js';
+import { toast } from 'react-toastify';
 
 const TransportPostDetails = () => {
     const { id } = useParams();
@@ -10,12 +12,26 @@ const TransportPostDetails = () => {
     const [post, setPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isFavorite, setIsFavorite] = useState(false);
 
     useEffect(() => {
         const fetchPost = async () => {
             try {
                 const response = await transportPostRepository.findById(id);
                 setPost(response.data);
+                
+                // Check if this post is in user's favorites
+                if (user && user.sub) {
+                    try {
+                        const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+                        const favorites = favoritesResponse.data || [];
+                        setIsFavorite(favorites.some(fav => 
+                            fav.postId === id || fav.postId === Number(id)
+                        ));
+                    } catch (favError) {
+                        console.error('Error checking favorites status:', favError);
+                    }
+                }
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -24,7 +40,39 @@ const TransportPostDetails = () => {
         };
 
         fetchPost();
-    }, [id]);
+    }, [id, user]);
+    
+    const toggleFavorite = async () => {
+        if (!user || !user.sub) {
+            toast.error('Мора да бидете најавени за да додадете во омилени');
+            return;
+        }
+        
+        try {
+            if (isFavorite) {
+                // Find the favorite ID
+                const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+                const favorites = favoritesResponse.data || [];
+                const favorite = favorites.find(fav => 
+                    fav.postId === id || fav.postId === Number(id)
+                );
+                
+                if (favorite) {
+                    await favoriteRepository.removeFavorite(user.sub, favorite.id);
+                    setIsFavorite(false);
+                    toast.success('Отстрането од омилени');
+                }
+            } else {
+                // Add to favorites
+                await favoriteRepository.addFavorite(user.sub, id);
+                setIsFavorite(true);
+                toast.success('Додадено во омилени');
+            }
+        } catch (err) {
+            toast.error('Грешка при ажурирање на омилени');
+            console.error('Error updating favorites:', err);
+        }
+    };
 
     const handleDelete = async () => {
         if (window.confirm('Дали сте сигурни дека сакате да го избришете превозот?')) {
@@ -164,12 +212,13 @@ const TransportPostDetails = () => {
                                         </>
                                     )}
                                     <button
-                                        className="btn btn-outline-danger"
-                                        onClick={() => {
-                                            console.log('Adding to favorites:', post.id);
-                                        }}
+                                        className={`btn ${isFavorite ? 'btn-danger' : 'btn-outline-danger'}`}
+                                        onClick={toggleFavorite}
                                     >
-                                        ♥ Додај во омилени
+                                        {isFavorite 
+                                            ? <><i className="bi bi-heart-fill"></i> Отстрани од омилени</>
+                                            : <><i className="bi bi-heart"></i> Додај во омилени</>
+                                        }
                                     </button>
                                 </div>
                             </div>

@@ -2,6 +2,8 @@ import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import authContext from '../../../contexts/authContext.js';
 import eventPostRepository from "../../../repository/eventPostRepository";
+import favoriteRepository from '../../../repository/favoriteRepository';
+import { toast } from 'react-toastify';
 
 const EventPostDetails = () => {
     const { id } = useParams();
@@ -10,12 +12,24 @@ const EventPostDetails = () => {
     const [eventPost, setEventPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isFavorite, setIsFavorite] = useState(false);
 
     useEffect(() => {
         const fetchEventPost = async () => {
             try {
                 const response = await eventPostRepository.findById(id);
                 setEventPost(response.data);
+                
+                // Check if this post is in user's favorites
+                if (user && user.sub) {
+                    try {
+                        const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+                        const favorites = favoritesResponse.data || [];
+                        setIsFavorite(favorites.some(fav => fav.postId === id || fav.postId === Number(id)));
+                    } catch (favError) {
+                        console.error('Error checking favorites status:', favError);
+                    }
+                }
             } catch (err) {
                 setError(err.message);
             } finally {
@@ -24,7 +38,7 @@ const EventPostDetails = () => {
         };
 
         fetchEventPost();
-    }, [id]);
+    }, [id, user]);
 
     const handleDelete = async () => {
         if (window.confirm('Дали сте сигурни дека сакате да го избришете настанот?')) {
@@ -167,12 +181,38 @@ const EventPostDetails = () => {
                                         </>
                                     )}
                                     <button
-                                        className="btn btn-outline-danger"
-                                        onClick={() => {
-                                            console.log('Adding to favorites:', eventPost.id);
+                                        className={`btn ${isFavorite ? 'btn-danger' : 'btn-outline-danger'}`}
+                                        onClick={async () => {
+                                            if (!user || !user.sub) {
+                                                toast.error('Мора да бидете најавени за да додадете во омилени');
+                                                return;
+                                            }
+                                            
+                                            try {
+                                                if (isFavorite) {
+                                                    // Find favorite ID and remove from favorites
+                                                    const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+                                                    const favorites = favoritesResponse.data || [];
+                                                    const existingFav = favorites.find(f => f.postId === eventPost.id || f.postId === Number(eventPost.id));
+                                                    
+                                                    if (existingFav) {
+                                                        await favoriteRepository.removeFavorite(user.sub, existingFav.id);
+                                                        setIsFavorite(false);
+                                                        toast.success('Отстрането од омилени');
+                                                    }
+                                                } else {
+                                                    // Add to favorites
+                                                    await favoriteRepository.addFavorite(user.sub, eventPost.id);
+                                                    setIsFavorite(true);
+                                                    toast.success('Додадено во омилени');
+                                                }
+                                            } catch (err) {
+                                                console.error('Error toggling favorite status:', err);
+                                                toast.error('Грешка при додавање/отстранување од омилени');
+                                            }
                                         }}
                                     >
-                                        ♥ Додаj во омилени
+                                        {isFavorite ? '♥ Отстрани од омилени' : '♥ Додај во омилени'}
                                     </button>
                                 </div>
                             </div>
