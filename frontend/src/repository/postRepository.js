@@ -1,23 +1,23 @@
 import axiosInstance from "../axios/axios";
 
 const postRepository = {
-    findAll: () => axiosInstance.get('/posts'),
+    findAll: () => axiosInstance.get('/api/posts'),
 
-    findById: (id) => axiosInstance.get(`/posts/${id}`),
+    findById: (id) => axiosInstance.get(`/api/posts/${id}`),
 
-    save: (post) => axiosInstance.post('/posts/add', post),
+    save: (post) => axiosInstance.post('/api/posts/add', post),
 
-    update: (id, post) => axiosInstance.put(`/posts/edit/${id}`, post),
+    update: (id, post) => axiosInstance.put(`/api/posts/edit/${id}`, post),
 
-    delete: (id) => axiosInstance.delete(`/posts/delete/${id}`),
+    delete: (id) => axiosInstance.delete(`/api/posts/delete/${id}`),
 
-    findByUsername: (username) => axiosInstance.get(`/posts/user/${username}`),
+    findByUsername: (username) => axiosInstance.get(`/api/posts/user/${username}`),
 
-    getMyPosts: () => axiosInstance.get('/posts/my-posts'),
+    getMyPosts: () => axiosInstance.get('/api/posts/my-posts'),
 
-    getLatest: () => axiosInstance.get('/posts/latest'),
+    getLatest: () => axiosInstance.get('/api/posts/latest'),
 
-    getLatestPerCategory: () => axiosInstance.get('/posts/latest-per-category')
+    getLatestPerCategory: () => axiosInstance.get('/api/posts/latest-per-category')
 };
 
 export default postRepository;

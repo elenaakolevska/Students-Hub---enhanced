@@ -24,6 +24,7 @@ import Home from './ui/pages/Home';
 import Chat from './ui/pages/Chat';
 import Login from './ui/pages/Login';
 import Register from './ui/pages/Register';
+import About from './ui/pages/About';
 
 
 function App() {
@@ -53,6 +54,7 @@ function App() {
         <Route path="/chat" element={<Chat />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
+        <Route path="/about" element={<About />} />
         <Route path="/event-posts" element={
           loading ? (
             <div className="container my-5 text-center">
