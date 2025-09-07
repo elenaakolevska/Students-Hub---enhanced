@@ -43,20 +43,43 @@ public class HousingPostController {
 
     @PutMapping("/edit/{id}")
     public ResponseEntity<DisplayHousingPostDto> update(@PathVariable Long id,
-                                                        @RequestBody CreateHousingPostDto createHousingPostDto) {
+                                                        @RequestBody CreateHousingPostDto createHousingPostDto,
+                                                        Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        var existingPost = housingPostApplicationService.findById(id);
+        if (existingPost.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (!existingPost.get().ownerUsername().equals(authentication.getName())) {
+            return ResponseEntity.status(403).build();
+        }
+
         return housingPostApplicationService.update(id, createHousingPostDto)
                 .map(housingPost -> ResponseEntity.ok().body(housingPost))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        if (housingPostApplicationService.findById(id).isPresent()) {
-            housingPostApplicationService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
+    public ResponseEntity<Void> deleteById(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        var existingPost = housingPostApplicationService.findById(id);
+        if (existingPost.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        if (!existingPost.get().ownerUsername().equals(authentication.getName())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        housingPostApplicationService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/municipality/{municipality}")

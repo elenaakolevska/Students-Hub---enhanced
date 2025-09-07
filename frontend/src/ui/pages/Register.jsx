@@ -12,7 +12,7 @@ import {
   CircularProgress,
 } from "@mui/material";
 import { useNavigate } from "react-router-dom";
-import { register as registerApi } from "../../repository/userRepository";
+import userRepository from "../../repository/userRepository";
 
 const initialFormData = {
   username: "",
@@ -57,10 +57,12 @@ const Register = () => {
     }
 
     try {
-      await registerApi({
+      await userRepository.register({
         username: formData.username,
         email: formData.email,
         password: formData.password,
+        name: formData.name || '',
+        surname: formData.surname || ''
       });
       setSuccess("Registration successful! Redirecting to login...");
       setTimeout(() => navigate("/login"), 2000);

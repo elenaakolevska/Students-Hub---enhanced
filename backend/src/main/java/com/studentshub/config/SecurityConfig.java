@@ -37,6 +37,8 @@ public class SecurityConfig {
             .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::sameOrigin))
             .authorizeHttpRequests(requests -> requests
                 .requestMatchers("/users/register", "/users/login", "/uploads/**", "/assets/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
+                .requestMatchers("/api/auth/check").permitAll()
+                .requestMatchers("/api/*/add*", "/api/*/edit/*", "/api/*/delete/*", "/api/favorites/**", "/api/chat/**").authenticated()
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll()

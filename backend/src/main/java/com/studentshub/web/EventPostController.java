@@ -44,20 +44,43 @@ public class EventPostController {
 
     @PutMapping("/edit/{id}")
     public ResponseEntity<DisplayEventPostDto> update(@PathVariable Long id,
-                                                      @RequestBody CreateEventPostDto createEventPostDto) {
+                                                      @RequestBody CreateEventPostDto createEventPostDto,
+                                                      Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        var existingPost = eventPostApplicationService.findById(id);
+        if (existingPost.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (!existingPost.get().ownerUsername().equals(authentication.getName())) {
+            return ResponseEntity.status(403).build();
+        }
+
         return eventPostApplicationService.update(id, createEventPostDto)
                 .map(eventPost -> ResponseEntity.ok().body(eventPost))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        if (eventPostApplicationService.findById(id).isPresent()) {
-            eventPostApplicationService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
+    public ResponseEntity<Void> deleteById(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        var existingPost = eventPostApplicationService.findById(id);
+        if (existingPost.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        if (!existingPost.get().ownerUsername().equals(authentication.getName())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        eventPostApplicationService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/category/{category}")

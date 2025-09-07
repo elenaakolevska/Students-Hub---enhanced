@@ -1,148 +1,148 @@
-import React, { useState } from "react";
-import {
-  Box,
-  TextField,
-  Button,
-  Typography,
-  Container,
-  Paper,
-  Alert,
-  Divider,
-  Fade,
-  CircularProgress,
-} from "@mui/material";
-import userRepository from "../../repository/userRepository";
-import { useNavigate } from "react-router";
-import useAuth from "../../hooks/useAuth";
-
-const initialFormData = {
-  username: "",
-  password: "",
-};
+import React, { useState, useContext } from "react";
+import { useNavigate } from "react-router-dom";
+import authContext from "../../contexts/authContext";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useContext(authContext);
 
-  const [formData, setFormData] = useState(initialFormData);
+  const [formData, setFormData] = useState({
+    username: "",
+    password: "",
+  });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+
+  React.useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    }
+  }, [isAuthenticated, navigate]);
 
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
 
-    userRepository
-      .login(formData)
-      .then((response) => {
-        if (response.data && response.data.token) {
-          login(response.data.token);
-          navigate("/");
-        } else {
-          setError("No token received. Please try again.");
-        }
-      })
-      .catch(() => {
-        setError("Invalid credentials. Please check your username/password.");
-      })
-      .finally(() => {
-        setLoading(false);
-      });
+    try {
+      await login(formData);
+      toast.success("Успешно се најавивте!");
+      navigate("/");
+    } catch (error) {
+      console.error("Login error:", error);
+      const errorMessage =
+        error.response?.data?.message ||
+        error.message ||
+        "Погрешни податоци. Проверете го корисничкото име и лозинката.";
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
+    <div
+      className="min-vh-100 d-flex align-items-center justify-content-center"
+      style={{
         background: "linear-gradient(135deg, #ece9e6, #ffffff)",
       }}
     >
-      <Container maxWidth="xs">
-        <Fade in timeout={600}>
-          <Paper
-            elevation={6}
-            sx={{
-              p: 4,
-              borderRadius: 4,
-              background: "linear-gradient(145deg, #fdfbfb, #ebedee)",
-            }}
-          >
-            <Typography variant="h5" align="center" gutterBottom fontWeight="bold">
-              Welcome Back
-            </Typography>
-            <Typography
-              variant="body2"
-              align="center"
-              color="text.secondary"
-              mb={2}
+      <div className="container">
+        <div className="row justify-content-center">
+          <div className="col-md-6 col-lg-4">
+            <div
+              className="card shadow-lg border-0"
+              style={{
+                borderRadius: "1rem",
+                background: "linear-gradient(145deg, #fdfbfb, #ebedee)",
+              }}
             >
-              Please login to continue
-            </Typography>
+              <div className="card-body p-5">
+                <h2 className="text-center mb-1 fw-bold">Добредојдовте</h2>
+                <p className="text-center text-muted mb-4">
+                  Најавете се за да продолжите
+                </p>
 
-            {error && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                {error}
-              </Alert>
-            )}
+                {error && (
+                  <div className="alert alert-danger" role="alert">
+                    {error}
+                  </div>
+                )}
 
-            <Box component="form" onSubmit={handleSubmit}>
-              <TextField
-                fullWidth
-                label="Username"
-                name="username"
-                margin="normal"
-                required
-                value={formData.username}
-                onChange={handleChange}
-                disabled={loading}
-              />
-              <TextField
-                fullWidth
-                label="Password"
-                name="password"
-                type="password"
-                margin="normal"
-                required
-                value={formData.password}
-                onChange={handleChange}
-                disabled={loading}
-              />
+                <form onSubmit={handleSubmit}>
+                  <div className="mb-3">
+                    <label htmlFor="username" className="form-label">
+                      Корисничко име
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control"
+                      id="username"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
 
-              <Button
-                fullWidth
-                variant="contained"
-                type="submit"
-                sx={{ mt: 3, py: 1.2, borderRadius: 3, textTransform: "none" }}
-                disabled={loading}
-              >
-                {loading ? <CircularProgress size={24} color="inherit" /> : "Login"}
-              </Button>
+                  <div className="mb-4">
+                    <label htmlFor="password" className="form-label">
+                      Лозинка
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required
+                      disabled={loading}
+                    />
+                  </div>
 
-              <Divider sx={{ my: 3 }}>or</Divider>
+                  <button
+                    type="submit"
+                    className="btn btn-primary w-100 mb-3"
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span
+                          className="spinner-border spinner-border-sm me-2"
+                          role="status"
+                          aria-hidden="true"
+                        ></span>
+                        Се најавувате...
+                      </>
+                    ) : (
+                      "Најавете се"
+                    )}
+                  </button>
+                </form>
 
-              <Button
-                fullWidth
-                variant="outlined"
-                sx={{ py: 1.2, borderRadius: 3, textTransform: "none" }}
-                onClick={() => navigate("/register")}
-                disabled={loading}
-              >
-                Create an Account
-              </Button>
-            </Box>
-          </Paper>
-        </Fade>
-      </Container>
-    </Box>
+                <hr />
+
+                <p className="text-center mb-0">
+                  Немате профил?{" "}
+                  <a href="/register" className="text-decoration-none">
+                    Регистрирајте се
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

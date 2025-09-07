@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import authContext from "../contexts/authContext";
 
 const Navigation = () => {
-    const { user, logout } = useContext(authContext);
+    const { user, isAuthenticated, logout } = useContext(authContext);
     const navigate = useNavigate();
     const location = useLocation();
     const [isDropdownOpen, setIsDropdownOpen] = useState(false);
@@ -11,18 +11,15 @@ const Navigation = () => {
 
     const handleLogout = () => {
         logout();
-        navigate('/login');
+        navigate('/');
     };
 
-    // Check if a link is active
     const isActive = (path) => location.pathname === path ? 'active' : '';
 
-    // Toggle dropdown
     const toggleDropdown = () => {
         setIsDropdownOpen(!isDropdownOpen);
     };
 
-    // Close dropdown when clicking outside
     useEffect(() => {
         const handleClickOutside = (event) => {
             if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -56,89 +53,111 @@ const Navigation = () => {
                 </button>
 
                 <div className="collapse navbar-collapse" id="navbarNav">
-                    {/* Main navigation links */}
-                    <ul className="navbar-nav me-auto">
+                    <ul className="navbar-nav me-auto mb-2 mb-lg-0">
                         <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/event-posts')}`} to="/event-posts">
+                            <Link className={`nav-link ${isActive('/')}`} to="/">
+                                <i className="bi bi-house-door me-1"></i>Дома
+                            </Link>
+                        </li>
+
+                        <li className="nav-item">
+                            <Link className={`nav-link ${isActive('/materials')}`} to="/materials">
+                                <i className="bi bi-file-earmark-text me-1"></i>Материјали
+                            </Link>
+                        </li>
+
+                        <li className="nav-item">
+                            <Link className={`nav-link ${isActive('/events')}`} to="/events">
                                 <i className="bi bi-calendar-event me-1"></i>Настани
                             </Link>
                         </li>
+
                         <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/housing-posts')}`} to="/housing-posts">
-                                <i className="bi bi-house me-1"></i>Сместување
+                            <Link className={`nav-link ${isActive('/tutors')}`} to="/tutors">
+                                <i className="bi bi-mortarboard me-1"></i>Тутори
                             </Link>
                         </li>
+
                         <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/internship-posts')}`} to="/internship-posts">
-                                <i className="bi bi-briefcase me-1"></i>Пракса
+                            <Link className={`nav-link ${isActive('/housing')}`} to="/housing">
+                                <i className="bi bi-house-door me-1"></i>Домување
                             </Link>
                         </li>
+
                         <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/transport-posts')}`} to="/transport-posts">
+                            <Link className={`nav-link ${isActive('/internships')}`} to="/internships">
+                                <i className="bi bi-briefcase me-1"></i>Пракси
+                            </Link>
+                        </li>
+
+                        <li className="nav-item">
+                            <Link className={`nav-link ${isActive('/transport')}`} to="/transport">
                                 <i className="bi bi-car-front me-1"></i>Превоз
                             </Link>
                         </li>
+
+                        {isAuthenticated && (
+                            <>
+                                <li className="nav-item">
+                                    <Link className={`nav-link ${isActive('/chat')}`} to="/chat">
+                                        <i className="bi bi-chat-dots me-1"></i>Чет
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className={`nav-link ${isActive('/favorites')}`} to="/favorites">
+                                        <i className="bi bi-heart me-1"></i>Омилени
+                                    </Link>
+                                </li>
+                            </>
+                        )}
+
                         <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/material-posts')}`} to="/material-posts">
-                                <i className="bi bi-book me-1"></i>Материјали
-                            </Link>
-                        </li>
-                        <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/tutor-posts')}`} to="/tutor-posts">
-                                <i className="bi bi-person-video3 me-1"></i>Тутори
+                            <Link className={`nav-link ${isActive('/about')}`} to="/about">
+                                <i className="bi bi-info-circle me-1"></i>За нас
                             </Link>
                         </li>
                     </ul>
 
-                    {/* User-related links */}
                     <ul className="navbar-nav">
-                        {user ? (
-                            <>
-                                <li className="nav-item dropdown" ref={dropdownRef}>
-                                    <a 
-                                        className={`nav-link dropdown-toggle ${isDropdownOpen ? 'show' : ''}`} 
-                                        href="#" 
-                                        onClick={(e) => {
-                                            e.preventDefault();
-                                            toggleDropdown();
-                                        }}
-                                    >
-                                        <i className="bi bi-person-circle me-1"></i>
-                                        {user.username || 'Корисник'}
-                                    </a>
-                                    <ul className={`dropdown-menu dropdown-menu-end ${isDropdownOpen ? 'show' : ''}`} style={{
-                                        display: isDropdownOpen ? 'block' : 'none',
-                                        position: 'absolute'
-                                    }}>
-                                        <li>
-                                            <Link className="dropdown-item" to="/my-posts" onClick={() => setIsDropdownOpen(false)}>
-                                                <i className="bi bi-file-earmark-text me-2"></i>Мои објави
-                                            </Link>
-                                        </li>
-                                        <li>
-                                            <Link className="dropdown-item" to="/favorites" onClick={() => setIsDropdownOpen(false)}>
-                                                <i className="bi bi-star me-2"></i>Омилени
-                                            </Link>
-                                        </li>
-                                        <li><hr className="dropdown-divider" /></li>
-                                        <li>
-                                            <button className="dropdown-item text-danger" onClick={handleLogout}>
-                                                <i className="bi bi-box-arrow-right me-2"></i>Одјави се
-                                            </button>
-                                        </li>
-                                    </ul>
-                                </li>
-                                <li className="nav-item">
-                                    <Link className={`nav-link ${isActive('/chat')}`} to="/chat">
-                                        <i className="bi bi-chat-dots-fill me-1"></i>Чат
-                                    </Link>
-                                </li>
-                            </>
+                        {isAuthenticated ? (
+                            <li className="nav-item dropdown" ref={dropdownRef}>
+                                <button
+                                    className="nav-link dropdown-toggle border-0 bg-transparent text-white"
+                                    onClick={toggleDropdown}
+                                    aria-expanded={isDropdownOpen}
+                                >
+                                    <i className="bi bi-person-circle me-1"></i>
+                                    {user?.sub || user?.username || 'Корисник'}
+                                </button>
+                                <ul className={`dropdown-menu dropdown-menu-end ${isDropdownOpen ? 'show' : ''}`}>
+                                    <li>
+                                        <Link className="dropdown-item" to="/my-posts">
+                                            <i className="bi bi-file-post me-2"></i>Мои објави
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to="/favorites">
+                                            <i className="bi bi-heart me-2"></i>Омилени
+                                        </Link>
+                                    </li>
+                                    <li><hr className="dropdown-divider" /></li>
+                                    <li>
+                                        <button className="dropdown-item" onClick={handleLogout}>
+                                            <i className="bi bi-box-arrow-right me-2"></i>Одјавете се
+                                        </button>
+                                    </li>
+                                </ul>
+                            </li>
                         ) : (
                             <>
                                 <li className="nav-item">
-                                    <Link className="btn btn-outline-light ms-2" to="/login">
-                                        <i className="bi bi-box-arrow-in-right me-1"></i>Најави се
+                                    <Link className="nav-link" to="/login">
+                                        <i className="bi bi-box-arrow-in-right me-1"></i>Најавете се
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link" to="/register">
+                                        <i className="bi bi-person-plus me-1"></i>Регистрирајте се
                                     </Link>
                                 </li>
                             </>

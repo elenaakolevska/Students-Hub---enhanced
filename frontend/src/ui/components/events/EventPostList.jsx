@@ -1,26 +1,22 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
-import useEventPosts from '../../../hooks/useEventPosts';
+import { Link, useNavigate } from 'react-router-dom';
+import useEventPosts from '../../../hooks/useEventPosts.js';
 import authContext from '../../../contexts/authContext';
 import favoriteRepository from '../../../repository/favoriteRepository';
 import { toast } from 'react-toastify';
 
 const EventPostList = () => {
-    const { user } = useContext(authContext);
-    const [selectedCategory, setSelectedCategory] = useState('');
-    const { eventPosts, loading, error } = useEventPosts(selectedCategory);
+    const [selectedMunicipality, setSelectedMunicipality] = useState('');
+    const { eventPosts, municipalities, loading, error } = useEventPosts(selectedMunicipality);
+    const { user, isAuthenticated } = useContext(authContext);
+    const navigate = useNavigate();
     const [favorites, setFavorites] = useState([]);
 
-    const eventCategories = [
-        'WORKSHOP', 'DISCUSSION', 'PARTY', 'HACKATHON', 'COMPETITION'
-    ];
-
-    // Load user's favorites when component mounts or user changes
     useEffect(() => {
         const fetchFavorites = async () => {
-            if (user && user.sub) {
+            if (isAuthenticated) {
                 try {
-                    const response = await favoriteRepository.getMyFavorites(user.sub);
+                    const response = await favoriteRepository.getMyFavorites();
                     setFavorites(response.data || []);
                 } catch (err) {
                     console.error('Error fetching favorites:', err);
@@ -29,10 +25,10 @@ const EventPostList = () => {
         };
         
         fetchFavorites();
-    }, [user]);
-    
-    const handleCategoryChange = (e) => {
-        setSelectedCategory(e.target.value);
+    }, [isAuthenticated]);
+
+    const handleMunicipalityChange = (e) => {
+        setSelectedMunicipality(e.target.value);
     };
 
     const isPostFavorite = (postId) => {
@@ -42,29 +38,27 @@ const EventPostList = () => {
     };
 
     const toggleFavorite = async (postId) => {
-        if (!user || !user.sub) {
+        if (!isAuthenticated) {
             toast.error('Мора да бидете најавени за да додадете во омилени');
+            navigate('/login');
             return;
         }
         
         const isFavorite = isPostFavorite(postId);
-        const username = user.sub;
-        
+
         try {
             if (isFavorite) {
-                // Find and remove from favorites
-                const existingFav = favorites.find(f => 
+                const existingFav = favorites.find(f =>
                     f.postId === postId || f.postId === Number(postId)
                 );
                 
                 if (existingFav) {
-                    await favoriteRepository.removeFavorite(username, existingFav.id);
+                    await favoriteRepository.removeFavorite(existingFav.id);
                     setFavorites(favorites.filter(f => f.id !== existingFav.id));
                     toast.success('Отстрането од омилени');
                 }
             } else {
-                // Add to favorites
-                const response = await favoriteRepository.addFavorite(username, postId);
+                const response = await favoriteRepository.addFavorite(postId);
                 setFavorites([...favorites, response.data]);
                 toast.success('Додадено во омилени');
             }
@@ -152,12 +146,12 @@ const EventPostList = () => {
                         name="category"
                         id="category"
                         className="form-select"
-                        value={selectedCategory}
-                        onChange={handleCategoryChange}
+                        value={selectedMunicipality}
+                        onChange={handleMunicipalityChange}
                     >
                         <option value="">Сите категории</option>
-                        {eventCategories.map(category => (
-                            <option key={category} value={category}>{category}</option>
+                        {municipalities.map(municipality => (
+                            <option key={municipality} value={municipality}>{municipality}</option>
                         ))}
                     </select>
                 </div>
@@ -204,12 +198,14 @@ const EventPostList = () => {
                                         Види детали
                                     </Link>
 
-                                    <button
-                                        onClick={() => toggleFavorite(post.id)}
-                                        className={`btn w-100 mt-2 ${isPostFavorite(post.id) ? 'btn-danger' : 'btn-outline-danger'}`}
-                                    >
-                                        ♥ {isPostFavorite(post.id) ? 'Отстрани од омилени' : 'Додај во омилени'}
-                                    </button>
+                                    {isAuthenticated && (
+                                        <button
+                                            onClick={() => toggleFavorite(post.id)}
+                                            className={`btn w-100 mt-2 ${isPostFavorite(post.id) ? 'btn-danger' : 'btn-outline-danger'}`}
+                                        >
+                                            ♥ {isPostFavorite(post.id) ? 'Отстрани од омилени' : 'Додај во омилени'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>

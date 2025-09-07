@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import useMaterialPosts from '../../../hooks/useMaterialPosts.js';
 import materialPostRepository from '../../../repository/materialPostRepository.js';
 import authContext from '../../../contexts/authContext';
@@ -9,15 +9,15 @@ import { toast } from 'react-toastify';
 const MaterialPostList = () => {
     const [selectedSubject, setSelectedSubject] = useState('');
     const { materialPosts, subjects, loading, error } = useMaterialPosts(selectedSubject);
-    const { user } = useContext(authContext);
+    const { isAuthenticated } = useContext(authContext);
+    const navigate = useNavigate();
     const [favorites, setFavorites] = useState([]);
 
-    // Load user's favorites when component mounts or user changes
     useEffect(() => {
         const fetchFavorites = async () => {
-            if (user && user.sub) {
+            if (isAuthenticated) {
                 try {
-                    const response = await favoriteRepository.getMyFavorites(user.sub);
+                    const response = await favoriteRepository.getMyFavorites();
                     setFavorites(response.data || []);
                 } catch (err) {
                     console.error('Error fetching favorites:', err);
@@ -26,8 +26,8 @@ const MaterialPostList = () => {
         };
         
         fetchFavorites();
-    }, [user]);
-    
+    }, [isAuthenticated]);
+
     const handleSubjectChange = (e) => {
         setSelectedSubject(e.target.value);
     };
@@ -39,29 +39,27 @@ const MaterialPostList = () => {
     };
 
     const toggleFavorite = async (postId) => {
-        if (!user || !user.sub) {
+        if (!isAuthenticated) {
             toast.error('Мора да бидете најавени за да додадете во омилени');
+            navigate('/login');
             return;
         }
         
         const isFavorite = isPostFavorite(postId);
-        const username = user.sub;
-        
+
         try {
             if (isFavorite) {
-                // Find and remove from favorites
-                const existingFav = favorites.find(f => 
+                const existingFav = favorites.find(f =>
                     f.postId === postId || f.postId === Number(postId)
                 );
                 
                 if (existingFav) {
-                    await favoriteRepository.removeFavorite(username, existingFav.id);
+                    await favoriteRepository.removeFavorite(existingFav.id);
                     setFavorites(favorites.filter(f => f.id !== existingFav.id));
                     toast.success('Отстрането од омилени');
                 }
             } else {
-                // Add to favorites
-                const response = await favoriteRepository.addFavorite(username, postId);
+                const response = await favoriteRepository.addFavorite(postId);
                 setFavorites([...favorites, response.data]);
                 toast.success('Додадено во омилени');
             }
@@ -77,7 +75,7 @@ const MaterialPostList = () => {
             const url = window.URL.createObjectURL(new Blob([response.data]));
             const link = document.createElement('a');
             link.href = url;
-            link.setAttribute('download', `material_${postId}`);
+            link.setAttribute('download', 'material');
             document.body.appendChild(link);
             link.click();
             link.remove();
@@ -91,7 +89,7 @@ const MaterialPostList = () => {
             <div className="container my-5">
                 <div className="text-center">
                     <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Вчитување...</span>
+                        <span className="visually-hidden">Вчитување материјали...</span>
                     </div>
                 </div>
             </div>
@@ -133,7 +131,7 @@ const MaterialPostList = () => {
                         transform: 'translateX(-50%)',
                         width: '60px',
                         height: '4px',
-                        background: '#fd7e14',
+                        background: '#dc3545',
                         borderRadius: '2px'
                     }}></div>
                 </h2>
@@ -145,7 +143,7 @@ const MaterialPostList = () => {
                     marginLeft: 'auto',
                     marginRight: 'auto'
                 }}>
-                    Прелистај и преземи корисни материјали споделени од студентите
+                    Пронајдете едукативни материјали и ресурси за вашите студии
                 </p>
             </div>
 
@@ -168,8 +166,8 @@ const MaterialPostList = () => {
                         onChange={handleSubjectChange}
                     >
                         <option value="">Сите предмети</option>
-                        {subjects.map(sub => (
-                            <option key={sub} value={sub}>{sub}</option>
+                        {subjects.map(subject => (
+                            <option key={subject} value={subject}>{subject}</option>
                         ))}
                     </select>
                 </div>
@@ -187,9 +185,10 @@ const MaterialPostList = () => {
                                 <div className="card-body d-flex flex-column">
                                     <h5 className="card-title">{post.title}</h5>
                                     <p className="card-text"><strong>Предмет:</strong> <span>{post.subject}</span></p>
-                                    <p className="card-text"><strong>Категорија:</strong> <span>{post.category}</span></p>
-                                    <p className="card-text"><strong>Оцена:</strong> <span>{post.rating}/5</span></p>
-                                    <p className="card-text"><strong>Опис:</strong> <span>{post.description}</span></p>
+                                    <p className="card-text"><strong>Оцена:</strong> <span>{post.rating}</span></p>
+                                    <p className="card-text"><strong>Опис:</strong> <span>{post.description?.length > 100
+                                      ? `${post.description.substring(0, 100)}...`
+                                      : post.description}</span></p>
 
                                     {post.tags && post.tags.length > 0 && (
                                         <div className="mb-2">
@@ -206,19 +205,23 @@ const MaterialPostList = () => {
                                         Види детали
                                     </Link>
 
-                                    <button
-                                        onClick={() => handleDownload(post.id)}
-                                        className="btn btn-outline-success btn-sm mt-2"
-                                    >
-                                        Преземи
-                                    </button>
+                                    {post.originalFileName && (
+                                        <button
+                                            onClick={() => handleDownload(post.id)}
+                                            className="btn btn-success w-100 mt-2"
+                                        >
+                                            📥 Преземи фајл
+                                        </button>
+                                    )}
 
-                                    <button
-                                        onClick={() => toggleFavorite(post.id)}
-                                        className={`btn w-100 mt-2 ${isPostFavorite(post.id) ? 'btn-danger' : 'btn-outline-danger'}`}
-                                    >
-                                        ♥ {isPostFavorite(post.id) ? 'Отстрани од омилени' : 'Додај во омилени'}
-                                    </button>
+                                    {isAuthenticated && (
+                                        <button
+                                            onClick={() => toggleFavorite(post.id)}
+                                            className={`btn w-100 mt-2 ${isPostFavorite(post.id) ? 'btn-danger' : 'btn-outline-danger'}`}
+                                        >
+                                            ♥ {isPostFavorite(post.id) ? 'Отстрани од омилени' : 'Додај во омилени'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>

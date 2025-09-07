@@ -43,20 +43,43 @@ public class InternshipPostController {
 
     @PutMapping("/edit/{id}")
     public ResponseEntity<DisplayInternshipPostDto> update(@PathVariable Long id,
-                                                           @RequestBody CreateInternshipPostDto createInternshipPostDto) {
+                                                           @RequestBody CreateInternshipPostDto createInternshipPostDto,
+                                                           Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        var existingPost = internshipPostApplicationService.findById(id);
+        if (existingPost.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (!existingPost.get().ownerUsername().equals(authentication.getName())) {
+            return ResponseEntity.status(403).build();
+        }
+
         return internshipPostApplicationService.update(id, createInternshipPostDto)
                 .map(internshipPost -> ResponseEntity.ok().body(internshipPost))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        if (internshipPostApplicationService.findById(id).isPresent()) {
-            internshipPostApplicationService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
+    public ResponseEntity<Void> deleteById(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        var existingPost = internshipPostApplicationService.findById(id);
+        if (existingPost.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        if (!existingPost.get().ownerUsername().equals(authentication.getName())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        internshipPostApplicationService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/faculty/{faculty}")

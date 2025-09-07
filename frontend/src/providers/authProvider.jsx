@@ -1,70 +1,92 @@
-import React, {useEffect, useState} from 'react';
-import AuthContext from "../contexts/authContext.js";
+import React, { useState, useEffect } from 'react';
+import authContext from '../contexts/authContext';
+import authService from '../services/authService';
 
-const decode = (jwtToken) => {
-    try {
-        return JSON.parse(atob(jwtToken.split(".")[1]));
-    } catch (error) {
-        console.log(error);
-        return null;
-    }
-};
+const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [loading, setLoading] = useState(true);
 
-const AuthProvider = ({children}) => {
-    const [state, setState] = useState({
-        "user": null,
-        "loading": true
-    });
+    useEffect(() => {
+        checkAuth();
+    }, []);
 
-    const login = (jwtToken) => {
-        const payload = decode(jwtToken);
-        if (payload) {
-            localStorage.setItem("token", jwtToken);
-            setState({
-                "user": payload,
-                "loading": false,
-            });
+    const checkAuth = async () => {
+        try {
+            setLoading(true);
+            const token = authService.getToken();
+
+            if (!token) {
+                setIsAuthenticated(false);
+                setUser(null);
+                setLoading(false);
+                return;
+            }
+
+            if (!authService.isAuthenticated()) {
+                authService.logout();
+                setIsAuthenticated(false);
+                setUser(null);
+                setLoading(false);
+                return;
+            }
+
+            const currentUser = authService.getCurrentUser();
+            if (currentUser) {
+                setUser(currentUser);
+                setIsAuthenticated(true);
+            } else {
+                const authCheck = await authService.checkAuth();
+                if (authCheck.authenticated) {
+                    setUser({ sub: authCheck.username });
+                    setIsAuthenticated(true);
+                } else {
+                    authService.logout();
+                    setIsAuthenticated(false);
+                    setUser(null);
+                }
+            }
+        } catch (error) {
+            console.error('Auth check failed:', error);
+            authService.logout();
+            setIsAuthenticated(false);
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const login = async (credentials) => {
+        try {
+            const response = await authService.login(credentials);
+            setUser(response.user || { sub: response.username });
+            setIsAuthenticated(true);
+            return response;
+        } catch (error) {
+            console.error('Login failed:', error);
+            throw error;
         }
     };
 
     const logout = () => {
-        const jwtToken = localStorage.getItem("token");
-        if (jwtToken) {
-            localStorage.removeItem("token");
-            setState({
-                "user": null,
-                "loading": false,
-            });
-        }
+        authService.logout();
+        setUser(null);
+        setIsAuthenticated(false);
     };
 
-    useEffect(() => {
-        const jwtToken = localStorage.getItem("token");
-        if (jwtToken) {
-            const payload = decode(jwtToken);
-            if (payload) {
-                setState({
-                    "user": payload,
-                    "loading": false,
-                });
-            } else {
-                setState({
-                    "user": null,
-                    "loading": false,
-                });
-            }
-        } else {
-            setState({
-                "user": null,
-                "loading": false,
-            });
-        }
-    }, []);
+    const value = {
+        user,
+        isAuthenticated,
+        loading,
+        login,
+        logout,
+        checkAuth
+    };
 
     return (
-        <AuthContext.Provider value={{login, logout, ...state, isLoggedIn: !!state.user}}>
+        <authContext.Provider value={value}>
             {children}
-        </AuthContext.Provider>
+        </authContext.Provider>
     );
 };
 

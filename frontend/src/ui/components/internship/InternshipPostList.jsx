@@ -8,15 +8,14 @@ import { toast } from 'react-toastify';
 const InternshipPostList = () => {
     const [facultyFilter, setFacultyFilter] = useState('');
     const { internshipPosts, loading, error } = useInternshipPosts(facultyFilter);
-    const { user } = useContext(authContext);
+    const { user, isAuthenticated } = useContext(authContext);
     const [favorites, setFavorites] = useState([]);
 
-    // Load user's favorites when component mounts or user changes
     useEffect(() => {
         const fetchFavorites = async () => {
-            if (user && user.sub) {
+            if (isAuthenticated) {
                 try {
-                    const response = await favoriteRepository.getMyFavorites(user.sub);
+                    const response = await favoriteRepository.getMyFavorites();
                     setFavorites(response.data || []);
                 } catch (err) {
                     console.error('Error fetching favorites:', err);
@@ -25,8 +24,8 @@ const InternshipPostList = () => {
         };
         
         fetchFavorites();
-    }, [user]);
-    
+    }, [isAuthenticated]);
+
     const handleFacultyChange = (e) => {
         setFacultyFilter(e.target.value);
     };
@@ -38,29 +37,26 @@ const InternshipPostList = () => {
     };
 
     const toggleFavorite = async (postId) => {
-        if (!user || !user.sub) {
+        if (!isAuthenticated) {
             toast.error('Мора да бидете најавени за да додадете во омилени');
             return;
         }
         
         const isFavorite = isPostFavorite(postId);
-        const username = user.sub;
-        
+
         try {
             if (isFavorite) {
-                // Find and remove from favorites
-                const existingFav = favorites.find(f => 
+                const existingFav = favorites.find(f =>
                     f.postId === postId || f.postId === Number(postId)
                 );
                 
                 if (existingFav) {
-                    await favoriteRepository.removeFavorite(username, existingFav.id);
+                    await favoriteRepository.removeFavorite(existingFav.id);
                     setFavorites(favorites.filter(f => f.id !== existingFav.id));
                     toast.success('Отстрането од омилени');
                 }
             } else {
-                // Add to favorites
-                const response = await favoriteRepository.addFavorite(username, postId);
+                const response = await favoriteRepository.addFavorite(postId);
                 setFavorites([...favorites, response.data]);
                 toast.success('Додадено во омилени');
             }
@@ -201,12 +197,14 @@ const InternshipPostList = () => {
                                         Види детали
                                     </Link>
 
-                                    <button
-                                        onClick={() => toggleFavorite(post.id)}
-                                        className={`btn w-100 mt-2 ${isPostFavorite(post.id) ? 'btn-danger' : 'btn-outline-danger'}`}
-                                    >
-                                        ♥ {isPostFavorite(post.id) ? 'Отстрани од омилени' : 'Додај во омилени'}
-                                    </button>
+                                    {isAuthenticated && (
+                                        <button
+                                            className={`btn w-100 mt-2 ${isPostFavorite(post.id) ? 'btn-danger' : 'btn-outline-danger'}`}
+                                            onClick={() => toggleFavorite(post.id)}
+                                        >
+                                            ♥ {isPostFavorite(post.id) ? 'Отстрани од омилени' : 'Додај во омилени'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
