@@ -14,7 +14,9 @@ public record DisplayHousingPostDto(
         Integer price,
         List<String> images,
         boolean isFound,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String ownerUsername,
+        Long ownerId
 ) {
     public static DisplayHousingPostDto from(HousingPost post) {
         return new DisplayHousingPostDto(
@@ -26,7 +28,9 @@ public record DisplayHousingPostDto(
                 post.getPrice(),
                 post.getImages(),
                 post.isFound(),
-                post.getCreatedAt()
+                post.getCreatedAt(),
+                post.getOwner() != null ? post.getOwner().getUsername() : null,
+                post.getOwner() != null ? post.getOwner().getId() : null
         );
     }
 

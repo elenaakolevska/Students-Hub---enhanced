@@ -42,6 +42,36 @@ const TransportPostDetails = () => {
         fetchPost();
     }, [id, user]);
     
+    const handleDelete = async () => {
+        if (window.confirm('Дали сте сигурни дека сакате да го избришете транспортот?')) {
+            try {
+                await transportPostRepository.delete(id);
+                navigate('/transport-posts');
+            } catch (err) {
+                console.error('Error deleting transport post:', err);
+            }
+        }
+    };
+
+    const handleChatWithCreator = async () => {
+        if (!user) {
+            toast.error('Мора да бидете најавени за да започнете разговор');
+            return;
+        }
+
+        if (user.username === post.ownerUsername) {
+            toast.info('Не можете да разговарате со себе');
+            return;
+        }
+
+        try {
+            navigate(`/chat/${post.ownerUsername}`);
+        } catch (err) {
+            toast.error('Грешка при започнување на разговор');
+            console.error('Error starting chat:', err);
+        }
+    };
+
     const toggleFavorite = async () => {
         if (!user || !user.sub) {
             toast.error('Мора да бидете најавени за да додадете во омилени');
@@ -50,20 +80,16 @@ const TransportPostDetails = () => {
         
         try {
             if (isFavorite) {
-                // Find the favorite ID
                 const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
                 const favorites = favoritesResponse.data || [];
-                const favorite = favorites.find(fav => 
-                    fav.postId === id || fav.postId === Number(id)
-                );
-                
+                const favorite = favorites.find(fav => fav.postId === id || fav.postId === Number(id));
+
                 if (favorite) {
                     await favoriteRepository.removeFavorite(user.sub, favorite.id);
                     setIsFavorite(false);
                     toast.success('Отстрането од омилени');
                 }
             } else {
-                // Add to favorites
                 await favoriteRepository.addFavorite(user.sub, id);
                 setIsFavorite(true);
                 toast.success('Додадено во омилени');
@@ -71,17 +97,6 @@ const TransportPostDetails = () => {
         } catch (err) {
             toast.error('Грешка при ажурирање на омилени');
             console.error('Error updating favorites:', err);
-        }
-    };
-
-    const handleDelete = async () => {
-        if (window.confirm('Дали сте сигурни дека сакате да го избришете превозот?')) {
-            try {
-                await transportPostRepository.delete(id);
-                navigate('/transport-posts');
-            } catch (err) {
-                console.error('Error deleting transport post:', err);
-            }
         }
     };
 
@@ -134,35 +149,47 @@ const TransportPostDetails = () => {
                         <div className="card-body">
                             <div className="row mb-4">
                                 <div className="col-md-6">
-                                    <h5 className="text-muted">Детали за превоз</h5>
+                                    <h5 className="text-muted">Детали за транспорт</h5>
                                     <p className="mb-2">
-                                        <strong>Провајдер:</strong> <span>{post.providerName}</span>
+                                        <strong>Од:</strong> <span>{post.fromLocation}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Од:</strong> <span>{post.locationFrom}</span>
+                                        <strong>До:</strong> <span>{post.toLocation}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>До:</strong> <span>{post.locationTo}</span>
+                                        <strong>Датум:</strong> <span>{new Date(post.departureDate).toLocaleDateString('mk-MK')}</span>
+                                    </p>
+                                    <p className="mb-2">
+                                        <strong>Време:</strong> <span>{post.departureTime}</span>
                                     </p>
                                     <p className="mb-2">
                                         <strong>Цена:</strong> <span>{post.price} ден.</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Време на поаѓање:</strong>
-                                        <span>
-                                            {post.departureDatetime ?
-                                                new Date(post.departureDatetime).toLocaleString('mk-MK') :
-                                                'Нема податок'
-                                            }
-                                        </span>
+                                        <strong>Достапни места:</strong> <span>{post.availableSeats}</span>
+                                    </p>
+                                </div>
+                                <div className="col-md-6">
+                                    <h5 className="text-muted">Информации за авторот</h5>
+                                    <p className="mb-2">
+                                        <strong>Создал:</strong> <span>{post.ownerUsername}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Контакт:</strong> <span>{post.contactInfo}</span>
+                                        <strong>Создадено:</strong> <span>{new Date(post.createdAt).toLocaleDateString('mk-MK', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}</span>
                                     </p>
-                                    {post.category && (
-                                        <p className="mb-2">
-                                            <strong>Категорија:</strong> <span>{post.category}</span>
-                                        </p>
+                                    {user && user.username !== post.ownerUsername && (
+                                        <button
+                                            onClick={handleChatWithCreator}
+                                            className="btn btn-success btn-sm"
+                                        >
+                                            💬 Разговарај со {post.ownerUsername}
+                                        </button>
                                     )}
                                 </div>
                             </div>
@@ -172,19 +199,32 @@ const TransportPostDetails = () => {
                                 <p className="lead">{post.description}</p>
                             </div>
 
-                            <div className="mb-4">
-                                <h5 className="text-muted">Информации за постот</h5>
-                                {post.createdAt && (
-                                    <p className="mb-1">
-                                        <strong>Создадено:</strong> {new Date(post.createdAt).toLocaleDateString('mk-MK')}
+                            {post.tags && post.tags.length > 0 && (
+                                <div className="mb-4">
+                                    <h5 className="text-muted">Тагови</h5>
+                                    <div>
+                                        {post.tags.map((tag, index) => (
+                                            <span key={index} className="badge bg-secondary me-2">
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {post.updatedAt && post.updatedAt !== post.createdAt && (
+                                <div className="mb-4">
+                                    <p className="text-muted small">
+                                        <strong>Последно ажурирано:</strong> {new Date(post.updatedAt).toLocaleDateString('mk-MK', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
                                     </p>
-                                )}
-                                {post.updatedAt && post.updatedAt !== post.createdAt && (
-                                    <p className="mb-1">
-                                        <strong>Последно а��урирано:</strong> {new Date(post.updatedAt).toLocaleDateString('mk-MK')}
-                                    </p>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                         <div className="card-footer bg-light">
                             <div className="d-flex justify-content-between">
@@ -195,7 +235,7 @@ const TransportPostDetails = () => {
                                     ← Назад кон листа
                                 </Link>
                                 <div>
-                                    {user && user.id === post.userId && (
+                                    {user && user.username === post.ownerUsername && (
                                         <>
                                             <Link
                                                 to={`/transport-posts/edit/${post.id}`}

@@ -16,7 +16,9 @@ public record DisplayEventPostDto(
         Integer price,
         String organizer,
         String imageUrl,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String ownerUsername,
+        Long ownerId
 ) {
     public static DisplayEventPostDto from(EventPost post) {
         return new DisplayEventPostDto(
@@ -29,7 +31,9 @@ public record DisplayEventPostDto(
                 post.getPrice(),
                 post.getOrganizer(),
                 post.getImageUrl(),
-                post.getCreatedAt()
+                post.getCreatedAt(),
+                post.getOwner() != null ? post.getOwner().getUsername() : null,
+                post.getOwner() != null ? post.getOwner().getId() : null
         );
     }
 

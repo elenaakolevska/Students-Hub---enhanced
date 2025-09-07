@@ -53,6 +53,53 @@ const HousingPostDetails = () => {
         }
     };
 
+    const handleChatWithCreator = async () => {
+        if (!user) {
+            toast.error('Мора да бидете најавени за да започнете разговор');
+            return;
+        }
+
+        if (user.username === post.ownerUsername) {
+            toast.info('Не можете да разговарате со себе');
+            return;
+        }
+
+        try {
+            navigate(`/chat/${post.ownerUsername}`);
+        } catch (err) {
+            toast.error('Грешка при започнување на разговор');
+            console.error('Error starting chat:', err);
+        }
+    };
+
+    const toggleFavorite = async () => {
+        if (!user || !user.sub) {
+            toast.error('Мора да бидете најавени за да додадете во омилени');
+            return;
+        }
+
+        try {
+            if (isFavorite) {
+                const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+                const favorites = favoritesResponse.data || [];
+                const favorite = favorites.find(fav => fav.postId === id || fav.postId === Number(id));
+
+                if (favorite) {
+                    await favoriteRepository.removeFavorite(user.sub, favorite.id);
+                    setIsFavorite(false);
+                    toast.success('Отстрането од омилени');
+                }
+            } else {
+                await favoriteRepository.addFavorite(user.sub, id);
+                setIsFavorite(true);
+                toast.success('Додадено во омилени');
+            }
+        } catch (err) {
+            toast.error('Грешка при ажурирање на омилени');
+            console.error('Error updating favorites:', err);
+        }
+    };
+
     if (loading) {
         return (
             <div className="container my-5">
@@ -117,7 +164,7 @@ const HousingPostDetails = () => {
                                             <img 
                                                 key={index}
                                                 src={img} 
-                                                alt={`${post.title} image ${index+1}`}
+                                                alt={`${post.title} ${index+1}`}
                                                 className="me-2"
                                                 style={{ 
                                                     height: '80px', 
@@ -149,17 +196,37 @@ const HousingPostDetails = () => {
                                         <strong>Локација:</strong> <span>{post.location}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Општина:</strong> <span>{post.municipality}</span>
-                                    </p>
-                                    <p className="mb-2">
                                         <strong>Цена:</strong> <span>{post.price} ден.</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Статус:</strong>
-                                        <span className={`ms-2 badge ${post.found ? 'bg-success' : 'bg-warning'}`}>
-                                            {post.found ? 'Пронајдено' : 'Достапно'}
-                                        </span>
+                                        <strong>Тип:</strong> <span>{post.housingType}</span>
                                     </p>
+                                    <p className="mb-2">
+                                        <strong>Достапно од:</strong> <span>{new Date(post.availableFrom).toLocaleDateString('mk-MK')}</span>
+                                    </p>
+                                </div>
+                                <div className="col-md-6">
+                                    <h5 className="text-muted">Информации за авторот</h5>
+                                    <p className="mb-2">
+                                        <strong>Создал:</strong> <span>{post.ownerUsername}</span>
+                                    </p>
+                                    <p className="mb-2">
+                                        <strong>Создадено:</strong> <span>{new Date(post.createdAt).toLocaleDateString('mk-MK', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}</span>
+                                    </p>
+                                    {user && user.username !== post.ownerUsername && (
+                                        <button
+                                            onClick={handleChatWithCreator}
+                                            className="btn btn-success btn-sm"
+                                        >
+                                            💬 Разговарај со {post.ownerUsername}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -171,27 +238,29 @@ const HousingPostDetails = () => {
                             {post.tags && post.tags.length > 0 && (
                                 <div className="mb-4">
                                     <h5 className="text-muted">Тагови</h5>
-                                    <div className="d-flex flex-wrap gap-2">
+                                    <div>
                                         {post.tags.map((tag, index) => (
-                                            <span key={index} className="badge bg-secondary fs-6">{tag}</span>
+                                            <span key={index} className="badge bg-secondary me-2">
+                                                {tag}
+                                            </span>
                                         ))}
                                     </div>
                                 </div>
                             )}
 
-                            <div className="mb-4">
-                                <h5 className="text-muted">Информации за постот</h5>
-                                {post.createdAt && (
-                                    <p className="mb-1">
-                                        <strong>Создадено:</strong> {new Date(post.createdAt).toLocaleDateString('mk-MK')}
+                            {post.updatedAt && post.updatedAt !== post.createdAt && (
+                                <div className="mb-4">
+                                    <p className="text-muted small">
+                                        <strong>Последно ажурирано:</strong> {new Date(post.updatedAt).toLocaleDateString('mk-MK', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
                                     </p>
-                                )}
-                                {post.updatedAt && post.updatedAt !== post.createdAt && (
-                                    <p className="mb-1">
-                                        <strong>Последно ажурирано:</strong> {new Date(post.updatedAt).toLocaleDateString('mk-MK')}
-                                    </p>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                         <div className="card-footer bg-light">
                             <div className="d-flex justify-content-between">
@@ -202,7 +271,7 @@ const HousingPostDetails = () => {
                                     ← Назад кон листа
                                 </Link>
                                 <div>
-                                    {user && user.id === post.userId && (
+                                    {user && user.username === post.ownerUsername && (
                                         <>
                                             <Link
                                                 to={`/housing-posts/edit/${post.id}`}
@@ -220,39 +289,12 @@ const HousingPostDetails = () => {
                                     )}
                                     <button
                                         className={`btn ${isFavorite ? 'btn-danger' : 'btn-outline-danger'}`}
-                                        onClick={async () => {
-                                            if (!user || !user.sub) {
-                                                toast.error('Мора да бидете најавени за да додадете во омилени');
-                                                return;
-                                            }
-                                            
-                                            try {
-                                                if (isFavorite) {
-                                                    // Find favorite ID and remove from favorites
-                                                    const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
-                                                    const favorites = favoritesResponse.data || [];
-                                                    const existingFav = favorites.find(f => 
-                                                        f.postId === post.id || f.postId === Number(post.id)
-                                                    );
-                                                    
-                                                    if (existingFav) {
-                                                        await favoriteRepository.removeFavorite(user.sub, existingFav.id);
-                                                        setIsFavorite(false);
-                                                        toast.success('Отстрането од омилени');
-                                                    }
-                                                } else {
-                                                    // Add to favorites
-                                                    await favoriteRepository.addFavorite(user.sub, post.id);
-                                                    setIsFavorite(true);
-                                                    toast.success('Додадено во омилени');
-                                                }
-                                            } catch (err) {
-                                                console.error('Error toggling favorite status:', err);
-                                                toast.error('Грешка при додавање/отстранување од омилени');
-                                            }
-                                        }}
+                                        onClick={toggleFavorite}
                                     >
-                                        ♥ {isFavorite ? 'Отстрани од омилени' : 'Додај во омилени'}
+                                        {isFavorite
+                                            ? <><i className="bi bi-heart-fill"></i> Отстрани од омилени</>
+                                            : <><i className="bi bi-heart"></i> Додај во омилени</>
+                                        }
                                     </button>
                                 </div>
                             </div>

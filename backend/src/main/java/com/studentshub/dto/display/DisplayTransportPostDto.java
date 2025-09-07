@@ -15,7 +15,9 @@ public record DisplayTransportPostDto(
         String locationTo,
         Integer price,
         String contactInfo,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String ownerUsername,
+        Long ownerId
 ) {
     public static DisplayTransportPostDto from(TransportPost post) {
         return new DisplayTransportPostDto(
@@ -28,7 +30,9 @@ public record DisplayTransportPostDto(
                 post.getLocationTo(),
                 post.getPrice(),
                 post.getContactInfo(),
-                post.getCreatedAt()
+                post.getCreatedAt(),
+                post.getOwner() != null ? post.getOwner().getUsername() : null,
+                post.getOwner() != null ? post.getOwner().getId() : null
         );
     }
 

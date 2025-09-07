@@ -13,7 +13,9 @@ public record DisplayMaterialPostDto(
         String fileUrl,
         String originalFileName,
         String subject,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String ownerUsername,
+        Long ownerId
 ) {
     public static DisplayMaterialPostDto from(MaterialPost post) {
         return new DisplayMaterialPostDto(
@@ -24,7 +26,9 @@ public record DisplayMaterialPostDto(
                 post.getFileUrl(),
                 post.getOriginalFileName(),
                 post.getSubject(),
-                post.getCreatedAt()
+                post.getCreatedAt(),
+                post.getOwner() != null ? post.getOwner().getUsername() : null,
+                post.getOwner() != null ? post.getOwner().getId() : null
         );
     }
 

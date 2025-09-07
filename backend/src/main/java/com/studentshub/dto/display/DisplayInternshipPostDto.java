@@ -13,7 +13,9 @@ public record DisplayInternshipPostDto(
         String facultyFilter,
         String position,
         String logoUrl,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String ownerUsername,
+        Long ownerId
 ) {
     public static DisplayInternshipPostDto from(InternshipPost post) {
         return new DisplayInternshipPostDto(
@@ -24,7 +26,9 @@ public record DisplayInternshipPostDto(
                 post.getFacultyFilter(),
                 post.getPosition(),
                 post.getLogoUrl(),
-                post.getCreatedAt()
+                post.getCreatedAt(),
+                post.getOwner() != null ? post.getOwner().getUsername() : null,
+                post.getOwner() != null ? post.getOwner().getId() : null
         );
     }
 

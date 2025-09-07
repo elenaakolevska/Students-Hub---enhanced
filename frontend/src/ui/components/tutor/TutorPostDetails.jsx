@@ -91,6 +91,25 @@ const TutorPostDetails = () => {
         }
     };
 
+    const handleChatWithCreator = async () => {
+        if (!user) {
+            toast.error('Мора да бидете најавени за да започнете разговор');
+            return;
+        }
+
+        if (user.username === post.ownerUsername) {
+            toast.info('Не можете да разговарате со себе');
+            return;
+        }
+
+        try {
+            navigate(`/chat/${post.ownerUsername}`);
+        } catch (err) {
+            toast.error('Грешка при започнување на разговор');
+            console.error('Error starting chat:', err);
+        }
+    };
+
     if (loading) {
         return (
             <div className="container my-5">
@@ -135,27 +154,47 @@ const TutorPostDetails = () => {
                 <div className="col-lg-8">
                     <div className="card">
                         <div className="card-header bg-primary text-white">
-                            <h1 className="card-title mb-0">{post.title}</h1>
+                            <h1 className="card-title mb-0">{post.subject}</h1>
                         </div>
                         <div className="card-body">
                             <div className="row mb-4">
                                 <div className="col-md-6">
-                                    <h5 className="text-muted">Информации за тутор</h5>
-                                    <p className="mb-2">
-                                        <strong>Тутор:</strong> <span className="text-primary">{post.tutorName}</span>
-                                    </p>
+                                    <h5 className="text-muted">Детали за тутор услуга</h5>
                                     <p className="mb-2">
                                         <strong>Предмет:</strong> <span>{post.subject}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Оцена:</strong>
-                                        <span className="ms-2">
-                                            {post.rating}/5
-                                            <span className="text-warning ms-1">
-                                                {'⭐'.repeat(parseInt(post.rating))}
-                                            </span>
-                                        </span>
+                                        <strong>Цена по час:</strong> <span>{post.pricePerHour} ден.</span>
                                     </p>
+                                    <p className="mb-2">
+                                        <strong>Достапност:</strong> <span>{post.availability}</span>
+                                    </p>
+                                    <p className="mb-2">
+                                        <strong>Локација:</strong> <span>{post.location}</span>
+                                    </p>
+                                </div>
+                                <div className="col-md-6">
+                                    <h5 className="text-muted">Информации за авторот</h5>
+                                    <p className="mb-2">
+                                        <strong>Создал:</strong> <span>{post.ownerUsername}</span>
+                                    </p>
+                                    <p className="mb-2">
+                                        <strong>Создадено:</strong> <span>{new Date(post.createdAt).toLocaleDateString('mk-MK', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}</span>
+                                    </p>
+                                    {user && user.username !== post.ownerUsername && (
+                                        <button
+                                            onClick={handleChatWithCreator}
+                                            className="btn btn-success btn-sm"
+                                        >
+                                            💬 Разговарај со {post.ownerUsername}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -167,27 +206,29 @@ const TutorPostDetails = () => {
                             {post.tags && post.tags.length > 0 && (
                                 <div className="mb-4">
                                     <h5 className="text-muted">Тагови</h5>
-                                    <div className="d-flex flex-wrap gap-2">
+                                    <div>
                                         {post.tags.map((tag, index) => (
-                                            <span key={index} className="badge bg-secondary fs-6">{tag}</span>
+                                            <span key={index} className="badge bg-secondary me-2">
+                                                {tag}
+                                            </span>
                                         ))}
                                     </div>
                                 </div>
                             )}
 
-                            <div className="mb-4">
-                                <h5 className="text-muted">Информации за постот</h5>
-                                {post.createdAt && (
-                                    <p className="mb-1">
-                                        <strong>Создадено:</strong> {new Date(post.createdAt).toLocaleDateString('mk-MK')}
+                            {post.updatedAt && post.updatedAt !== post.createdAt && (
+                                <div className="mb-4">
+                                    <p className="text-muted small">
+                                        <strong>Последно ажурирано:</strong> {new Date(post.updatedAt).toLocaleDateString('mk-MK', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
                                     </p>
-                                )}
-                                {post.updatedAt && post.updatedAt !== post.createdAt && (
-                                    <p className="mb-1">
-                                        <strong>Последно ажурирано:</strong> {new Date(post.updatedAt).toLocaleDateString('mk-MK')}
-                                    </p>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                         <div className="card-footer bg-light">
                             <div className="d-flex justify-content-between">
@@ -198,7 +239,7 @@ const TutorPostDetails = () => {
                                     ← Назад кон листа
                                 </Link>
                                 <div>
-                                    {user && (
+                                    {user && user.username === post.ownerUsername && (
                                         <>
                                             <Link
                                                 to={`/tutor-posts/edit/${post.id}`}
