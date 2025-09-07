@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import materialPostRepository from '../../../repository/materialPostRepository.js';
-import authContext from '../../../contexts/authContext.js';
 
 const MaterialPostForm = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user } = useContext(authContext);
     const isEdit = Boolean(id);
 
     const [formData, setFormData] = useState({
@@ -101,7 +99,19 @@ const MaterialPostForm = () => {
             if (isEdit) {
                 await materialPostRepository.update(id, formDataToSend);
             } else {
-                await materialPostRepository.save(formDataToSend);
+                if (formData.file) {
+                    await materialPostRepository.saveWithFile(formDataToSend);
+                } else {
+                    const postData = {
+                        title: formData.title,
+                        description: formData.description,
+                        subject: formData.subject,
+                        rating: formData.rating,
+                        category: formData.category,
+                        tags: tags
+                    };
+                    await materialPostRepository.save(postData);
+                }
             }
             navigate('/material-posts');
         } catch (err) {
