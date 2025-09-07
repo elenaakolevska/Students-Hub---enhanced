@@ -20,7 +20,6 @@ const EventPostDetails = () => {
                 const response = await eventPostRepository.findById(id);
                 setEventPost(response.data);
                 
-                // Check if this post is in user's favorites
                 if (user && user.sub) {
                     try {
                         const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
@@ -48,6 +47,53 @@ const EventPostDetails = () => {
             } catch (err) {
                 console.error('Error deleting event post:', err);
             }
+        }
+    };
+
+    const handleChatWithCreator = async () => {
+        if (!user) {
+            toast.error('Мора да бидете најавени за да започнете разговор');
+            return;
+        }
+
+        if (user.username === eventPost.ownerUsername) {
+            toast.info('Не можете да разговарате со себе');
+            return;
+        }
+
+        try {
+            navigate(`/chat/${eventPost.ownerUsername}`);
+        } catch (err) {
+            toast.error('Грешка при започнување на разговор');
+            console.error('Error starting chat:', err);
+        }
+    };
+
+    const toggleFavorite = async () => {
+        if (!user || !user.sub) {
+            toast.error('Мора да бидете најавени за да додадете во омилени');
+            return;
+        }
+
+        try {
+            if (isFavorite) {
+                const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+                const favorites = favoritesResponse.data || [];
+                const favorite = favorites.find(fav => fav.postId === id || fav.postId === Number(id));
+
+                if (favorite) {
+                    await favoriteRepository.removeFavorite(user.sub, favorite.id);
+                    setIsFavorite(false);
+                    toast.success('Отстрането од омилени');
+                }
+            } else {
+                await favoriteRepository.addFavorite(user.sub, id);
+                setIsFavorite(true);
+                toast.success('Додадено во омилени');
+            }
+        } catch (err) {
+            toast.error('Грешка при ажурирање на омилени');
+            console.error('Error updating favorites:', err);
         }
     };
 
@@ -116,9 +162,6 @@ const EventPostDetails = () => {
                                         <strong>Локација:</strong> <span>{eventPost.location}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Датум:</strong> <span>{eventPost.createdAt ? new Date(eventPost.createdAt).toLocaleDateString('mk-MK') : 'Непознато'}</span>
-                                    </p>
-                                    <p className="mb-2">
                                         <strong>Организатор:</strong> <span>{eventPost.organizer}</span>
                                     </p>
                                     <p className="mb-2">
@@ -127,6 +170,29 @@ const EventPostDetails = () => {
                                             {eventPost.isFree ? 'Бесплатно' : `${eventPost.price} ден.`}
                                         </span>
                                     </p>
+                                </div>
+                                <div className="col-md-6">
+                                    <h5 className="text-muted">Информации за авторот</h5>
+                                    <p className="mb-2">
+                                        <strong>Создал:</strong> <span>{eventPost.ownerUsername}</span>
+                                    </p>
+                                    <p className="mb-2">
+                                        <strong>Создадено:</strong> <span>{new Date(eventPost.createdAt).toLocaleDateString('mk-MK', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}</span>
+                                    </p>
+                                    {user && user.username !== eventPost.ownerUsername && (
+                                        <button
+                                            onClick={handleChatWithCreator}
+                                            className="btn btn-success btn-sm"
+                                        >
+                                            💬 Разговарај со {eventPost.ownerUsername}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -138,27 +204,29 @@ const EventPostDetails = () => {
                             {eventPost.tags && eventPost.tags.length > 0 && (
                                 <div className="mb-4">
                                     <h5 className="text-muted">Тагови</h5>
-                                    <div className="d-flex flex-wrap gap-2">
+                                    <div>
                                         {eventPost.tags.map((tag, index) => (
-                                            <span key={index} className="badge bg-secondary fs-6">{tag}</span>
+                                            <span key={index} className="badge bg-secondary me-2">
+                                                {tag}
+                                            </span>
                                         ))}
                                     </div>
                                 </div>
                             )}
 
-                            <div className="mb-4">
-                                <h5 className="text-muted">Информации за постот</h5>
-                                {eventPost.createdAt && (
-                                    <p className="mb-1">
-                                        <strong>Создадено:</strong> {new Date(eventPost.createdAt).toLocaleDateString('mk-MK')}
+                            {eventPost.updatedAt && eventPost.updatedAt !== eventPost.createdAt && (
+                                <div className="mb-4">
+                                    <p className="text-muted small">
+                                        <strong>Последно ажурирано:</strong> {new Date(eventPost.updatedAt).toLocaleDateString('mk-MK', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
                                     </p>
-                                )}
-                                {eventPost.updatedAt && eventPost.updatedAt !== eventPost.createdAt && (
-                                    <p className="mb-1">
-                                        <strong>Последно ажурирано:</strong> {new Date(eventPost.updatedAt).toLocaleDateString('mk-MK')}
-                                    </p>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                         <div className="card-footer bg-light">
                             <div className="d-flex justify-content-between">
@@ -169,7 +237,7 @@ const EventPostDetails = () => {
                                     ← Назад кон листа
                                 </Link>
                                 <div>
-                                    {user && (
+                                    {user && user.username === eventPost.ownerUsername && (
                                         <>
                                             <Link
                                                 to={`/event-posts/edit/${eventPost.id}`}
@@ -187,37 +255,12 @@ const EventPostDetails = () => {
                                     )}
                                     <button
                                         className={`btn ${isFavorite ? 'btn-danger' : 'btn-outline-danger'}`}
-                                        onClick={async () => {
-                                            if (!user || !user.sub) {
-                                                toast.error('Мора да бидете најавени за да додадете во омилени');
-                                                return;
-                                            }
-                                            
-                                            try {
-                                                if (isFavorite) {
-                                                    // Find favorite ID and remove from favorites
-                                                    const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
-                                                    const favorites = favoritesResponse.data || [];
-                                                    const existingFav = favorites.find(f => f.postId === eventPost.id || f.postId === Number(eventPost.id));
-                                                    
-                                                    if (existingFav) {
-                                                        await favoriteRepository.removeFavorite(user.sub, existingFav.id);
-                                                        setIsFavorite(false);
-                                                        toast.success('Отстрането од омилени');
-                                                    }
-                                                } else {
-                                                    // Add to favorites
-                                                    await favoriteRepository.addFavorite(user.sub, eventPost.id);
-                                                    setIsFavorite(true);
-                                                    toast.success('Додадено во омилени');
-                                                }
-                                            } catch (err) {
-                                                console.error('Error toggling favorite status:', err);
-                                                toast.error('Грешка при додавање/отстранување од омилени');
-                                            }
-                                        }}
+                                        onClick={toggleFavorite}
                                     >
-                                        {isFavorite ? '♥ Отстрани од омилени' : '♥ Додај во омилени'}
+                                        {isFavorite
+                                            ? <><i className="bi bi-heart-fill"></i> Отстрани од омилени</>
+                                            : <><i className="bi bi-heart"></i> Додај во омилени</>
+                                        }
                                     </button>
                                 </div>
                             </div>

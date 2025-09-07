@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef } from 'react';
+import { useParams } from 'react-router-dom';
 import Navigation from '../Navigation';
 import Footer from '../Footer';
 import chatRepository from '../../repository/chatRepository';
 import './Chat.css';
 
 const Chat = () => {
+  const { username } = useParams();
   const [partners, setPartners] = useState([]);
   const [selectedPartner, setSelectedPartner] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -31,12 +33,34 @@ const Chat = () => {
       try {
         const data = await chatRepository.getChatPartners();
         setPartners(data);
+
+        if (username) {
+          const targetPartner = data.find(p => p.username === username) || {
+            username,
+            id: username,
+            unreadCount: 0
+          };
+          setSelectedPartner(targetPartner);
+
+          if (!data.find(p => p.username === username)) {
+            setPartners(prev => [...prev, targetPartner]);
+          }
+        }
       } catch {
         setPartners([]);
+        if (username) {
+          const targetPartner = {
+            username,
+            id: username,
+            unreadCount: 0
+          };
+          setSelectedPartner(targetPartner);
+          setPartners([targetPartner]);
+        }
       }
     };
     fetchPartners();
-  }, []);
+  }, [username]);
 
   // Fetch messages when partner selected
   useEffect(() => {
@@ -99,11 +123,12 @@ const Chat = () => {
 
   return (
     <div className="d-flex flex-column min-vh-100">
+      <Navigation />
       <main className="container flex-grow-1 py-4">
         <div className="row">
           {/* Partners */}
           <div className="col-md-3 border-end">
-            <h5 className="mb-3">Conversations</h5>
+            <h5 className="mb-3">Разговори</h5>
             <ul className="list-group">
               {partners.length ? partners.map(p => (
                 <li
@@ -121,7 +146,7 @@ const Chat = () => {
                   )}
                 </li>
               )) : (
-                <li className="list-group-item text-center text-muted">No conversations yet</li>
+                <li className="list-group-item text-center text-muted">Нема разговори</li>
               )}
             </ul>
           </div>
@@ -141,7 +166,7 @@ const Chat = () => {
 
                 <div ref={messageContainerRef} className="chat-body">
                   {loading ? (
-                    <div className="text-center text-muted">Loading...</div>
+                    <div className="text-center text-muted">Вчитување...</div>
                   ) : (
                     messages.map((message, idx) => {
                       const messageClass = isSender(message) ? 'sender' : 'receiver';
@@ -154,6 +179,12 @@ const Chat = () => {
                           <div className={`message ${messageClass}`}>
                             <div className="username">{message.senderUsername}</div>
                             <div>{content}</div>
+                            <div className="timestamp">
+                              {new Date(message.timestamp).toLocaleTimeString('mk-MK', {
+                                hour: '2-digit',
+                                minute: '2-digit'
+                              })}
+                            </div>
                           </div>
                         </div>
                       );
@@ -162,33 +193,28 @@ const Chat = () => {
                 </div>
 
                 <div className="card-footer chat-input">
-                  <input
-                    className="form-control"
-                    type="text"
-                    placeholder="Type a message..."
-                    value={messageInput}
-                    onChange={(e) => setMessageInput(e.target.value)}
-                    disabled={loading}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter' && !e.shiftKey) {
-                        e.preventDefault();
-                        handleSend(e);
-                      }
-                    }}
-                  />
-                  <button
-                    className="btn send-btn"
-                    type="button"
-                    onClick={handleSend}
-                    disabled={loading || !messageInput.trim()}
-                  >
-                    Send
-                  </button>
+                  <form onSubmit={handleSend} className="d-flex">
+                    <input
+                      className="form-control me-2"
+                      type="text"
+                      placeholder="Напиши порака..."
+                      value={messageInput}
+                      onChange={(e) => setMessageInput(e.target.value)}
+                      disabled={loading}
+                    />
+                    <button
+                      className="btn btn-primary"
+                      type="submit"
+                      disabled={loading || !messageInput.trim()}
+                    >
+                      Прати
+                    </button>
+                  </form>
                 </div>
               </div>
             ) : (
               <div className="d-flex justify-content-center align-items-center h-100 text-muted">
-                <p>Select a chat partner to start chatting.</p>
+                <p>Изберете партнер за разговор.</p>
               </div>
             )}
           </div>

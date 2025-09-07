@@ -13,13 +13,11 @@ import MaterialPostForm from './ui/components/materials/MaterialPostForm';
 import TutorPostList from './ui/components/tutor/TutorPostList';
 import TutorPostDetails from './ui/components/tutor/TutorPostDetails';
 import TutorPostForm from './ui/components/tutor/TutorPostForm';
-
 import EventPostList from './ui/components/events/EventPostList';
 import EventPostDetails from './ui/components/events/EventPostDetails';
 import EventPostForm from './ui/components/events/EventPostForm';
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Navigation from './ui/Navigation';
-import eventPostRepository from './repository/eventPostRepository';
 import { Routes, Route } from 'react-router-dom';
 import Home from './ui/pages/Home';
 import Chat from './ui/pages/Chat';
@@ -31,30 +29,13 @@ import Favorites from './ui/pages/Favorites';
 
 
 function App() {
-  const [eventPosts, setEventPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const res = await eventPostRepository.findAll();
-        setEventPosts(res.data);
-      } catch (err) {
-        setError('Грешка при вчитување на настаните');
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchPosts();
-  }, []);
-
   return (
     <>
       <Navigation />
       <Routes>
         <Route path="/" element={<Home />} />
         <Route path="/chat" element={<Chat />} />
+        <Route path="/chat/:username" element={<Chat />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
         <Route path="/about" element={<About />} />

@@ -14,7 +14,9 @@ public record DisplayTutorPostDto(
         boolean worksOnline,
         Integer price,
         String subject,
-        LocalDateTime createdAt
+        LocalDateTime createdAt,
+        String ownerUsername,
+        Long ownerId
 ) {
     public static DisplayTutorPostDto from(TutorPost post) {
         return new DisplayTutorPostDto(
@@ -26,7 +28,9 @@ public record DisplayTutorPostDto(
                 post.isWorksOnline(),
                 post.getPrice(),
                 post.getSubject(),
-                post.getCreatedAt()
+                post.getCreatedAt(),
+                post.getOwner() != null ? post.getOwner().getUsername() : null,
+                post.getOwner() != null ? post.getOwner().getId() : null
         );
     }
 

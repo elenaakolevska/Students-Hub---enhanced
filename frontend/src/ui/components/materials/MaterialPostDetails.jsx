@@ -100,6 +100,25 @@ const MaterialPostDetails = () => {
         }
     };
 
+    const handleChatWithCreator = async () => {
+        if (!user) {
+            toast.error('Мора да бидете најавени за да започнете разговор');
+            return;
+        }
+
+        if (user.username === post.ownerUsername) {
+            toast.info('Не можете да разговарате со себе');
+            return;
+        }
+
+        try {
+            navigate(`/chat/${post.ownerUsername}`);
+        } catch (err) {
+            toast.error('Грешка при започнување на разговор');
+            console.error('Error starting chat:', err);
+        }
+    };
+
     if (loading) {
         return (
             <div className="container my-5">
@@ -154,17 +173,45 @@ const MaterialPostDetails = () => {
                                         <strong>Предмет:</strong> <span>{post.subject}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Оцена:</strong> <span>{post.rating}</span>
+                                        <strong>Категорија:</strong> <span>{post.category}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Фајл:</strong>
-                                        <button
-                                            onClick={handleDownload}
-                                            className="btn btn-outline-success btn-sm ms-2"
-                                        >
-                                            📥 Преземи
-                                        </button>
+                                        <strong>Оцена:</strong> <span>{post.rating}</span>
                                     </p>
+                                    {post.originalFileName && (
+                                        <p className="mb-2">
+                                            <strong>Фајл:</strong>
+                                            <button
+                                                onClick={handleDownload}
+                                                className="btn btn-outline-success btn-sm ms-2"
+                                            >
+                                                📥 Преземи ({post.originalFileName})
+                                            </button>
+                                        </p>
+                                    )}
+                                </div>
+                                <div className="col-md-6">
+                                    <h5 className="text-muted">Информации за авторот</h5>
+                                    <p className="mb-2">
+                                        <strong>Создал:</strong> <span>{post.ownerUsername}</span>
+                                    </p>
+                                    <p className="mb-2">
+                                        <strong>Создадено:</strong> <span>{new Date(post.createdAt).toLocaleDateString('mk-MK', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}</span>
+                                    </p>
+                                    {user && user.username !== post.ownerUsername && (
+                                        <button
+                                            onClick={handleChatWithCreator}
+                                            className="btn btn-success btn-sm"
+                                        >
+                                            💬 Разговарај со {post.ownerUsername}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
 
@@ -173,19 +220,32 @@ const MaterialPostDetails = () => {
                                 <p className="lead">{post.description}</p>
                             </div>
 
-                            <div className="mb-4">
-                                <h5 className="text-muted">Информации за постот</h5>
-                                {post.createdAt && (
-                                    <p className="mb-1">
-                                        <strong>Создадено:</strong> {new Date(post.createdAt).toLocaleDateString('mk-MK')}
+                            {post.tags && post.tags.length > 0 && (
+                                <div className="mb-4">
+                                    <h5 className="text-muted">Тагови</h5>
+                                    <div>
+                                        {post.tags.map((tag, index) => (
+                                            <span key={index} className="badge bg-secondary me-2">
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+
+                            {post.updatedAt && post.updatedAt !== post.createdAt && (
+                                <div className="mb-4">
+                                    <p className="text-muted small">
+                                        <strong>Последно ажурирано:</strong> {new Date(post.updatedAt).toLocaleDateString('mk-MK', {
+                                            year: 'numeric',
+                                            month: 'long',
+                                            day: 'numeric',
+                                            hour: '2-digit',
+                                            minute: '2-digit'
+                                        })}
                                     </p>
-                                )}
-                                {post.updatedAt && post.updatedAt !== post.createdAt && (
-                                    <p className="mb-1">
-                                        <strong>Последно ажурирано:</strong> {new Date(post.updatedAt).toLocaleDateString('mk-MK')}
-                                    </p>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </div>
                         <div className="card-footer bg-light">
                             <div className="d-flex justify-content-between">
@@ -196,7 +256,7 @@ const MaterialPostDetails = () => {
                                     ← Назад кон листа
                                 </Link>
                                 <div>
-                                    {user && user.id === post.userId && (
+                                    {user && user.username === post.ownerUsername && (
                                         <>
                                             <Link
                                                 to={`/material-posts/edit/${post.id}`}
