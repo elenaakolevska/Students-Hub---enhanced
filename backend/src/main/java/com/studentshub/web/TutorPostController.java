@@ -42,20 +42,43 @@ public class TutorPostController {
 
     @PutMapping("/edit/{id}")
     public ResponseEntity<DisplayTutorPostDto> update(@PathVariable Long id,
-                                                      @RequestBody CreateTutorPostDto createTutorPostDto) {
+                                                      @RequestBody CreateTutorPostDto createTutorPostDto,
+                                                      Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        var existingPost = tutorPostApplicationService.findById(id);
+        if (existingPost.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (!existingPost.get().ownerUsername().equals(authentication.getName())) {
+            return ResponseEntity.status(403).build();
+        }
+
         return tutorPostApplicationService.update(id, createTutorPostDto)
                 .map(tutorPost -> ResponseEntity.ok().body(tutorPost))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        if (tutorPostApplicationService.findById(id).isPresent()) {
-            tutorPostApplicationService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
+    public ResponseEntity<Void> deleteById(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        var existingPost = tutorPostApplicationService.findById(id);
+        if (existingPost.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        if (!existingPost.get().ownerUsername().equals(authentication.getName())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        tutorPostApplicationService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/search")

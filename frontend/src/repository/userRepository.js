@@ -1,29 +1,51 @@
-import axios from '../axios/axios';
+import axiosInstance from '../axios/axios';
 
-const API_URL = '/users'; // Adjust if your backend uses a different path
+const userRepository = {
+  login: async (formData) => {
+    try {
+      const response = await axiosInstance.post('/api/auth/login', formData);
+      return response;
+    } catch (error) {
+      throw error;
+    }
+  },
 
-export const login = async (formData) => {
-  return await axios.post(`${API_URL}/login`, formData);
+  register: async (formData) => {
+    try {
+      const payload = {
+        firstName: formData.name,
+        lastName: formData.surname,
+        username: formData.username,
+        email: formData.email,
+        password: formData.password,
+        education: formData.education || '',
+        profileImageUrl: formData.profileImageUrl || '',
+        role: formData.role || 'USER'
+      };
+      const response = await axiosInstance.post('/api/auth/register', payload);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  getCurrentUser: async () => {
+    try {
+      const response = await axiosInstance.get('/api/auth/me');
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  },
+
+  updateProfile: async (userData) => {
+    try {
+      const response = await axiosInstance.put('/api/auth/profile', userData);
+      return response.data;
+    } catch (error) {
+      throw error;
+    }
+  }
 };
 
-export const register = async (formData) => {
-  // Map frontend fields to backend DTO
-  const payload = {
-    firstName: formData.name,
-    lastName: formData.surname,
-    username: formData.username,
-    email: formData.email,
-    password: formData.password,
-    education: '',
-    profileImageUrl: '',
-    createdAt: null,
-    role: formData.role
-  };
-  const response = await axios.post('/users/register', payload);
-  return response.data;
-};
-
-export default {
-  login,
-  register,
-};
+export default userRepository;

@@ -42,20 +42,43 @@ public class TransportPostController {
 
     @PutMapping("/edit/{id}")
     public ResponseEntity<DisplayTransportPostDto> update(@PathVariable Long id,
-                                                          @RequestBody CreateTransportPostDto createTransportPostDto) {
+                                                          @RequestBody CreateTransportPostDto createTransportPostDto,
+                                                          Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        var existingPost = transportPostApplicationService.findById(id);
+        if (existingPost.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        if (!existingPost.get().ownerUsername().equals(authentication.getName())) {
+            return ResponseEntity.status(403).build();
+        }
+
         return transportPostApplicationService.update(id, createTransportPostDto)
                 .map(transportPost -> ResponseEntity.ok().body(transportPost))
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<Void> deleteById(@PathVariable Long id) {
-        if (transportPostApplicationService.findById(id).isPresent()) {
-            transportPostApplicationService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } else {
+    public ResponseEntity<Void> deleteById(@PathVariable Long id, Authentication authentication) {
+        if (authentication == null) {
+            return ResponseEntity.status(401).build();
+        }
+
+        var existingPost = transportPostApplicationService.findById(id);
+        if (existingPost.isEmpty()) {
             return ResponseEntity.notFound().build();
         }
+
+        if (!existingPost.get().ownerUsername().equals(authentication.getName())) {
+            return ResponseEntity.status(403).build();
+        }
+
+        transportPostApplicationService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/route")

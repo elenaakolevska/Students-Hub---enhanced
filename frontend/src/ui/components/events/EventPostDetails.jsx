@@ -8,7 +8,7 @@ import { toast } from 'react-toastify';
 const EventPostDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
-    const { user } = useContext(authContext);
+    const { user, isAuthenticated } = useContext(authContext);
     const [eventPost, setEventPost] = useState(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
@@ -40,18 +40,31 @@ const EventPostDetails = () => {
     }, [id, user]);
 
     const handleDelete = async () => {
+        if (!isAuthenticated) {
+            toast.error('Мора да бидете најавени');
+            navigate('/login');
+            return;
+        }
+
         if (window.confirm('Дали сте сигурни дека сакате да го избришете настанот?')) {
             try {
                 await eventPostRepository.delete(id);
                 navigate('/event-posts');
             } catch (err) {
-                console.error('Error deleting event post:', err);
+                if (err.response?.status === 401) {
+                    toast.error('Мора да бидете најавени');
+                    navigate('/login');
+                } else if (err.response?.status === 403) {
+                    toast.error('Немате дозвола за ова дејство');
+                } else {
+                    toast.error('Грешка при бришење на настанот');
+                }
             }
         }
     };
 
     const handleChatWithCreator = async () => {
-        if (!user) {
+        if (!isAuthenticated) {
             toast.error('Мора да бидете најавени за да започнете разговор');
             return;
         }
@@ -65,37 +78,43 @@ const EventPostDetails = () => {
             navigate(`/chat/${eventPost.ownerUsername}`);
         } catch (err) {
             toast.error('Грешка при започнување на разговор');
-            console.error('Error starting chat:', err);
         }
     };
 
     const toggleFavorite = async () => {
-        if (!user || !user.sub) {
+        if (!isAuthenticated) {
             toast.error('Мора да бидете најавени за да додадете во омилени');
+            navigate('/login');
             return;
         }
 
         try {
             if (isFavorite) {
-                const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+                const favoritesResponse = await favoriteRepository.getMyFavorites(user.id);
                 const favorites = favoritesResponse.data || [];
                 const favorite = favorites.find(fav => fav.postId === id || fav.postId === Number(id));
 
                 if (favorite) {
-                    await favoriteRepository.removeFavorite(user.sub, favorite.id);
+                    await favoriteRepository.removeFavorite(user.id, favorite.id);
                     setIsFavorite(false);
                     toast.success('Отстрането од омилени');
                 }
             } else {
-                await favoriteRepository.addFavorite(user.sub, id);
+                await favoriteRepository.addFavorite(user.id, id);
                 setIsFavorite(true);
                 toast.success('Додадено во омилени');
             }
         } catch (err) {
-            toast.error('Грешка при ажурирање на омилени');
-            console.error('Error updating favorites:', err);
+            if (err.response?.status === 401) {
+                toast.error('Мора да бидете најавени');
+                navigate('/login');
+            } else {
+                toast.error('Грешка при ажурирање на омилени');
+            }
         }
     };
+
+    const isOwner = isAuthenticated && user && eventPost && user.username === eventPost.ownerUsername;
 
     if (loading) {
         return (
@@ -185,13 +204,20 @@ const EventPostDetails = () => {
                                             minute: '2-digit'
                                         })}</span>
                                     </p>
-                                    {user && user.username !== eventPost.ownerUsername && (
+                                    {isAuthenticated && user && user.username !== eventPost.ownerUsername && (
                                         <button
                                             onClick={handleChatWithCreator}
                                             className="btn btn-success btn-sm"
                                         >
                                             💬 Разговарај со {eventPost.ownerUsername}
                                         </button>
+                                    )}
+                                    {!isAuthenticated && (
+                                        <div className="mt-2">
+                                            <Link to="/login" className="btn btn-outline-primary btn-sm">
+                                                Најавете се за разговор
+                                            </Link>
+                                        </div>
                                     )}
                                 </div>
                             </div>
@@ -237,7 +263,7 @@ const EventPostDetails = () => {
                                     ← Назад кон листа
                                 </Link>
                                 <div>
-                                    {user && user.username === eventPost.ownerUsername && (
+                                    {isOwner && (
                                         <>
                                             <Link
                                                 to={`/event-posts/edit/${eventPost.id}`}
@@ -253,15 +279,17 @@ const EventPostDetails = () => {
                                             </button>
                                         </>
                                     )}
-                                    <button
-                                        className={`btn ${isFavorite ? 'btn-danger' : 'btn-outline-danger'}`}
-                                        onClick={toggleFavorite}
-                                    >
-                                        {isFavorite
-                                            ? <><i className="bi bi-heart-fill"></i> Отстрани од омилени</>
-                                            : <><i className="bi bi-heart"></i> Додај во омилени</>
-                                        }
-                                    </button>
+                                    {isAuthenticated && (
+                                        <button
+                                            className={`btn ${isFavorite ? 'btn-danger' : 'btn-outline-danger'}`}
+                                            onClick={toggleFavorite}
+                                        >
+                                            {isFavorite
+                                                ? <><i className="bi bi-heart-fill"></i> Отстрани од омилени</>
+                                                : <><i className="bi bi-heart"></i> Додај во омилени</>
+                                            }
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>

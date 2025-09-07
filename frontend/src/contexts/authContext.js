@@ -1,22 +1,12 @@
-// import React from "react";
+import { createContext } from 'react';
 
-// const authContext = React.createContext(null);
-
-// export const AuthProvider = ({ children }) => {
-// 	// You can add real auth logic here
-// 	const [user, setUser] = React.useState(null);
-// 	const value = { user, setUser };
-// 	return (
-// 		<authContext.Provider value={value}>
-// 			{children}
-// 		</authContext.Provider>
-// 	);
-// };
-
-// export default authContext;
-
-import React from "react";
-
-const authContext = React.createContext(null);
+const authContext = createContext({
+    user: null,
+    isAuthenticated: false,
+    loading: true,
+    login: () => {},
+    logout: () => {},
+    checkAuth: () => {}
+});
 
 export default authContext;

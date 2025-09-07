@@ -6,7 +6,7 @@ import authContext from '../../../contexts/authContext.js';
 import { toast } from 'react-toastify';
 
 const TransportPostList = () => {
-    const { user } = useContext(authContext);
+    const { user, isAuthenticated } = useContext(authContext);
     const [locationFrom, setLocationFrom] = useState('');
     const [locationTo, setLocationTo] = useState('');
     const [transportPosts, setTransportPosts] = useState([]);
@@ -14,10 +14,8 @@ const TransportPostList = () => {
     const [error, setError] = useState('');
     const [favorites, setFavorites] = useState([]);
 
-    // Helper function to check if a post is in favorites
     const isPostFavorite = (postId) => {
         return favorites.some(fav => 
-            // Handle both string and number IDs
             String(fav.postId) === String(postId)
         );
     };
@@ -39,10 +37,10 @@ const TransportPostList = () => {
     }, [locationFrom, locationTo]);
     
     useEffect(() => {
-        if (user && user.sub) {
+        if (isAuthenticated) {
             const fetchFavorites = async () => {
                 try {
-                    const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
+                    const favoritesResponse = await favoriteRepository.getMyFavorites();
                     setFavorites(favoritesResponse.data || []);
                 } catch (error) {
                     console.error('Error fetching favorites:', error);
@@ -50,7 +48,7 @@ const TransportPostList = () => {
             };
             fetchFavorites();
         }
-    }, [user]);
+    }, [isAuthenticated]);
 
     const handleLocationFromChange = (e) => {
         setLocationFrom(e.target.value);
@@ -61,25 +59,21 @@ const TransportPostList = () => {
     };
 
     const toggleFavorite = async (postId) => {
-        if (!user || !user.sub) {
+        if (!isAuthenticated) {
             toast.error('Мора да бидете најавени за да додадете во омилени');
             return;
         }
         
         try {
             if (isPostFavorite(postId)) {
-                // Find the favorite ID
                 const favorite = favorites.find(f => String(f.postId) === String(postId));
                 if (favorite) {
-                    await favoriteRepository.removeFavorite(user.sub, favorite.id);
-                    // Update local state
+                    await favoriteRepository.removeFavorite(favorite.id);
                     setFavorites(favorites.filter(f => f.id !== favorite.id));
                     toast.success('Отстрането од омилени');
                 }
             } else {
-                // Add to favorites
-                const response = await favoriteRepository.addFavorite(user.sub, postId);
-                // Update local state
+                const response = await favoriteRepository.addFavorite(postId);
                 setFavorites([...favorites, response.data]);
                 toast.success('Додадено во омилени');
             }
@@ -223,15 +217,14 @@ const TransportPostList = () => {
                                         Види детали
                                     </Link>
 
-                                    <button
-                                        onClick={() => toggleFavorite(post.id)}
-                                        className={`btn ${isPostFavorite(post.id) ? 'btn-danger' : 'btn-outline-danger'} w-100 mt-2`}
-                                    >
-                                        {isPostFavorite(post.id) 
-                                            ? <><i className="bi bi-heart-fill"></i> Отстрани од омилени</>
-                                            : <><i className="bi bi-heart"></i> Додај во омилени</>
-                                        }
-                                    </button>
+                                    {isAuthenticated && (
+                                        <button
+                                            onClick={() => toggleFavorite(post.id)}
+                                            className={`btn ${isPostFavorite(post.id) ? 'btn-danger' : 'btn-outline-danger'} w-100 mt-2`}
+                                        >
+                                            ♥ {isPostFavorite(post.id) ? 'Отстрани од омилени' : 'Додај во омилени'}
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         </div>
