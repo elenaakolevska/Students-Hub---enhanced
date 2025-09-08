@@ -33,7 +33,7 @@ const Navigation = () => {
     }, []);
 
     return (
-    <nav className="navbar navbar-expand-lg navbar-dark bg-primary fixed-top shadow">
+    <nav className="navbar navbar-expand-lg navbar-dark bg-primary sticky-top shadow">
             <div className="container">
                 <Link className="navbar-brand fw-bold d-flex align-items-center" to="/">
                     <i className="bi bi-mortarboard-fill me-2"></i>

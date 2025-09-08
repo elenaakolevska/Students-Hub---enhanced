@@ -88,6 +88,7 @@ function App() {
               <Route path="/tutor-posts/:id/edit" element={<ProtectedRoute><TutorPostForm /></ProtectedRoute>} />
 
               <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+              <Route path="/chat/:username" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
               <Route path="/my-posts" element={<ProtectedRoute><MyPosts /></ProtectedRoute>} />
 

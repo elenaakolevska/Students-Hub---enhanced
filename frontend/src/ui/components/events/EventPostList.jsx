@@ -150,7 +150,7 @@ const EventPostList = () => {
                         onChange={handleMunicipalityChange}
                     >
                         <option value="">Сите категории</option>
-                        {municipalities.map(municipality => (
+                        {(municipalities || []).map(municipality => (
                             <option key={municipality} value={municipality}>{municipality}</option>
                         ))}
                     </select>
@@ -163,7 +163,7 @@ const EventPostList = () => {
                 </div>
             ) : (
                 <div className="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-                    {eventPosts.map(post => (
+                    {(eventPosts || []).map(post => (
                         <div key={post.id} className="col">
                             <div className="card h-100">
                                 {post.imageUrl && (
@@ -185,7 +185,7 @@ const EventPostList = () => {
 
                                     {post.tags && post.tags.length > 0 && (
                                         <div className="mb-2">
-                                            {post.tags.map((tag, index) => (
+                                            {(post.tags || []).map((tag, index) => (
                                                 <span key={index} className="badge bg-secondary me-1">{tag}</span>
                                             ))}
                                         </div>
