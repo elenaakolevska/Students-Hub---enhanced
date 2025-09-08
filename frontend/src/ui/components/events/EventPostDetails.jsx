@@ -155,7 +155,7 @@ const EventPostDetails = () => {
     }
 
     return (
-        <div className="container my-5">
+        <div className="container" style={{ marginTop: '3rem', marginBottom: '5rem' }}>
             <div className="row justify-content-center">
                 <div className="col-lg-8">
                     <div className="card">
@@ -266,7 +266,7 @@ const EventPostDetails = () => {
                                     {isOwner && (
                                         <>
                                             <Link
-                                                to={`/event-posts/edit/${eventPost.id}`}
+                                                to={`/event-posts/${eventPost.id}/edit`}
                                                 className="btn btn-outline-warning me-2"
                                             >
                                                 Уреди

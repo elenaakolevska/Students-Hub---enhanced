@@ -6,7 +6,7 @@ import authContext from '../../../contexts/authContext.js';
 import { toast } from 'react-toastify';
 
 const TransportPostList = () => {
-    const { user, isAuthenticated } = useContext(authContext);
+    const { isAuthenticated } = useContext(authContext);
     const [locationFrom, setLocationFrom] = useState('');
     const [locationTo, setLocationTo] = useState('');
     const [transportPosts, setTransportPosts] = useState([]);
@@ -197,8 +197,8 @@ const TransportPostList = () => {
                                     <h5 className="card-title">{post.title}</h5>
                                     <p className="card-text"><strong>Од:</strong> <span>{post.locationFrom}</span></p>
                                     <p className="card-text"><strong>До:</strong> <span>{post.locationTo}</span></p>
-                                    <p className="card-text"><strong>Датум:</strong> <span>{new Date(post.departureDate).toLocaleDateString('mk-MK')}</span></p>
-                                    <p className="card-text"><strong>Време:</strong> <span>{post.departureTime}</span></p>
+                                    <p className="card-text"><strong>Датум:</strong> <span>{post.departureDatetime ? new Date(post.departureDatetime).toLocaleDateString('mk-MK') : 'Не е наведен'}</span></p>
+                                    <p className="card-text"><strong>Време:</strong> <span>{post.departureDatetime ? new Date(post.departureDatetime).toLocaleTimeString('mk-MK', { hour: '2-digit', minute: '2-digit' }) : 'Не е наведено'}</span></p>
                                     <p className="card-text"><strong>Цена:</strong> <span>{post.price} ден.</span></p>
                                     <p className="card-text"><strong>Опис:</strong> <span>{post.description}</span></p>
 

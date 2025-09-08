@@ -106,7 +106,7 @@ const Favorites = () => {
     }
 
     return (
-        <div className="container my-5">
+        <div className="container" style={{ marginTop: '3rem', marginBottom: '5rem' }}>
             <div className="row">
                 <div className="col-12">
                     <div className="d-flex justify-content-between align-items-center mb-4">

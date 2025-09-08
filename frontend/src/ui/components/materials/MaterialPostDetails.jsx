@@ -20,7 +20,6 @@ const MaterialPostDetails = () => {
                 const response = await materialPostRepository.findById(id);
                 setPost(response.data);
                 
-                // Check if this post is in user's favorites
                 if (user && user.sub) {
                     try {
                         const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
@@ -191,9 +190,6 @@ const MaterialPostDetails = () => {
                                         <strong>Предмет:</strong> <span>{post.subject}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Категорија:</strong> <span>{post.category}</span>
-                                    </p>
-                                    <p className="mb-2">
                                         <strong>Оцена:</strong> <span>{post.rating}</span>
                                     </p>
                                     {post.originalFileName && (
@@ -284,7 +280,7 @@ const MaterialPostDetails = () => {
                                     {isOwner && (
                                         <>
                                             <Link
-                                                to={`/material-posts/edit/${post.id}`}
+                                                to={`/material-posts/${post.id}/edit`}
                                                 className="btn btn-outline-warning me-2"
                                             >
                                                 Уреди

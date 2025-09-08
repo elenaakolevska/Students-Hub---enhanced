@@ -9,7 +9,7 @@ const TutorPostList = () => {
     const [tutorName, setTutorName] = useState('');
     const [subject, setSubject] = useState('');
     const { tutorPosts, loading, error, refetch } = useTutorPosts(tutorName, subject);
-    const { user, isAuthenticated } = useContext(authContext);
+    const { isAuthenticated } = useContext(authContext);
     const [favorites, setFavorites] = useState([]);
 
     const isPostFavorite = (postId) => {
@@ -180,7 +180,7 @@ const TutorPostList = () => {
                                     <h5 className="card-title">{post.title}</h5>
                                     <p className="card-text"><strong>Тутор:</strong> <span>{post.tutorName}</span></p>
                                     <p className="card-text"><strong>Предмет:</strong> <span>{post.subject}</span></p>
-                                    <p className="card-text"><strong>Оцена:</strong> <span>{post.rating}/5</span></p>
+                                    <p className="card-text"><strong>Оцена:</strong> <span>{post.rating}5</span></p>
                                     <p className="card-text"><strong>Опис:</strong> <span>{post.description}</span></p>
 
                                     {post.tags && post.tags.length > 0 && (

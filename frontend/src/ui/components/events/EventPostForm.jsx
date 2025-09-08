@@ -24,7 +24,6 @@ const EventPostForm = () => {
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
 
-    // Event categories based on backend enum
     const eventCategories = [
         'WORKSHOP', 
         'DISCUSSION', 
@@ -82,7 +81,7 @@ const EventPostForm = () => {
             if (isEdit) {
                 await eventPostRepository.update(id, dataToSend);
                 toast.success('Настанот беше успешно ажуриран!');
-                navigate(`/event-posts/${id}`);
+                navigate(`/events`);
             } else {
                 const response = await eventPostRepository.save(dataToSend);
                 const newId = response?.data?.id;
@@ -261,21 +260,7 @@ const EventPostForm = () => {
                             </div>
                         )}
                     </div>
-                    <div className="mb-3">
-                        <label htmlFor="tagsString" className="form-label">Тагови (одделени со запирка):</label>
-                        <input
-                            type="text"
-                            className="form-control"
-                            id="tagsString"
-                            name="tagsString"
-                            value={formData.tagsString}
-                            onChange={handleChange}
-                            placeholder="настан, студенти, работилница"
-                        />
-                        <small className="form-text text-muted">
-                            Одделете ги таговите со запирка
-                        </small>
-                    </div>
+
                     <button
                         type="submit"
                         className="btn btn-primary w-100"

@@ -13,8 +13,10 @@ const TutorPostForm = () => {
         title: '',
         description: '',
         tutorName: '',
+        faculty: '',
         subject: '',
-        rating: '3', // Default to middle rating
+        price: '',
+        rating: '3',
         tagsString: ''
     });
     
@@ -26,14 +28,15 @@ const TutorPostForm = () => {
                     const response = await tutorPostRepository.findById(id);
                     const post = response.data;
                     
-                    // Ensure the rating is a string and not a number
                     const ratingAsString = post.rating ? post.rating.toString() : '3';
                     
                     const updatedFormData = {
                         title: post.title || '',
                         description: post.description || '',
                         tutorName: post.tutorName || '',
+                        faculty: post.faculty || '',
                         subject: post.subject || '',
+                        price: post.price || '',
                         rating: ratingAsString,
                         tagsString: post.tags ? post.tags.join(', ') : ''
                     };
@@ -62,13 +65,11 @@ const TutorPostForm = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Check if title is empty
         if (!formData.title.trim()) {
             setError("Насловот е задолжително поле");
             return;
         }
         
-        // Check if rating is selected
         if (!formData.rating) {
             setError("Оцената е задолжително поле");
             return;
@@ -82,7 +83,9 @@ const TutorPostForm = () => {
                 title: formData.title.trim(),
                 description: formData.description.trim(),
                 tutorName: formData.tutorName.trim(),
+                faculty: formData.faculty.trim(),
                 subject: formData.subject.trim(),
+                price: parseFloat(formData.price) || 0,
                 rating: formData.rating,
                 tags: formData.tagsString.split(',').map(t => t.trim()).filter(Boolean)
             };
@@ -90,18 +93,14 @@ const TutorPostForm = () => {
             if (isEdit) {
                 await tutorPostRepository.update(id, dataToSend);
                 
-                // Show success message
                 toast.success("Тутор постот беше успешно ажуриран!");
                 
-                // Navigate to the details page of the updated post
-                navigate(`/tutor-posts/${id}`);
+                navigate(`/tutors`);
             } else {
                 const response = await tutorPostRepository.save(dataToSend);
                 
-                // Show success message
                 toast.success("Тутор постот беше успешно креиран!");
                 
-                // Navigate to the details page of the newly created post
                 const newId = response.data.id;
                 navigate(`/tutor-posts/${newId}`);
             }
@@ -120,7 +119,7 @@ const TutorPostForm = () => {
                 <div className="col-md-8">
                     <div className="card">
                         <div className="card-header">
-                            <h2 className="mb-0">{isEdit ? 'Уреди тутор пост' : 'Создади тутор пост'}</h2>
+                            <h2 className="mb-0">{isEdit ? 'Уреди тутор пост' : 'Создади тутора пост'}</h2>
                         </div>
                         <div className="card-body">
                             {error && (
@@ -159,6 +158,20 @@ const TutorPostForm = () => {
                                 </div>
 
                                 <div className="mb-3">
+                                    <label htmlFor="faculty" className="form-label">Факултет:</label>
+                                    <input
+                                        type="text"
+                                        className="form-control"
+                                        id="faculty"
+                                        name="faculty"
+                                        value={formData.faculty}
+                                        onChange={handleChange}
+                                        required
+                                        placeholder="Пр. Факултет за информатички науки"
+                                    />
+                                </div>
+
+                                <div className="mb-3">
                                     <label htmlFor="subject" className="form-label">Предмет:</label>
                                     <input
                                         type="text"
@@ -173,12 +186,28 @@ const TutorPostForm = () => {
                                 </div>
 
                                 <div className="mb-3">
+                                    <label htmlFor="price" className="form-label">Цена по час (денари):</label>
+                                    <input
+                                        type="number"
+                                        className="form-control"
+                                        id="price"
+                                        name="price"
+                                        value={formData.price}
+                                        onChange={handleChange}
+                                        required
+                                        min="0"
+                                        step="10"
+                                        placeholder="Пр. 500"
+                                    />
+                                </div>
+
+                                <div className="mb-3">
                                     <label htmlFor="rating" className="form-label">Оцена (1-5):</label>
                                     <select
                                         className="form-select"
                                         id="rating"
                                         name="rating"
-                                        value={formData.rating || '3'} /* Default to 3 if empty */
+                                        value={formData.rating || '3'}
                                         onChange={handleChange}
                                         required
                                     >
@@ -202,22 +231,6 @@ const TutorPostForm = () => {
                                         required
                                         placeholder="Опишете го искуството со тутор..."
                                     />
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="tagsString" className="form-label">Тагови (одделени со запирка):</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="tagsString"
-                                        name="tagsString"
-                                        value={formData.tagsString}
-                                        onChange={handleChange}
-                                        placeholder="пр. математика, калкулус, напреден"
-                                    />
-                                    <small className="form-text text-muted">
-                                        Одделете ги таговите со запирка
-                                    </small>
                                 </div>
 
                                 <div className="d-grid gap-2 d-md-flex justify-content-md-end">
