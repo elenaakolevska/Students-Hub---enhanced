@@ -137,7 +137,7 @@ const InternshipPostDetails = () => {
                 <div className="alert alert-danger" role="alert">
                     Грешка: {error}
                 </div>
-                <Link to="/internship-posts" className="btn btn-primary">
+                <Link to="/internships" className="btn btn-primary">
                     Назад кон листа
                 </Link>
             </div>
@@ -150,7 +150,7 @@ const InternshipPostDetails = () => {
                 <div className="alert alert-warning" role="alert">
                     Праксата не е пронајдена.
                 </div>
-                <Link to="/internship-posts" className="btn btn-primary">
+                <Link to="/internships" className="btn btn-primary">
                     Назад кон листа
                 </Link>
             </div>
@@ -261,7 +261,7 @@ const InternshipPostDetails = () => {
                         <div className="card-footer bg-light">
                             <div className="d-flex justify-content-between">
                                 <Link
-                                    to="/internship-posts"
+                                    to="/internships"
                                     className="btn btn-outline-primary"
                                 >
                                     ← Назад кон листа

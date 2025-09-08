@@ -94,7 +94,7 @@ const Home = () => {
 
                     <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-4 mt-4">
                         <div className="col">
-                            <Link to="/event-posts" className="text-decoration-none">
+                            <Link to="/events" className="text-decoration-none">
                                 <div className="card text-center h-100 shadow hover-card" style={{
                                     borderRadius: '10px',
                                     transition: 'all 0.3s ease',
@@ -112,7 +112,7 @@ const Home = () => {
                         </div>
 
                         <div className="col">
-                            <Link to="/internship-posts" className="text-decoration-none">
+                            <Link to="/internships" className="text-decoration-none">
                                 <div className="card text-center h-100 shadow hover-card" style={{
                                     borderRadius: '10px',
                                     transition: 'all 0.3s ease',
@@ -130,7 +130,7 @@ const Home = () => {
                         </div>
 
                         <div className="col">
-                            <Link to="/transport-posts" className="text-decoration-none">
+                            <Link to="/transport" className="text-decoration-none">
                                 <div className="card text-center h-100 shadow hover-card" style={{
                                     borderRadius: '10px',
                                     transition: 'all 0.3s ease',
@@ -148,7 +148,7 @@ const Home = () => {
                         </div>
 
                         <div className="col">
-                            <Link to="/housing-posts" className="text-decoration-none">
+                            <Link to="/housing" className="text-decoration-none">
                                 <div className="card text-center h-100 shadow hover-card" style={{
                                     borderRadius: '10px',
                                     transition: 'all 0.3s ease',
@@ -166,7 +166,7 @@ const Home = () => {
                         </div>
 
                         <div className="col">
-                            <Link to="/material-posts" className="text-decoration-none">
+                            <Link to="/materials" className="text-decoration-none">
                                 <div className="card text-center h-100 shadow hover-card" style={{
                                     borderRadius: '10px',
                                     transition: 'all 0.3s ease',
@@ -184,7 +184,7 @@ const Home = () => {
                         </div>
 
                         <div className="col">
-                            <Link to="/tutor-posts" className="text-decoration-none">
+                            <Link to="/tutors" className="text-decoration-none">
                                 <div className="card text-center h-100 shadow hover-card" style={{
                                     borderRadius: '10px',
                                     transition: 'all 0.3s ease',
@@ -247,7 +247,9 @@ const Home = () => {
                             </div>
                         ) : (
                             <div className="row g-4 mt-3">
-                                {latestPosts.map((post) => (
+                                {latestPosts.map((post) => {
+                                    console.log('Home latest post:', post);
+                                    return (
                                     <div className="col-md-4" key={post.id}>
                                         <div className="card news-card h-100 shadow hover-card" style={{
                                             borderRadius: '10px',
@@ -282,11 +284,20 @@ const Home = () => {
                                                         )}
                                                     </div>
                                                     <Link
-                                                        to={`/${post.category?.toLowerCase()}-posts/${post.id}`}
+                                                        to={(() => {
+                                                            const cat = typeof post.category === 'string' ? post.category : (post.category?.name || post.category?.toString?.() || '');
+                                                            if (cat === 'EVENT') return `/event-posts/${post.id}`;
+                                                            if (cat === 'INTERNSHIP') return `/internship-posts/${post.id}`;
+                                                            if (cat === 'TRANSPORT') return `/transport-posts/${post.id}`;
+                                                            if (cat === 'HOUSING') return `/housing-posts/${post.id}`;
+                                                            if (cat === 'MATERIAL') return `/material-posts/${post.id}`;
+                                                            if (cat === 'TUTOR') return `/tutor-posts/${post.id}`;
+                                                            return '/';
+                                                        })()}
                                                         className="btn btn-sm" style={{
-                                                        backgroundColor: getCategoryColor(post.category),
-                                                        color: 'white'
-                                                    }}
+                                                            backgroundColor: getCategoryColor(post.category),
+                                                            color: 'white'
+                                                        }}
                                                     >
                                                         <i className="bi bi-eye me-1"></i> Види повеќе
                                                     </Link>
@@ -294,7 +305,8 @@ const Home = () => {
                                             </div>
                                         </div>
                                     </div>
-                                ))}
+                                    );
+                                })}
                             </div>
                         )}
                     </div>

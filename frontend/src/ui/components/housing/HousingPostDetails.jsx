@@ -137,8 +137,8 @@ const HousingPostDetails = () => {
                 <div className="alert alert-danger" role="alert">
                     Грешка: {error}
                 </div>
-                <Link to="/housing-posts" className="btn btn-primary">
-                    Назад
+                <Link to="/housing" className="btn btn-primary">
+                    Назад кон листа
                 </Link>
             </div>
         );
@@ -150,8 +150,8 @@ const HousingPostDetails = () => {
                 <div className="alert alert-warning" role="alert">
                     Објавата за сместување не е пронајдена.
                 </div>
-                <Link to="/housing-posts" className="btn btn-primary">
-                    Назад
+                <Link to="/housing" className="btn btn-primary">
+                    Назад кон листа
                 </Link>
             </div>
         );
@@ -291,7 +291,7 @@ const HousingPostDetails = () => {
                         <div className="card-footer bg-light">
                             <div className="d-flex justify-content-between">
                                 <Link
-                                    to="/housing-posts"
+                                    to="/housing"
                                     className="btn btn-outline-primary"
                                 >
                                     ← Назад кон листа

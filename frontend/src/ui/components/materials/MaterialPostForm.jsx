@@ -100,7 +100,13 @@ const MaterialPostForm = () => {
                 await materialPostRepository.update(id, formDataToSend);
             } else {
                 if (formData.file) {
-                    await materialPostRepository.saveWithFile(formDataToSend);
+                    const response = await materialPostRepository.saveWithFile(formDataToSend);
+                    const newId = response?.data?.id;
+                    if (newId) {
+                        navigate(`/material-posts/${newId}`);
+                    } else {
+                        navigate('/material-posts');
+                    }
                 } else {
                     const postData = {
                         title: formData.title,
@@ -110,10 +116,15 @@ const MaterialPostForm = () => {
                         category: formData.category,
                         tags: tags
                     };
-                    await materialPostRepository.save(postData);
+                    const response = await materialPostRepository.save(postData);
+                    const newId = response?.data?.id;
+                    if (newId) {
+                        navigate(`/material-posts/${newId}`);
+                    } else {
+                        navigate('/material-posts');
+                    }
                 }
             }
-            navigate('/material-posts');
         } catch (err) {
             setError(err.response?.data?.message || 'Грешка при зачувување');
         } finally {

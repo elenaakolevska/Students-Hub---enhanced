@@ -134,7 +134,7 @@ const EventPostDetails = () => {
                 <div className="alert alert-danger" role="alert">
                     Грешка: {error}
                 </div>
-                <Link to="/event-posts" className="btn btn-primary">
+                <Link to="/events" className="btn btn-primary">
                     Назад кон листа
                 </Link>
             </div>
@@ -147,7 +147,7 @@ const EventPostDetails = () => {
                 <div className="alert alert-warning" role="alert">
                     Настанот не е пронајден.
                 </div>
-                <Link to="/event-posts" className="btn btn-primary">
+                <Link to="/events" className="btn btn-primary">
                     Назад кон листа
                 </Link>
             </div>
@@ -257,7 +257,7 @@ const EventPostDetails = () => {
                         <div className="card-footer bg-light">
                             <div className="d-flex justify-content-between">
                                 <Link
-                                    to="/event-posts"
+                                    to="/events"
                                     className="btn btn-outline-primary"
                                 >
                                     ← Назад кон листа

@@ -59,58 +59,40 @@ const Navigation = () => {
                                 <i className="bi bi-house-door me-1"></i>Дома
                             </Link>
                         </li>
-
-                        <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/materials')}`} to="/materials">
-                                <i className="bi bi-file-earmark-text me-1"></i>Материјали
-                            </Link>
-                        </li>
-
-                        <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/events')}`} to="/events">
-                                <i className="bi bi-calendar-event me-1"></i>Настани
-                            </Link>
-                        </li>
-
-                        <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/tutors')}`} to="/tutors">
-                                <i className="bi bi-mortarboard me-1"></i>Тутори
-                            </Link>
-                        </li>
-
-                        <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/housing')}`} to="/housing">
-                                <i className="bi bi-house-door me-1"></i>Домување
-                            </Link>
-                        </li>
-
-                        <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/internships')}`} to="/internships">
-                                <i className="bi bi-briefcase me-1"></i>Пракси
-                            </Link>
-                        </li>
-
-                        <li className="nav-item">
-                            <Link className={`nav-link ${isActive('/transport')}`} to="/transport">
-                                <i className="bi bi-car-front me-1"></i>Превоз
-                            </Link>
-                        </li>
-
                         {isAuthenticated && (
                             <>
                                 <li className="nav-item">
-                                    <Link className={`nav-link ${isActive('/chat')}`} to="/chat">
-                                        <i className="bi bi-chat-dots me-1"></i>Чет
+                                    <Link className={`nav-link ${isActive('/materials')}`} to="/materials">
+                                        <i className="bi bi-file-earmark-text me-1"></i>Материјали
                                     </Link>
                                 </li>
                                 <li className="nav-item">
-                                    <Link className={`nav-link ${isActive('/favorites')}`} to="/favorites">
-                                        <i className="bi bi-heart me-1"></i>Омилени
+                                    <Link className={`nav-link ${isActive('/events')}`} to="/events">
+                                        <i className="bi bi-calendar-event me-1"></i>Настани
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className={`nav-link ${isActive('/tutors')}`} to="/tutors">
+                                        <i className="bi bi-mortarboard me-1"></i>Тутори
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className={`nav-link ${isActive('/housing')}`} to="/housing">
+                                        <i className="bi bi-house-door me-1"></i>Домување
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className={`nav-link ${isActive('/internships')}`} to="/internships">
+                                        <i className="bi bi-briefcase me-1"></i>Пракси
+                                    </Link>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className={`nav-link ${isActive('/transport')}`} to="/transport">
+                                        <i className="bi bi-car-front me-1"></i>Превоз
                                     </Link>
                                 </li>
                             </>
                         )}
-
                         <li className="nav-item">
                             <Link className={`nav-link ${isActive('/about')}`} to="/about">
                                 <i className="bi bi-info-circle me-1"></i>За нас
@@ -138,6 +120,11 @@ const Navigation = () => {
                                     <li>
                                         <Link className="dropdown-item" to="/favorites">
                                             <i className="bi bi-heart me-2"></i>Омилени
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to="/chat">
+                                            <i className="bi bi-chat-dots me-2"></i>Чет
                                         </Link>
                                     </li>
                                     <li><hr className="dropdown-divider" /></li>

@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
-import transportPostRepository from '../../../repository/transportPostRepository.js';
+import materialPostRepository from '../../../repository/materialPostRepository.js';
 import favoriteRepository from '../../../repository/favoriteRepository';
 import authContext from '../../../contexts/authContext.js';
 import { toast } from 'react-toastify';
 
-const TransportPostDetails = () => {
+const MaterialPostDetails = () => {
     const { id } = useParams();
     const navigate = useNavigate();
     const { user, isAuthenticated } = useContext(authContext);
@@ -17,7 +17,7 @@ const TransportPostDetails = () => {
     useEffect(() => {
         const fetchPost = async () => {
             try {
-                const response = await transportPostRepository.findById(id);
+                const response = await materialPostRepository.findById(id);
                 setPost(response.data);
                 
                 // Check if this post is in user's favorites
@@ -41,7 +41,7 @@ const TransportPostDetails = () => {
 
         fetchPost();
     }, [id, user]);
-    
+
     const handleDelete = async () => {
         if (!isAuthenticated) {
             toast.error('Мора да бидете најавени');
@@ -49,10 +49,10 @@ const TransportPostDetails = () => {
             return;
         }
 
-        if (window.confirm('Дали сте сигурни дека сакате да го избришете транспортот?')) {
+        if (window.confirm('Дали сте сигурни дека сакате да го избришете материјалот?')) {
             try {
-                await transportPostRepository.delete(id);
-                navigate('/transport-posts');
+                await materialPostRepository.delete(id);
+                navigate('/material-posts');
             } catch (err) {
                 if (err.response?.status === 401) {
                     toast.error('Мора да бидете најавени');
@@ -60,30 +60,12 @@ const TransportPostDetails = () => {
                 } else if (err.response?.status === 403) {
                     toast.error('Немате дозвола за ова дејство');
                 } else {
-                    toast.error('Грешка при бришење на транспортот');
+                    toast.error('Грешка при бришење на материјалот');
                 }
             }
         }
     };
-
-    const handleChatWithCreator = async () => {
-        if (!isAuthenticated) {
-            toast.error('Мора да бидете најавени за да започнете разговор');
-            return;
-        }
-
-        if (user.username === post.ownerUsername) {
-            toast.info('Не можете да разговарате со себе');
-            return;
-        }
-
-        try {
-            navigate(`/chat/${post.ownerUsername}`);
-        } catch (err) {
-            toast.error('Грешка при започнување на разговор');
-        }
-    };
-
+    
     const toggleFavorite = async () => {
         if (!isAuthenticated) {
             toast.error('Мора да бидете најавени за да додадете во омилени');
@@ -95,8 +77,10 @@ const TransportPostDetails = () => {
             if (isFavorite) {
                 const favoritesResponse = await favoriteRepository.getMyFavorites(user.id);
                 const favorites = favoritesResponse.data || [];
-                const favorite = favorites.find(fav => fav.postId === id || fav.postId === Number(id));
-
+                const favorite = favorites.find(fav => 
+                    fav.postId === id || fav.postId === Number(id)
+                );
+                
                 if (favorite) {
                     await favoriteRepository.removeFavorite(user.id, favorite.id);
                     setIsFavorite(false);
@@ -117,6 +101,40 @@ const TransportPostDetails = () => {
         }
     };
 
+    const handleDownload = async () => {
+        try {
+            const response = await materialPostRepository.download(id);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `${post.title}`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            console.error('Error downloading file:', error);
+        }
+    };
+
+    const handleChatWithCreator = async () => {
+        if (!user) {
+            toast.error('Мора да бидете најавени за да започнете разговор');
+            return;
+        }
+
+        if (user.username === post.ownerUsername) {
+            toast.info('Не можете да разговарате со себе');
+            return;
+        }
+
+        try {
+            navigate(`/chat/${post.ownerUsername}`);
+        } catch (err) {
+            toast.error('Грешка при започнување на разговор');
+            console.error('Error starting chat:', err);
+        }
+    };
+
     const isOwner = isAuthenticated && user && post && user.username === post.ownerUsername;
 
     if (loading) {
@@ -124,7 +142,7 @@ const TransportPostDetails = () => {
             <div className="container my-5">
                 <div className="text-center">
                     <div className="spinner-border" role="status">
-                        <span className="visually-hidden">Вчитување детали за превоз...</span>
+                        <span className="visually-hidden">Вчитување детали за материјал...</span>
                     </div>
                 </div>
             </div>
@@ -137,7 +155,7 @@ const TransportPostDetails = () => {
                 <div className="alert alert-danger" role="alert">
                     Грешка: {error}
                 </div>
-                <Link to="/transport" className="btn btn-primary">
+                <Link to="/materials" className="btn btn-primary">
                     Назад кон листа
                 </Link>
             </div>
@@ -148,9 +166,9 @@ const TransportPostDetails = () => {
         return (
             <div className="container my-5">
                 <div className="alert alert-warning" role="alert">
-                    Превозот не е пронајден.
+                    Материјалот не е пронајден.
                 </div>
-                <Link to="/transport" className="btn btn-primary">
+                <Link to="/material-posts" className="btn btn-primary">
                     Назад кон листа
                 </Link>
             </div>
@@ -168,25 +186,27 @@ const TransportPostDetails = () => {
                         <div className="card-body">
                             <div className="row mb-4">
                                 <div className="col-md-6">
-                                    <h5 className="text-muted">Детали за транспорт</h5>
+                                    <h5 className="text-muted">Детали за материјал</h5>
                                     <p className="mb-2">
-                                        <strong>Од:</strong> <span>{post.fromLocation}</span>
+                                        <strong>Предмет:</strong> <span>{post.subject}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>До:</strong> <span>{post.toLocation}</span>
+                                        <strong>Категорија:</strong> <span>{post.category}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Датум:</strong> <span>{new Date(post.departureDate).toLocaleDateString('mk-MK')}</span>
+                                        <strong>Оцена:</strong> <span>{post.rating}</span>
                                     </p>
-                                    <p className="mb-2">
-                                        <strong>Време:</strong> <span>{post.departureTime}</span>
-                                    </p>
-                                    <p className="mb-2">
-                                        <strong>Цена:</strong> <span>{post.price} ден.</span>
-                                    </p>
-                                    <p className="mb-2">
-                                        <strong>Достапни места:</strong> <span>{post.availableSeats}</span>
-                                    </p>
+                                    {post.originalFileName && (
+                                        <p className="mb-2">
+                                            <strong>Фајл:</strong>
+                                            <button
+                                                onClick={handleDownload}
+                                                className="btn btn-outline-success btn-sm ms-2"
+                                            >
+                                                📥 Преземи ({post.originalFileName})
+                                            </button>
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="col-md-6">
                                     <h5 className="text-muted">Информации за авторот</h5>
@@ -255,7 +275,7 @@ const TransportPostDetails = () => {
                         <div className="card-footer bg-light">
                             <div className="d-flex justify-content-between">
                                 <Link
-                                    to="/transport"
+                                    to="/material-posts"
                                     className="btn btn-outline-primary"
                                 >
                                     ← Назад кон листа
@@ -264,7 +284,7 @@ const TransportPostDetails = () => {
                                     {isOwner && (
                                         <>
                                             <Link
-                                                to={`/transport-posts/edit/${post.id}`}
+                                                to={`/material-posts/edit/${post.id}`}
                                                 className="btn btn-outline-warning me-2"
                                             >
                                                 Уреди
@@ -277,7 +297,7 @@ const TransportPostDetails = () => {
                                             </button>
                                         </>
                                     )}
-                                    {isAuthenticated ? (
+                                    {isAuthenticated && (
                                         <button
                                             className={`btn ${isFavorite ? 'btn-danger' : 'btn-outline-danger'}`}
                                             onClick={toggleFavorite}
@@ -287,10 +307,6 @@ const TransportPostDetails = () => {
                                                 : <><i className="bi bi-heart"></i> Додај во омилени</>
                                             }
                                         </button>
-                                    ) : (
-                                        <Link to="/login" className="btn btn-outline-primary">
-                                            Најавете се за омилени
-                                        </Link>
                                     )}
                                 </div>
                             </div>
@@ -302,4 +318,4 @@ const TransportPostDetails = () => {
     );
 };
 
-export default TransportPostDetails;
+export default MaterialPostDetails;

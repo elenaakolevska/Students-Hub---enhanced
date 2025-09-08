@@ -145,7 +145,7 @@ const TutorPostDetails = () => {
                 <div className="alert alert-danger" role="alert">
                     Грешка: {error}
                 </div>
-                <Link to="/tutor-posts" className="btn btn-primary">
+                <Link to="/tutors" className="btn btn-primary">
                     Назад кон листа
                 </Link>
             </div>
@@ -158,7 +158,7 @@ const TutorPostDetails = () => {
                 <div className="alert alert-warning" role="alert">
                     Тутор постот не е пронајден.
                 </div>
-                <Link to="/tutor-posts" className="btn btn-primary">
+                <Link to="/tutors" className="btn btn-primary">
                     Назад кон листа
                 </Link>
             </div>
@@ -257,7 +257,7 @@ const TutorPostDetails = () => {
                         <div className="card-footer bg-light">
                             <div className="d-flex justify-content-between">
                                 <Link
-                                    to="/tutor-posts"
+                                    to="/tutors"
                                     className="btn btn-outline-primary"
                                 >
                                     ← Назад кон листа

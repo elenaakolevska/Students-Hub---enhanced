@@ -82,11 +82,17 @@ const EventPostForm = () => {
             if (isEdit) {
                 await eventPostRepository.update(id, dataToSend);
                 toast.success('Настанот беше успешно ажуриран!');
+                navigate(`/event-posts/${id}`);
             } else {
-                await eventPostRepository.save(dataToSend);
+                const response = await eventPostRepository.save(dataToSend);
+                const newId = response?.data?.id;
                 toast.success('Настанот беше успешно креиран!');
+                if (newId) {
+                    navigate(`/event-posts/${newId}`);
+                } else {
+                    navigate('/event-posts');
+                }
             }
-            navigate('/event-posts');
         } catch (err) {
             const errorMessage = err.response?.data?.message || err.message || 'Грешка при зачувување на настанот';
             toast.error(errorMessage);

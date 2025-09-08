@@ -155,7 +155,7 @@ const MaterialPostDetails = () => {
                 <div className="alert alert-danger" role="alert">
                     Грешка: {error}
                 </div>
-                <Link to="/material-posts" className="btn btn-primary">
+                <Link to="/materials" className="btn btn-primary">
                     Назад кон листа
                 </Link>
             </div>
@@ -168,7 +168,7 @@ const MaterialPostDetails = () => {
                 <div className="alert alert-warning" role="alert">
                     Материјалот не е пронајден.
                 </div>
-                <Link to="/material-posts" className="btn btn-primary">
+                <Link to="/materials" className="btn btn-primary">
                     Назад кон листа
                 </Link>
             </div>
@@ -275,7 +275,7 @@ const MaterialPostDetails = () => {
                         <div className="card-footer bg-light">
                             <div className="d-flex justify-content-between">
                                 <Link
-                                    to="/material-posts"
+                                    to="/materials"
                                     className="btn btn-outline-primary"
                                 >
                                     ← Назад кон листа
