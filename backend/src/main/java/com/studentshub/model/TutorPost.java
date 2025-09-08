@@ -3,12 +3,10 @@ package com.studentshub.model;
 import com.studentshub.model.enumerations.PostCategory;
 import jakarta.persistence.Entity;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Entity
 public class TutorPost extends Post {

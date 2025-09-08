@@ -23,7 +23,6 @@ const TutorPostDetails = () => {
                 setPost(postData);
                 setError(null);
                 
-                // Check if this post is in user's favorites
                 if (user && user.sub) {
                     try {
                         const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
@@ -181,13 +180,10 @@ const TutorPostDetails = () => {
                                         <strong>Предмет:</strong> <span>{post.subject}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Цена по час:</strong> <span>{post.pricePerHour} ден.</span>
+                                        <strong>Цена по час:</strong> <span>{post.price} ден.</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Достапност:</strong> <span>{post.availability}</span>
-                                    </p>
-                                    <p className="mb-2">
-                                        <strong>Локација:</strong> <span>{post.location}</span>
+                                        <strong>Факултет:</strong> <span>{post.faculty}</span>
                                     </p>
                                 </div>
                                 <div className="col-md-6">
@@ -266,7 +262,7 @@ const TutorPostDetails = () => {
                                     {isOwner && (
                                         <>
                                             <Link
-                                                to={`/tutor-posts/edit/${post.id}`}
+                                                to={`/tutor-posts/${post.id}/edit`}
                                                 className="btn btn-outline-warning me-2"
                                             >
                                                 Уреди

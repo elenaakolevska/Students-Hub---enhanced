@@ -158,7 +158,7 @@ const HousingPostDetails = () => {
     }
 
     return (
-        <div className="container my-5">
+        <div className="container" style={{ marginTop: '3rem', marginBottom: '5rem' }}>
             <div className="row justify-content-center">
                 <div className="col-lg-8">
                     <div className="card">
@@ -215,13 +215,16 @@ const HousingPostDetails = () => {
                                         <strong>Локација:</strong> <span>{post.location}</span>
                                     </p>
                                     <p className="mb-2">
+                                        <strong>Општина:</strong> <span>{post.municipality}</span>
+                                    </p>
+                                    <p className="mb-2">
                                         <strong>Цена:</strong> <span>{post.price} ден.</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Тип:</strong> <span>{post.housingType}</span>
-                                    </p>
-                                    <p className="mb-2">
-                                        <strong>Достапно од:</strong> <span>{new Date(post.availableFrom).toLocaleDateString('mk-MK')}</span>
+                                        <strong>Статус:</strong>
+                                        <span className={`ms-2 badge ${post.isFound ? 'bg-success' : 'bg-warning'}`}>
+                                            {post.isFound ? 'Пронајдено' : 'Се бара'}
+                                        </span>
                                     </p>
                                 </div>
                                 <div className="col-md-6">
@@ -300,7 +303,7 @@ const HousingPostDetails = () => {
                                     {isOwner && (
                                         <>
                                             <Link
-                                                to={`/housing-posts/edit/${post.id}`}
+                                                to={`/housing-posts/${post.id}/edit`}
                                                 className="btn btn-outline-warning me-2"
                                             >
                                                 Уреди
@@ -339,4 +342,3 @@ const HousingPostDetails = () => {
 };
 
 export default HousingPostDetails;
-

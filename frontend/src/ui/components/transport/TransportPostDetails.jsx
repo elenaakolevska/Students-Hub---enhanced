@@ -20,7 +20,6 @@ const TransportPostDetails = () => {
                 const response = await transportPostRepository.findById(id);
                 setPost(response.data);
                 
-                // Check if this post is in user's favorites
                 if (user && user.sub) {
                     try {
                         const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
@@ -170,23 +169,25 @@ const TransportPostDetails = () => {
                                 <div className="col-md-6">
                                     <h5 className="text-muted">Детали за транспорт</h5>
                                     <p className="mb-2">
-                                        <strong>Од:</strong> <span>{post.fromLocation}</span>
+                                        <strong>Од:</strong> <span>{post.locationFrom}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>До:</strong> <span>{post.toLocation}</span>
+                                        <strong>До:</strong> <span>{post.locationTo}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Датум:</strong> <span>{new Date(post.departureDate).toLocaleDateString('mk-MK')}</span>
+                                        <strong>Датум:</strong> <span>{post.departureDatetime ? new Date(post.departureDatetime).toLocaleDateString('mk-MK') : 'Не е наведен'}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Време:</strong> <span>{post.departureTime}</span>
+                                        <strong>Време:</strong> <span>{post.departureDatetime ? new Date(post.departureDatetime).toLocaleTimeString('mk-MK', { hour: '2-digit', minute: '2-digit' }) : 'Не е наведено'}</span>
                                     </p>
                                     <p className="mb-2">
                                         <strong>Цена:</strong> <span>{post.price} ден.</span>
                                     </p>
-                                    <p className="mb-2">
-                                        <strong>Достапни места:</strong> <span>{post.availableSeats}</span>
-                                    </p>
+                                    {post.availableSeats && (
+                                        <p className="mb-2">
+                                            <strong>Достапни места:</strong> <span>{post.availableSeats}</span>
+                                        </p>
+                                    )}
                                 </div>
                                 <div className="col-md-6">
                                     <h5 className="text-muted">Информации за авторот</h5>
@@ -264,7 +265,7 @@ const TransportPostDetails = () => {
                                     {isOwner && (
                                         <>
                                             <Link
-                                                to={`/transport-posts/edit/${post.id}`}
+                                                to={`/transport-posts/${post.id}/edit`}
                                                 className="btn btn-outline-warning me-2"
                                             >
                                                 Уреди

@@ -9,7 +9,7 @@ const About = () => {
 
 
         {/* Main Content */}
-        <div className="container my-5">
+        <div className="container" style={{ marginTop: '3rem', marginBottom: '5rem' }}>
           <div className="row g-5">
             <div className="col-lg-7">
               <div 

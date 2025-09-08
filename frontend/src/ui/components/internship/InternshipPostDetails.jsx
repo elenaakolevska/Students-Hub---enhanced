@@ -20,7 +20,6 @@ const InternshipPostDetails = () => {
                 const response = await internshipPostRepository.findById(id);
                 setPost(response.data);
                 
-                // Check if this post is in user's favorites
                 if (user && user.sub) {
                     try {
                         const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
@@ -173,19 +172,12 @@ const InternshipPostDetails = () => {
                                         <strong>Компанија:</strong> <span>{post.company}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Локација:</strong> <span>{post.location}</span>
+                                        <strong>Позиција:</strong> <span>{post.position}</span>
                                     </p>
                                     <p className="mb-2">
-                                        <strong>Тип:</strong> <span>{post.internshipType}</span>
+                                        <strong>Факултет:</strong> <span>{post.facultyFilter}</span>
                                     </p>
-                                    <p className="mb-2">
-                                        <strong>Траење:</strong> <span>{post.duration}</span>
-                                    </p>
-                                    {post.isPaid && (
-                                        <p className="mb-2">
-                                            <strong>Плаќање:</strong> <span className="text-success">Платена</span>
-                                        </p>
-                                    )}
+
                                 </div>
                                 <div className="col-md-6">
                                     <h5 className="text-muted">Информации за авторот</h5>
@@ -270,7 +262,7 @@ const InternshipPostDetails = () => {
                                     {isOwner && (
                                         <>
                                             <Link
-                                                to={`/internship-posts/edit/${post.id}`}
+                                                to={`/internship-posts/${post.id}/edit`}
                                                 className="btn btn-outline-warning me-2"
                                             >
                                                 Уреди

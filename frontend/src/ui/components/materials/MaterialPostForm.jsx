@@ -98,6 +98,7 @@ const MaterialPostForm = () => {
 
             if (isEdit) {
                 await materialPostRepository.update(id, formDataToSend);
+                navigate('/materials');
             } else {
                 if (formData.file) {
                     const response = await materialPostRepository.saveWithFile(formDataToSend);
@@ -240,22 +241,6 @@ const MaterialPostForm = () => {
                                             Тековна датотека: {formData.originalFileName}
                                         </small>
                                     )}
-                                </div>
-
-                                <div className="mb-3">
-                                    <label htmlFor="tagsString" className="form-label">Тагови (одделени со запирка):</label>
-                                    <input
-                                        type="text"
-                                        className="form-control"
-                                        id="tagsString"
-                                        name="tagsString"
-                                        value={formData.tagsString}
-                                        onChange={handleChange}
-                                        placeholder="пр. презентации, скрипти, испити"
-                                    />
-                                    <small className="form-text text-muted">
-                                        Одделете ги таговите со запирка
-                                    </small>
                                 </div>
 
                                 <div className="d-grid gap-2 d-md-flex justify-content-md-end">
