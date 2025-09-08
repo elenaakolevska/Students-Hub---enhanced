@@ -8,6 +8,7 @@ const AuthProvider = ({ children }) => {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
+        console.log("AuthProvider: Initial check for authentication");
         checkAuth();
     }, []);
 
@@ -33,6 +34,7 @@ const AuthProvider = ({ children }) => {
 
             const currentUser = authService.getCurrentUser();
             if (currentUser) {
+                console.log("AuthProvider: Retrieved current user from localStorage", currentUser);
                 setUser(currentUser);
                 setIsAuthenticated(true);
             } else {

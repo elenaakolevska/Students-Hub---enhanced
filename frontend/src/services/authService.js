@@ -3,7 +3,7 @@ import axiosInstance from '../axios/axios';
 const authService = {
     login: async (credentials) => {
         try {
-            const response = await axiosInstance.post('/api/auth/login', credentials);
+            const response = await axiosInstance.post('/users/login', credentials);
             if (response.data.token) {
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('user', JSON.stringify(response.data.user));
@@ -16,7 +16,7 @@ const authService = {
 
     register: async (userData) => {
         try {
-            const response = await axiosInstance.post('/api/auth/register', userData);
+            const response = await axiosInstance.post('/users/register', userData);
             return response.data;
         } catch (error) {
             throw error;

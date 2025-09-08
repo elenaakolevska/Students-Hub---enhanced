@@ -123,7 +123,6 @@ const Chat = () => {
 
   return (
     <div className="d-flex flex-column min-vh-100">
-      <Navigation />
       <main className="container flex-grow-1 py-4">
         <div className="row">
           {/* Partners */}

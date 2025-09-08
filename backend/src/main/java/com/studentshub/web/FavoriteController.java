@@ -2,7 +2,9 @@ package com.studentshub.web;
 
 import com.studentshub.dto.create.CreateFavoriteDto;
 import com.studentshub.dto.display.DisplayFavoriteDto;
+import com.studentshub.dto.display.DisplayFavoriteWithPostInfoDto;
 import com.studentshub.service.application.FavoriteApplicationService;
+import com.studentshub.service.domain.FavoriteService;
 import com.studentshub.service.domain.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -16,14 +18,16 @@ import java.util.List;
 public class FavoriteController {
     private final FavoriteApplicationService favoriteApplicationService;
     private final UserService userService;
+    private final FavoriteService favoriteService;
 
-    public FavoriteController(FavoriteApplicationService favoriteApplicationService, UserService userService) {
+    public FavoriteController(FavoriteApplicationService favoriteApplicationService, UserService userService, FavoriteService favoriteService) {
         this.favoriteApplicationService = favoriteApplicationService;
         this.userService = userService;
+        this.favoriteService = favoriteService;
     }
 
     @GetMapping
-    public ResponseEntity<List<DisplayFavoriteDto>> getUserFavorites(Authentication authentication) {
+    public ResponseEntity<List<DisplayFavoriteWithPostInfoDto>> getUserFavorites(Authentication authentication) {
         if (authentication == null) {
             return ResponseEntity.status(401).build();
         }
@@ -33,8 +37,11 @@ public class FavoriteController {
             return ResponseEntity.status(401).build();
         }
 
-        List<DisplayFavoriteDto> favorites = favoriteApplicationService.findByUserId(user.getId());
-        return ResponseEntity.ok(favorites);
+        // Get favorites
+        var favorites = favoriteService.getFavoritesByUser(user);
+        // Convert to enhanced DTO with post info
+        List<DisplayFavoriteWithPostInfoDto> favoritesWithInfo = DisplayFavoriteWithPostInfoDto.from(favorites);
+        return ResponseEntity.ok(favoritesWithInfo);
     }
 
     @PostMapping("/add")

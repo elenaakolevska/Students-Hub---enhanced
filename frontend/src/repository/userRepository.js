@@ -3,7 +3,7 @@ import axiosInstance from '../axios/axios';
 const userRepository = {
   login: async (formData) => {
     try {
-      const response = await axiosInstance.post('/api/auth/login', formData);
+      const response = await axiosInstance.post('/users/login', formData);
       return response;
     } catch (error) {
       throw error;
@@ -22,7 +22,7 @@ const userRepository = {
         profileImageUrl: formData.profileImageUrl || '',
         role: formData.role || 'USER'
       };
-      const response = await axiosInstance.post('/api/auth/register', payload);
+      const response = await axiosInstance.post('/users/register', payload);
       return response.data;
     } catch (error) {
       throw error;
@@ -31,7 +31,7 @@ const userRepository = {
 
   getCurrentUser: async () => {
     try {
-      const response = await axiosInstance.get('/api/auth/me');
+      const response = await axiosInstance.get('/api/auth/current-user');
       return response.data;
     } catch (error) {
       throw error;

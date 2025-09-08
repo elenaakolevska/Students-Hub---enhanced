@@ -13,7 +13,16 @@ const Favorites = () => {
     const fetchFavorites = useCallback(async () => {
         try {
             setLoading(true);
+            if (!user) {
+                console.warn('User is not authenticated, skipping favorites fetch');
+                setLoading(false);
+                return;
+            }
             const response = await favoriteRepository.getMyFavorites();
+            console.log('Favorites response:', response);
+            if (response.data && response.data.length > 0) {
+                console.log('First favorite item structure:', JSON.stringify(response.data[0], null, 2));
+            }
             setFavorites(response.data || []);
         } catch (err) {
             console.error('Error fetching favorites:', err);
@@ -21,7 +30,7 @@ const Favorites = () => {
         } finally {
             setLoading(false);
         }
-    }, []);
+    }, [user]);
 
     useEffect(() => {
         if (isAuthenticated) {
@@ -128,7 +137,7 @@ const Favorites = () => {
                                         <div className="card-body d-flex flex-column">
                                             <div className="d-flex justify-content-between align-items-start mb-2">
                                                 <span className="badge bg-primary">
-                                                    {getPostTypeLabel(favorite.postType)}
+                                                    {favorite.postType ? getPostTypeLabel(favorite.postType) : 'Unknown'}
                                                 </span>
                                                 <button
                                                     className="btn btn-sm btn-outline-danger"

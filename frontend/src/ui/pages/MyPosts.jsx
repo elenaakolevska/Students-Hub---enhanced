@@ -44,17 +44,14 @@ const MyPosts = () => {
         const postsResponse = await postRepository.getMyPosts();
         setPosts(postsResponse.data);
         
-        // Only attempt to fetch favorites if user.sub exists (that's the username in JWT)
-        if (user.sub) {
-          try {
-            const favoritesResponse = await favoriteRepository.getMyFavorites(user.sub);
-            setFavorites(favoritesResponse.data);
-          } catch (favError) {
-            console.error('Error fetching favorites:', favError);
-            // Don't set the main error state, just log it
-          }
-        } else {
-          console.warn('Username is undefined, skipping favorites fetch');
+        // Attempt to fetch favorites for the current user
+        try {
+          const favoritesResponse = await favoriteRepository.getMyFavorites();
+          console.log('MyPosts favorites response:', favoritesResponse);
+          setFavorites(favoritesResponse.data || []);
+        } catch (favError) {
+          console.error('Error fetching favorites:', favError);
+          // Don't set the main error state, just log it
         }
         
         setError(null);
