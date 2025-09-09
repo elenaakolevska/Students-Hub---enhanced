@@ -124,7 +124,12 @@ const Navigation = () => {
                                     </li>
                                     <li>
                                         <Link className="dropdown-item" to="/chat">
-                                            <i className="bi bi-chat-dots me-2"></i>Чет
+                                            <i className="bi bi-chat-dots me-2"></i>Приватни пораки
+                                        </Link>
+                                    </li>
+                                    <li>
+                                        <Link className="dropdown-item" to="/group-chat">
+                                            <i className="bi bi-people me-2"></i>Групни разговори
                                         </Link>
                                     </li>
                                     <li><hr className="dropdown-divider" /></li>

@@ -13,6 +13,9 @@ import Login from './ui/pages/Login';
 import Register from './ui/pages/Register';
 import About from './ui/pages/About';
 import Chat from './ui/pages/Chat';
+import GroupChat from './ui/pages/GroupChat';
+import GroupChatList from './ui/pages/GroupChatList';
+import CreateGroupChat from './ui/pages/CreateGroupChat';
 import Favorites from './ui/pages/Favorites';
 import MyPosts from './ui/pages/MyPosts';
 
@@ -89,6 +92,9 @@ function App() {
 
               <Route path="/chat" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
               <Route path="/chat/:username" element={<ProtectedRoute><Chat /></ProtectedRoute>} />
+              <Route path="/group-chat" element={<ProtectedRoute><GroupChatList /></ProtectedRoute>} />
+              <Route path="/group-chat/:groupId" element={<ProtectedRoute><GroupChat /></ProtectedRoute>} />
+              <Route path="/create-group" element={<ProtectedRoute><CreateGroupChat /></ProtectedRoute>} />
               <Route path="/favorites" element={<ProtectedRoute><Favorites /></ProtectedRoute>} />
               <Route path="/my-posts" element={<ProtectedRoute><MyPosts /></ProtectedRoute>} />
 
