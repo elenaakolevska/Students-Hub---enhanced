@@ -17,6 +17,7 @@ import java.util.List;
 public interface MessageRepository extends JpaRepository<Message, Long>, JpaSpecificationExecutor<Message> {
     List<Message> findBySenderOrReceiver(User sender, User receiver);
     List<Message> findByGroup(GroupChat group);
+    List<Message> findByGroupOrderByTimestampAsc(GroupChat group);
 
     @Query("SELECT m FROM Message m WHERE (m.sender = :u1 AND m.receiver = :u2) OR (m.sender = :u2 AND m.receiver = :u1) ORDER BY m.timestamp")
     List<Message> findChatBetweenUsers(@Param("u1") User u1, @Param("u2") User u2);
@@ -32,4 +33,7 @@ public interface MessageRepository extends JpaRepository<Message, Long>, JpaSpec
 
     @Query("SELECT COUNT(m) FROM Message m WHERE m.sender = :sender AND m.receiver = :receiver AND m.read = false")
     long countUnreadMessages(@Param("sender") User sender, @Param("receiver") User receiver);
+    
+    @Query("SELECT COUNT(m) FROM Message m WHERE m.group = :group AND m.read = false AND m.sender != :user")
+    long countUnreadGroupMessages(@Param("group") GroupChat group, @Param("user") User user);
 }

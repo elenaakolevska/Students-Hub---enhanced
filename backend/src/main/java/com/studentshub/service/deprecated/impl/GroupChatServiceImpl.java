@@ -11,7 +11,7 @@ import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Service
+@Service("deprecatedGroupChatService") // Adding a specific name to avoid conflict
 public class GroupChatServiceImpl implements GroupChatService {
 
     private final GroupChatRepository groupChatRepository;

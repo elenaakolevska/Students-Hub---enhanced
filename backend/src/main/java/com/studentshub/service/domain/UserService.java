@@ -16,6 +16,7 @@ public interface UserService extends UserDetailsService
     User updateUser(User user);
     void deleteUser(Long id);
     User getCurrentUser();
+    List<User> findByUsernameContaining(String username);
     
     @Override
     UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;

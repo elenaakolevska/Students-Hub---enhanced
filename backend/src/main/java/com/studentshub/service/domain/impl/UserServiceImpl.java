@@ -76,6 +76,11 @@ public class UserServiceImpl implements UserService {
     }
     
     @Override
+    public List<User> findByUsernameContaining(String username) {
+        return userRepository.findByUsernameContainingIgnoreCase(username);
+    }
+    
+    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with username: " + username));

@@ -3,8 +3,9 @@ package com.studentshub.model;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 
-@Entity
+import java.time.LocalDateTime;
 
+@Entity
 public class GroupChatMembers {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -15,16 +16,29 @@ public class GroupChatMembers {
 
     @ManyToOne
     private User user;
+    
+    private LocalDateTime joinedAt;
+    private boolean isAdmin;
 
-    public GroupChatMembers(Long id, GroupChat group, User user) {
+    public GroupChatMembers(Long id, GroupChat group, User user, LocalDateTime joinedAt, boolean isAdmin) {
         this.id = id;
         this.group = group;
         this.user = user;
+        this.joinedAt = joinedAt;
+        this.isAdmin = isAdmin;
     }
 
     public GroupChatMembers() {
     }
 
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+    
     public GroupChat getGroup() {
         return group;
     }
@@ -39,5 +53,21 @@ public class GroupChatMembers {
 
     public void setUser(User user) {
         this.user = user;
+    }
+    
+    public LocalDateTime getJoinedAt() {
+        return joinedAt;
+    }
+
+    public void setJoinedAt(LocalDateTime joinedAt) {
+        this.joinedAt = joinedAt;
+    }
+    
+    public boolean isAdmin() {
+        return isAdmin;
+    }
+
+    public void setAdmin(boolean admin) {
+        isAdmin = admin;
     }
 }

@@ -38,7 +38,10 @@ public class SecurityConfig {
             .authorizeHttpRequests(requests -> requests
                 .requestMatchers("/users/register", "/users/login", "/uploads/**", "/assets/**", "/css/**", "/js/**", "/images/**", "/webjars/**").permitAll()
                 .requestMatchers("/api/auth/check").permitAll()
-                .requestMatchers("/api/*/add*", "/api/*/edit/*", "/api/*/delete/*", "/api/favorites/**", "/api/chat/**").authenticated()
+                .requestMatchers("/api/public/**").permitAll() // Explicitly permit all public endpoints
+                .requestMatchers("/api/chat/search-users").permitAll() // Keep this too for backward compatibility
+                .requestMatchers("/api/*/add*", "/api/*/edit/*", "/api/*/delete/*", "/api/favorites/**").authenticated()
+                .requestMatchers("/api/chat/**").authenticated() 
                 .requestMatchers("/api/**").permitAll()
                 .requestMatchers("/admin/**").hasRole("ADMIN")
                 .anyRequest().permitAll()

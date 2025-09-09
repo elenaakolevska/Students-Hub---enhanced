@@ -14,6 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/users")
 public class UserController {
@@ -61,5 +62,28 @@ public class UserController {
     @GetMapping("/profile/{username}")
     public DisplayUserDto getUserProfile(@PathVariable String username) {
         return userApplicationService.findByUsername(username).orElse(null);
+    }
+    
+    @GetMapping("/search")
+    public ResponseEntity<?> searchUsers(@RequestParam(required = true) String username) {
+        System.out.println("UserController: Searching for users with username containing: " + username);
+        try {
+            List<Map<String, Object>> results = userService.findByUsernameContaining(username).stream()
+                    .map(user -> {
+                        Map<String, Object> map = new HashMap<>();
+                        map.put("id", user.getId());
+                        map.put("username", user.getUsername());
+                        map.put("firstName", user.getFirstName() != null ? user.getFirstName() : "");
+                        map.put("lastName", user.getLastName() != null ? user.getLastName() : "");
+                        return map;
+                    })
+                    .collect(Collectors.toList());
+            System.out.println("UserController: Found " + results.size() + " users");
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            System.err.println("Error in search users: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
     }
 }
