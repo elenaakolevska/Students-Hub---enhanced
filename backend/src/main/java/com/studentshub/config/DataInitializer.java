@@ -75,7 +75,7 @@ public class DataInitializer {
 
 
 
-    @PostConstruct
+    //@PostConstruct
     public void initData() {
         User adminUser = userRepository.findByUsername("admin")
                 .orElseGet(() -> {

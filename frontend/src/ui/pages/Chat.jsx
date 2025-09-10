@@ -4,6 +4,7 @@ import Navigation from '../Navigation';
 import Footer from '../Footer';
 import chatRepository from '../../repository/chatRepository';
 import './Chat.css';
+import './GroupChat.css';
 
 const Chat = () => {
   const { username } = useParams();
@@ -124,98 +125,129 @@ const Chat = () => {
   return (
     <div className="d-flex flex-column min-vh-100">
       <main className="container flex-grow-1 py-4">
-        <div className="row">
-          {/* Partners */}
-          <div className="col-md-3 border-end">
-            <h5 className="mb-3">Разговори</h5>
-            <ul className="list-group">
-              {partners.length ? partners.map(p => (
-                <li
-                  key={p.id}
-                  className={`list-group-item list-group-item-action d-flex justify-content-between align-items-center${selectedPartner?.id === p.id ? ' active' : ''}`}
-                  onClick={() => setSelectedPartner(p)}
-                  style={{ cursor: 'pointer' }}
-                >
-                  <div className="d-flex align-items-center">
-                    <div className="avatar-placeholder me-2">{p.username.charAt(0).toUpperCase()}</div>
-                    <span>{p.username}</span>
-                  </div>
-                  {p.unreadCount > 0 && (
-                    <span className="badge rounded-pill bg-danger">{p.unreadCount}</span>
-                  )}
-                </li>
-              )) : (
-                <li className="list-group-item text-center text-muted">Нема разговори</li>
-              )}
-            </ul>
-          </div>
-
-          {/* Chat */}
-          <div className="col-md-9">
-            {selectedPartner ? (
-              <div className="card shadow-sm chat-card">
+        <div className="groups-container">
+          <h2 className="mb-4">Приватни разговори</h2>
+          
+          <div className="row">
+            {/* Partners List */}
+            <div className="col-lg-3 col-md-4">
+              <div className="card shadow-sm mb-4 mb-md-0">
                 <div className="card-header bg-primary text-white">
-                  <h5 className="mb-0 d-flex align-items-center">
-                    <div className="avatar-placeholder me-2">
-                      {selectedPartner.username.charAt(0).toUpperCase()}
-                    </div>
-                    <span>{selectedPartner.username}</span>
-                  </h5>
+                  <h5 className="mb-0">Контакти</h5>
                 </div>
+                <div className="groups-list">
+                  {partners.length ? partners.map(p => (
+                    <div
+                      key={p.id}
+                      className={`group-list-item ${selectedPartner?.id === p.id ? 'active' : ''}`}
+                      onClick={() => setSelectedPartner(p)}
+                    >
+                      <div className="d-flex align-items-center">
+                        <div className="member-avatar me-2">
+                          {p.username.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="fw-medium">{p.username}</span>
+                      </div>
+                      {p.unreadCount > 0 && (
+                        <span className="badge rounded-pill bg-danger">{p.unreadCount}</span>
+                      )}
+                    </div>
+                  )) : (
+                    <div className="group-list-item text-center text-muted">Нема разговори</div>
+                  )}
+                </div>
+              </div>
+            </div>
 
-                <div ref={messageContainerRef} className="chat-body">
-                  {loading ? (
-                    <div className="text-center text-muted">Вчитување...</div>
-                  ) : (
-                    messages.map((message, idx) => {
-                      const messageClass = isSender(message) ? 'sender' : 'receiver';
-                      const content = message.content.startsWith('"') ?
-                        JSON.parse(message.content) :
-                        message.content;
+            {/* Chat Area */}
+            <div className="col-lg-9 col-md-8">
+              {selectedPartner ? (
+                <div className="group-chat-container">
+                  <div className="group-header">
+                    <div className="group-info">
+                      <div className="d-flex align-items-center">
+                        <div className="member-avatar me-2">
+                          {selectedPartner.username.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="group-name">{selectedPartner.username}</span>
+                      </div>
+                    </div>
+                  </div>
 
-                      return (
-                        <div key={idx} className="message-wrapper">
-                          <div className={`message ${messageClass}`}>
-                            <div className="username">{message.senderUsername}</div>
-                            <div>{content}</div>
-                            <div className="timestamp">
-                              {new Date(message.timestamp).toLocaleTimeString('mk-MK', {
-                                hour: '2-digit',
-                                minute: '2-digit'
-                              })}
+                  <div ref={messageContainerRef} className="messages-container">
+                    {loading ? (
+                      <div className="text-center text-muted p-4">
+                        <div className="spinner-border spinner-border-sm me-2" role="status">
+                          <span className="visually-hidden">Вчитување...</span>
+                        </div>
+                        Вчитување на пораки...
+                      </div>
+                    ) : messages.length === 0 ? (
+                      <div className="text-center text-muted p-4">
+                        <i className="bi bi-chat-left-dots mb-3" style={{ fontSize: '2rem' }}></i>
+                        <p>Нема пораки. Започнете разговор!</p>
+                      </div>
+                    ) : (
+                      messages.map((message, idx) => {
+                        const messageType = isSender(message) ? 'sent' : 'received';
+                        const content = message.content.startsWith('"') ?
+                          JSON.parse(message.content) :
+                          message.content;
+
+                        return (
+                          <div key={idx} className={`message ${messageType}`}>
+                            <div className="message-content">
+                              {content}
+                            </div>
+                            <div className="message-meta">
+                              <span className="message-sender">{message.senderUsername}</span>
+                              <span className="message-time">
+                                {new Date(message.timestamp).toLocaleTimeString('mk-MK', {
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
                             </div>
                           </div>
-                        </div>
-                      );
-                    })
-                  )}
-                </div>
+                        );
+                      })
+                    )}
+                  </div>
 
-                <div className="card-footer chat-input">
-                  <form onSubmit={handleSend} className="d-flex">
-                    <input
-                      className="form-control me-2"
-                      type="text"
-                      placeholder="Напиши порака..."
-                      value={messageInput}
-                      onChange={(e) => setMessageInput(e.target.value)}
-                      disabled={loading}
-                    />
-                    <button
-                      className="btn btn-primary"
-                      type="submit"
-                      disabled={loading || !messageInput.trim()}
-                    >
-                      Прати
-                    </button>
-                  </form>
+                  <div className="message-input-container">
+                    <form onSubmit={handleSend} className="d-flex">
+                      <div className="input-group">
+                        <input
+                          className="form-control"
+                          type="text"
+                          placeholder="Напиши порака..."
+                          value={messageInput}
+                          onChange={(e) => setMessageInput(e.target.value)}
+                          disabled={loading}
+                        />
+                        <button
+                          className="btn btn-primary"
+                          type="submit"
+                          disabled={loading || !messageInput.trim()}
+                        >
+                          <i className="bi bi-send-fill"></i> Прати
+                        </button>
+                      </div>
+                    </form>
+                  </div>
                 </div>
-              </div>
-            ) : (
-              <div className="d-flex justify-content-center align-items-center h-100 text-muted">
-                <p>Изберете партнер за разговор.</p>
-              </div>
-            )}
+              ) : (
+                <div className="text-center p-5 bg-light rounded">
+                  <div className="mb-4">
+                    <i className="bi bi-chat-dots" style={{ fontSize: '3rem' }}></i>
+                  </div>
+                  <h4>Изберете разговор</h4>
+                  <p className="text-muted">
+                    Изберете контакт од левата страна за да започнете или продолжите разговор.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </main>
